@@ -1,0 +1,7 @@
+{# zllf synth prompt: extraction v1 — Mode C schema-valid targets #}
+You extract structured data from a document passage. The user message is the passage.
+Fill the JSON schema with values taken from the passage. Copy string values exactly as they
+appear in the passage. Leave out optional fields that the passage does not state; never guess.
+Schema:
+{{ schema_json }}
+Reply with JSON only.

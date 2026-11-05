@@ -1,0 +1,53 @@
+{
+  "arc_easy": {
+    "config": "ARC-Easy",
+    "dataset": "allenai/ai2_arc",
+    "fetched": "2026-11-05",
+    "licence": "CC BY-SA 4.0",
+    "rows": 150,
+    "seed": 1234,
+    "sha256": "b842347664858c0dde16bf4d9b17d9cdb9b706efefd6822e1abca24af04e39b3",
+    "split": "test",
+    "url": "https://huggingface.co/datasets/allenai/ai2_arc"
+  },
+  "gsm8k": {
+    "config": "main",
+    "dataset": "openai/gsm8k",
+    "fetched": "2026-11-05",
+    "licence": "MIT",
+    "rows": 150,
+    "seed": 1234,
+    "sha256": "08e71af0f6d379acbb42b32e78161d1bce4e1cd22d437b69c84515ec8518800e",
+    "split": "test",
+    "url": "https://huggingface.co/datasets/openai/gsm8k"
+  },
+  "ifeval": {
+    "config": "default",
+    "dataset": "google/IFEval",
+    "fetched": "2026-11-05",
+    "licence": "Apache-2.0",
+    "rows": 150,
+    "seed": 1234,
+    "sha256": "fd64af7201ee7dcfb88984fa07871b4f91acd09b58d72090c9fa0b37f41859c7",
+    "split": "train",
+    "url": "https://huggingface.co/datasets/google/IFEval"
+  },
+  "json_schema": {
+    "dataset": "self-written (scripts/fetch_bench.py:gen_json_schema)",
+    "licence": "same as this repository",
+    "rows": 100,
+    "seed": 1234,
+    "sha256": "4de8915ca7f5f7b9d6988c74c9b90576ccf8caa372a86f693572c89e6e488319"
+  },
+  "mmlu": {
+    "config": "all",
+    "dataset": "cais/mmlu",
+    "fetched": "2026-11-05",
+    "licence": "MIT",
+    "rows": 200,
+    "seed": 1234,
+    "sha256": "965dd5217486c57d8c79c50b1c313e8dba84aa3f8c5ab679d043542816f029a9",
+    "split": "test",
+    "url": "https://huggingface.co/datasets/cais/mmlu"
+  }
+}

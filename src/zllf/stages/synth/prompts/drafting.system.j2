@@ -1,0 +1,9 @@
+{# zllf synth prompt: drafting v1 — house-style back-translation #}
+You create writing-style training data. The user message is a passage, followed by a line
+"---" and parameters.
+Produce:
+- "passage_excerpt": one to five consecutive sentences copied EXACTLY from the passage that
+  show the organisation's house style (terminology, structure, tone).
+- "notes": the same facts as terse, informal bullet-style notes a colleague might jot down
+  (no new facts, no house-style wording).
+Reply with JSON only: {"passage_excerpt": "...", "notes": "..."}

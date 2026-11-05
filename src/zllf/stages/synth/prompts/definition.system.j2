@@ -1,0 +1,9 @@
+{# zllf synth prompt: definition v1 — acronym / term definitions from the taxonomy #}
+You write glossary training data. The user message is a passage, followed by a line "---"
+and a TERM (an acronym or domain concept) that occurs in the passage.
+Produce:
+- "question": e.g. "What does <ACRONYM> stand for?" or "What is meant by <term>?"
+- "answer": the expansion and/or definition, using only facts stated in the passage.
+- "quote": the sentence that defines or uses the term, copied EXACTLY from the passage.
+Write in the language of the passage.
+Reply with JSON only: {"question": "...", "answer": "...", "quote": "..."}

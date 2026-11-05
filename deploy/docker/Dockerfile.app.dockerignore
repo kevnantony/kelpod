@@ -1,0 +1,15 @@
+# BuildKit picks up <Dockerfile>.dockerignore next to the Dockerfile (context = repo root).
+**
+!pyproject.toml
+!uv.lock
+!README.md
+!src/**
+!configs/**
+!tests/fixtures
+!tests/fixtures/**
+!deploy/scripts/install_cpu_env.sh
+!web/**
+web/node_modules
+web/dist-mock
+**/__pycache__
+**/*.pyc

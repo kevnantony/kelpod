@@ -1,0 +1,47 @@
+# pre-commit hooks (DEVELOPMENT_PLAN P0.2.2). Install: `uv run pre-commit install`.
+# Run everything: `uv run pre-commit run --all-files`.
+default_language_version:
+  python: python3.12
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3 # keep in sync with ruff in uv.lock
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: check-added-large-files
+        args: [--maxkb=5120]
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-merge-conflict
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        # Lockfiles and hash manifests are full of high-entropy sha256 strings.
+        exclude: (^|/)(uv\.lock|package-lock\.json|manifest\.json|sources\.json|SHA256SUMS[^/]*)$
+
+  - repo: local
+    hooks:
+      - id: block-data-artefacts
+        name: block documents/datasets/weights outside tests/fixtures
+        description: PRD §13.2 - never commit corpora, parquet artefacts or model weights.
+        language: fail
+        entry: "do not commit *.pdf / *.parquet / *.safetensors outside tests/fixtures/:"
+        files: \.(pdf|parquet|safetensors)$
+        exclude: ^tests/fixtures/
+      - id: mypy-core
+        name: mypy (strict) on src/zllf/core
+        language: system
+        entry: uv run --no-sync mypy src/zllf/core
+        files: ^src/zllf/core/
+        pass_filenames: false

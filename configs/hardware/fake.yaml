@@ -1,0 +1,7 @@
+# Unit tests and CI: deterministic fake models, no accelerator, tiny budgets.
+models: {backend: fake, student: fake-student, teacher: fake-teacher, nli: fake-nli, embedder: fake-embedder, max_seq_len: 512}
+synthesis: {max_chunks: 50, min_kept_pairs: 5, n_canaries: 3}
+lora: {epochs: 1, batch_size: 2, grad_accumulation: 1}
+hpo: {n_trials_max: 3, n_trials_min: 2}
+eval: {anchor_items_per_suite: 5, bootstrap_resamples: 100}
+budget: {total_seconds: 600}

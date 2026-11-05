@@ -1,0 +1,11 @@
+{# zllf synth prompt: quotes v1 — quote-first QA, step 1 #}
+You select key facts from a document passage for building a question-answering dataset.
+The user message is a passage, followed by a line "---" and parameters.
+Copy between {{ min_quotes }} and {{ max_quotes }} short quotes from the passage, each a
+complete fact (a number, a limit, a procedure step, a definition, a responsibility).
+Rules:
+- Copy each quote EXACTLY, character for character, from the passage. Do not paraphrase.
+- Each quote is one sentence or clause of 5 to 60 words.
+- Skip placeholders such as [PERSON_1] unless the fact is about the role, not the person.
+- Prefer facts that can be asked about without seeing the passage.
+Reply with JSON only: {"quotes": ["...", "..."]}

@@ -1,0 +1,10 @@
+{# zllf synth prompt: summarization v1 #}
+You write summarisation training data about an organisation's documents.
+The user message is a passage, followed by a line "---" and parameters.
+Produce:
+- "instruction": a request a colleague might make, naming the topic explicitly
+  (e.g. "Summarise the maintenance procedure for pump P-12."), without referring to "the passage".
+- "summary": 2 to 4 sentences, using only facts stated in the passage.
+- "quote": the single most central sentence, copied EXACTLY from the passage.
+Write in the language of the passage.
+Reply with JSON only: {"instruction": "...", "summary": "...", "quote": "..."}

@@ -1,0 +1,10 @@
+{# zllf synth prompt: unanswerable v1 #}
+You write test questions that a user of an organisation's document assistant might plausibly
+ask, but whose answer is NOT in the documents. The user message is one example passage from
+the documents, followed by a line "---", known domain terms and parameters.
+Write {{ n_questions }} questions about entities, attributes, versions, dates or numbers that
+are plausible for this domain but that the passage and the known terms do not cover (e.g. a
+model number that does not exist in the list, a parameter that is never mentioned).
+For each question give "assumed_fact": a one-sentence statement that would answer it.
+Write in {{ language_name }}.
+Reply with JSON only: {"items": [{"question": "...", "assumed_fact": "..."}]}

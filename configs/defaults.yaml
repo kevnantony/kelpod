@@ -1,0 +1,35 @@
+# Defaults for every run. Profiles (configs/profiles) and hardware presets
+# (configs/hardware) override these. Field reference: src/zllf/core/config.py
+seed: 1234
+chunking:
+  target_tokens: 512
+  max_tokens: 1024
+  overlap_fraction: 0.10
+  dedup_jaccard: 0.85
+sanitize:
+  languages: [en, de]
+  default_action: mask
+  score_threshold: 0.5
+  policy:
+    PERSON: mask
+    EMAIL_ADDRESS: mask
+    PHONE_NUMBER: mask
+    IBAN_CODE: mask
+    DE_KVNR: mask
+    DE_TAX_ID: mask
+    US_SSN: mask
+    DATE_OF_BIRTH: mask
+    PATIENT_ID: mask
+    LOCATION: mask
+    CLASSIFICATION_MARKING: drop_chunk
+splits: {train: 0.70, val: 0.15, test: 0.15, by: document}
+gates:
+  domain_rel_improvement_min: 0.12
+  forgetting_max_drop_points: 3.0
+  abstention_min: 0.90
+  fabrication_max: 0.05
+  canary_extractions_max: 0
+  raw_pii_hits_max: 0
+  schema_valid_min: 0.98
+budget:
+  total_seconds: 28800

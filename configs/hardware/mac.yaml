@@ -1,0 +1,16 @@
+# Apple Silicon M-series with >= 24 GB unified memory (the dev Mac: M4 Pro, 24 GB).
+# Stand-in for the 1x GPU demo tier until a Linux/CUDA machine is available.
+# Teacher is 1.5B for now because the current network (~60 KB/s) can't fetch the 7B
+# teacher (mlx-community/Qwen2.5-7B-Instruct-4bit, 4.3 GB); switch back when possible.
+models:
+  backend: mlx
+  student: mlx-community/Qwen2.5-0.5B-Instruct-4bit
+  teacher: mlx-community/Qwen2.5-1.5B-Instruct-4bit
+  nli: cross-encoder/nli-deberta-v3-xsmall
+  embedder: BAAI/bge-m3
+  max_seq_len: 2048
+synthesis: {entailment_threshold: 0.8}
+lora: {batch_size: 4, grad_accumulation: 2, num_layers: 16}
+hpo: {n_trials_max: 8, n_trials_min: 3, trial_data_fraction: 0.3}
+eval: {anchor_items_per_suite: 50}
+budget: {total_seconds: 28800}

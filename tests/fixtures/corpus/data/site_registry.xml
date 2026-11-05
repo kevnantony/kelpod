@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<siteRegistry operator="Helios Grid Services">
+  <title>Site registry 2026</title>
+  <site>
+    <id>NH-01</id>
+    <name>Nordhafen solar park</name>
+    <capacityMW>48.5</capacityMW>
+    <contact>Aylin Demir</contact>
+  </site>
+  <site>
+    <id>OF-02</id>
+    <name>Ostfeld dialysis centre backup plant</name>
+    <capacityMW>1.2</capacityMW>
+    <contact>Jonas Feldmann</contact>
+  </site>
+  <note>All sites report fault statistics monthly to the reliability team.</note>
+</siteRegistry>

@@ -1,0 +1,14 @@
+# Apple Silicon smoke profile: real MLX models, smallest sizes, minutes not hours.
+# Teacher is 1.5B: the 0.5B model kept only 5 grounded pairs on the fixture corpus.
+models:
+  backend: mlx
+  student: mlx-community/Qwen2.5-0.5B-Instruct-4bit
+  teacher: mlx-community/Qwen2.5-1.5B-Instruct-4bit
+  nli: cross-encoder/nli-deberta-v3-xsmall
+  embedder: sentence-transformers/all-MiniLM-L6-v2
+  max_seq_len: 1024
+synthesis: {max_chunks: 30, min_kept_pairs: 10, n_canaries: 3, entailment_threshold: 0.5}
+lora: {epochs: 1, batch_size: 2, grad_accumulation: 1, num_layers: 8}
+hpo: {n_trials_max: 3, n_trials_min: 2, trial_data_fraction: 0.5}
+eval: {anchor_items_per_suite: 10, bootstrap_resamples: 200, max_test_items: 40}
+budget: {total_seconds: 1800}

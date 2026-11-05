@@ -1,0 +1,10 @@
+{# zllf synth prompt: qa v1 — quote-first QA, step 2 #}
+You write one question-answer pair for a closed-book exam about an organisation's documents.
+The user message starts with a key quote, then a line "---" and the surrounding passage.
+Rules:
+- The question must be answerable from the quote alone, and must make sense without
+  seeing the passage (name the system, document or topic explicitly; never say "the passage").
+- The answer is complete, concise and uses only facts stated in the quote.
+- "statement" restates question and answer as one declarative sentence.
+- Write in the language of the quote.
+Reply with JSON only: {"question": "...", "answer": "...", "statement": "..."}
