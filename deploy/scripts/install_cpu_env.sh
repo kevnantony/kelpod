@@ -37,7 +37,9 @@ trap 'rm -rf "$tmp"' EXIT
 
 export_args=(--frozen --no-hashes --no-emit-project --format requirements.txt)
 [[ $dev == 1 ]] || export_args+=(--no-dev)
-uv export --project "$project" "${export_args[@]}" > "$tmp/req-all.txt"
+# -o, not a stdout redirect: with FORCE_COLOR=1 (set in CI) uv colours stdout, which puts an
+# ANSI escape before the first line and makes `uv pip install -r` reject the file.
+uv export --project "$project" "${export_args[@]}" -o "$tmp/req-all.txt" >/dev/null
 
 # Drop CUDA runtime wheels and triton (GPU kernels); CPU torch does not need them.
 grep -viE '^(nvidia-|triton==|cuda-|cupy)' "$tmp/req-all.txt" > "$tmp/req-cpu.txt"

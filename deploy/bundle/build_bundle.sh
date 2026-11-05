@@ -71,8 +71,11 @@ fi
 if [[ $skip_wheels == 0 ]]; then
   mkdir -p "$b/wheelhouse"
   req="$stage/requirements.txt"
+  # -o, not a pipe: with FORCE_COLOR set, uv colours stdout and corrupts the first line.
   uv export --project "$repo" --frozen --no-dev --no-emit-project --no-hashes \
-     --format requirements.txt | grep -viE '^(nvidia-|triton==|cuda-|mlx)' > "$req"
+     --format requirements.txt -o "$req.all" >/dev/null
+  grep -viE '^(nvidia-|triton==|cuda-|mlx)' "$req.all" > "$req"
+  rm -f "$req.all"
   log "wheelhouse for $platform ($(grep -cE '^[a-zA-Z0-9]' "$req") packages)"
   uvx pip download --quiet -r "$req" -d "$b/wheelhouse" --only-binary=:all: \
      --platform "$platform" --python-version 3.12 --implementation cp \
