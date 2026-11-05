@@ -1,0 +1,72 @@
+# ZLLF sanitize rule pack: English. Format: see rules_common.yaml.
+version: 1
+language: en
+
+macros:
+  EN_TITLE: "(?:Mr|Mrs|Ms|Mx|Miss|Sir|Dame|Nurse|Sister|Father|Rev)\\.?"
+  EN_LABEL: "(?i:patient[ ]name|patient|pt\\.?|name|full[ ]name|technician|tech\\.?|engineer|inspector|inspected[ ]by|reported[ ]by|performed[ ]by|carried[ ]out[ ]by|signed(?:[ ]by)?|signature|attending(?:[ ]physician)?|physician|doctor|surgeon|nurse|contact(?:[ ]person)?|referred[ ]by|referring[ ]physician|supervisor|operator|approved[ ]by|checked[ ]by|verified[ ]by|mechanic|next[ ]of[ ]kin|emergency[ ]contact|guardian|caregiver|author|prepared[ ]by|on[ ]behalf[ ]of)"
+
+recognizers:
+  - name: person_en_title
+    entity_type: PERSON
+    score: 0.75
+    patterns:
+      - "\\b<<EN_TITLE>>[ ](?:(?:Dr|Prof)\\.?[ ])?(?P<value><<NAME>>)"
+
+  - name: person_en_label
+    entity_type: PERSON
+    score: 0.75
+    patterns:
+      - "\\b<<EN_LABEL>>[ \\t]*[:\\-–][ \\t]*(?:(?:<<EN_TITLE>>|Dr\\.?|Prof\\.?)[ ])*(?P<value><<NAME>>)"
+
+  - name: person_en_relation
+    entity_type: PERSON
+    score: 0.6
+    patterns:
+      - "\\b(?:wife|husband|partner|son|daughter|mother|father|brother|sister|niece|nephew|grandson|granddaughter|colleague|patient)[ ](?:(?:<<EN_TITLE>>|Dr\\.?)[ ])?(?P<value><<NAME>>)(?=[ ,.;:)]|$)"
+
+  - name: person_en_by
+    entity_type: PERSON
+    score: 0.7
+    patterns:
+      - "\\b(?i:inspected|reported|performed|checked|approved|verified|signed|prepared|seen|examined|treated|referred|reviewed|repaired|serviced|dictated|written|countersigned)[ ](?i:by)[ ](?:(?:<<EN_TITLE>>|Dr\\.?|Prof\\.?)[ ])*(?P<value><<NAME>>)"
+
+  - name: person_en_signature
+    entity_type: PERSON
+    score: 0.75
+    patterns:
+      - "(?i:best[ ]regards|kind[ ]regards|regards|sincerely|yours[ ]truly|cheers|thanks|signed)[,:]?[ \\t]*\\n?[ \\t]*(?:(?:<<EN_TITLE>>|Dr\\.?|Prof\\.?)[ ])*(?P<value><<NAME>>)"
+
+  - name: date_of_birth_en
+    entity_type: DATE_OF_BIRTH
+    score: 0.85
+    requires_context: true
+    context: [born, birth, dob, d.o.b, birthday, "*"]
+    context_window: 30
+    context_stop: "\n;,)"
+    patterns:
+      - "(?<![\\w.])<<DATE>>(?![\\w])"
+
+  - name: address_en_street
+    entity_type: LOCATION
+    score: 0.7
+    patterns:
+      - "\\b\\d{1,5}[ ](?:<<TOK>>[ ]){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Boulevard|Blvd|Way|Court|Ct|Place|Pl|Terrace|Close|Crescent|Square|Sq|Parkway|Pkwy|Highway|Hwy)\\b\\.?(?:,?[ ](?:Apt|Suite|Unit|Flat)\\.?[ ]?\\w+)?"
+
+  - name: address_en_city_state_zip
+    entity_type: LOCATION
+    score: 0.7
+    patterns:
+      - "\\b<<TOK>>(?:[ ]<<TOK>>)?,[ ][A-Z]{2}[ ]\\d{5}(?:-\\d{4})?\\b"
+
+  - name: address_uk_postcode
+    entity_type: LOCATION
+    score: 0.6
+    patterns:
+      - "\\b[A-Z]{1,2}\\d[A-Z\\d]?[ ]\\d[A-Z]{2}\\b"
+
+  - name: location_en_residence
+    entity_type: LOCATION
+    score: 0.7
+    patterns:
+      - "(?i:\\b(?:lives|living|resides|residing|resident|located|based|moved|relocated|transferred|trip|travel|travelled|traveled|vacation|holiday)[ ](?:in|at|of|to|from))[ ](?P<value><<TOK>>(?:[ ]<<TOK>>)?)"

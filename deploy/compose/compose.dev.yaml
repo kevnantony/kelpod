@@ -1,0 +1,31 @@
+# Dev override: build the image from the checkout, mount sources and the host HF cache.
+#
+#   docker compose -f deploy/compose/compose.yaml -f deploy/compose/compose.dev.yaml up --build
+#
+# Still offline at runtime (internal network + Appendix A env). The host HF cache is mounted
+# read-only so the `toy` profile can find models fetched by scripts/download_models.py; note
+# that MLX does not exist in Linux containers, so in Docker use ZLLF_HARDWARE=fake (default).
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.app
+    image: zllf-app:dev
+    command: ["serve-api", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      ZLLF_LOG_LEVEL: debug
+    volumes:
+      - ../../src:/app/src:ro
+      - ../../configs:/app/configs:ro
+      - ../../tests/fixtures:/app/tests/fixtures:ro
+      - ${HF_CACHE_HOST:-~/.cache/huggingface}:/data/models:ro
+
+  worker:
+    image: zllf-app:dev
+    environment:
+      ZLLF_LOG_LEVEL: debug
+    volumes:
+      - ../../src:/app/src:ro
+      - ../../configs:/app/configs:ro
+      - ../../tests/fixtures:/app/tests/fixtures:ro
+      - ${HF_CACHE_HOST:-~/.cache/huggingface}:/data/models:ro

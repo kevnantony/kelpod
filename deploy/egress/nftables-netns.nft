@@ -1,0 +1,21 @@
+#!/usr/sbin/nft -f
+# Loaded INSIDE the throw-away test network namespace by lib/netns_inner.sh.
+# Every non-loopback packet the pipeline tries to send is logged, counted and dropped.
+# The namespace has lo + a dummy "egress0" with a default route, so attempts (incl. DNS to
+# the fake resolver 10.255.255.53) reach this chain instead of failing with ENETUNREACH.
+table inet zllf_egress {
+    counter egress_attempts { }
+    counter dns_attempts { }
+    counter link_housekeeping { }
+
+    chain output {
+        type filter hook output priority filter; policy accept;
+        oifname "lo" accept
+        # Kernel IPv6 neighbour discovery / MLD on the dummy uplink itself (link-local, never
+        # leaves a real host); counted separately, not an application egress attempt.
+        icmpv6 type { nd-router-solicit, nd-neighbor-solicit, nd-neighbor-advert, mld-listener-report, mld2-listener-report } ip6 daddr ff02::/16 counter name link_housekeeping accept
+        udp dport 53 counter name dns_attempts
+        tcp dport 53 counter name dns_attempts
+        counter name egress_attempts log prefix "ZLLF-EGRESS " level warn drop
+    }
+}

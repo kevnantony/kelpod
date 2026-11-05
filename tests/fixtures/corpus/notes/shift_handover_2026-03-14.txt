@@ -1,0 +1,20 @@
+SHIFT HANDOVER NOTE - OSTFELD DIALYSIS CENTRE, TECHNICAL SERVICES
+
+Date: 2026-03-14, night shift to early shift
+Handed over by: Jonas Feldmann (phone +49 30 5550 7788)
+Received by: Sabine Krüger
+
+1. Chiller CH-2 tripped twice with fault E203 between 02:10 and 03:40. The heat sink fins
+were dusty and were cleaned. Fan F2 runs normally. Please monitor the converter temper-
+ature during the morning peak.
+
+2. Patient room 3 reported a noisy ventilation unit. No technical fault found; the filter
+was replaced. The ward nurse asked that patient Greta Lindqvist (KVNR B987654321, born
+12.07.1954) is informed before any further work in room 3.
+
+3. The water treatment unit WT-1 completed its nightly disinfection cycle without alarms.
+Conductivity after rinse: 2.1 microsiemens per centimetre.
+
+OPEN ITEMS
+- Order spare filter cartridges for HX-200 pumps (stock is down to two).
+- Calibration of pressure sensor P1 on pump HX2-1042 is due next week.

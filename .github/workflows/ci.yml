@@ -1,0 +1,123 @@
+# ZLLF CI (DEVELOPMENT_PLAN §11). CPU-only Linux runners; models run with the `fake` profile.
+#
+# CPU-only torch: uv.lock pins torch from PyPI, whose Linux wheels pull ~3 GB of nvidia-*
+# CUDA wheels. deploy/scripts/install_cpu_env.sh installs the exact locked versions but takes
+# torch/torchvision as "+cpu" builds from the PyTorch CPU index and drops the CUDA-only
+# packages. MLX is darwin-only by marker and is skipped automatically.
+# (Proper fix, owned by the platform track: route torch to the CPU index in pyproject.toml via
+#  [tool.uv.sources]; then these jobs can use plain `uv sync --locked`.)
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_PYTHON: "3.12"
+  UV_TORCH_BACKEND: cpu
+  FORCE_COLOR: "1"
+  # Offline defaults for tests (zllf sets these on import too; Appendix A).
+  HF_HUB_OFFLINE: "1"
+  TRANSFORMERS_OFFLINE: "1"
+  HF_HUB_DISABLE_TELEMETRY: "1"
+  DO_NOT_TRACK: "1"
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install (CPU torch, dev group)
+        run: deploy/scripts/install_cpu_env.sh --dev
+      - name: ruff
+        run: uv run --no-sync ruff check src tests scripts
+      - name: ruff format
+        run: uv run --no-sync ruff format --check src tests scripts
+        continue-on-error: true # informational until the codebase is formatted once
+      - name: mypy (strict on zllf.core)
+        run: uv run --no-sync mypy src/zllf/core
+
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install (CPU torch, dev group)
+        run: deploy/scripts/install_cpu_env.sh --dev
+      - name: pytest (fake profile, no MLX, no slow)
+        run: uv run --no-sync pytest -m "not mlx and not slow" --junitxml=pytest-report.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-report
+          path: pytest-report.xml
+          if-no-files-found: ignore
+
+  web:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test -- --run
+      - run: npm run build
+
+  egress:
+    # NFR-SEC-01: fake-profile pipeline inside a network namespace with only loopback + a
+    # dummy uplink whose traffic nftables logs, counts and drops; tcpdump on all interfaces.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq nftables tcpdump iproute2
+      - name: Install (CPU torch, runtime deps only)
+        run: deploy/scripts/install_cpu_env.sh
+      - name: Harness self-test (stand-in commands; must catch egress)
+        run: EGRESS_SELFTEST_OUT=egress-out/self-test deploy/egress/self_test.sh --mode linux
+      - name: Egress test (fake pipeline)
+        run: deploy/egress/run_egress_test.sh --mode linux --out egress-out/pipeline
+        env:
+          ZLLF_EGRESS_CMD: >-
+            zllf run --corpus tests/fixtures/corpus --hardware fake --auto-approve
+            --runs-dir /tmp/runs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: egress-evidence
+          path: egress-out/
+          retention-days: 30

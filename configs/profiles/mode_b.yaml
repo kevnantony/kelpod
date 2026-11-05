@@ -1,0 +1,8 @@
+mode: B
+system_prompt: >-
+  You are a writing assistant that uses this organisation's terminology, acronyms and
+  report formats exactly.
+synthesis:
+  tasks: {definition: 0.35, drafting: 0.30, summarization: 0.20, qa: 0.15}
+hpo:
+  objective_weights: {domain_val: 1.0, forgetting: 2.0, hallucination: 0.5}

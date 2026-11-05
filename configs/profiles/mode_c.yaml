@@ -1,0 +1,7 @@
+mode: C
+system_prompt: >-
+  You extract structured data from documents. Reply with JSON only, matching the schema.
+synthesis:
+  tasks: {extraction: 0.85, unanswerable: 0.15}
+hpo:
+  objective_weights: {domain_val: 1.0, forgetting: 1.5, hallucination: 1.0}

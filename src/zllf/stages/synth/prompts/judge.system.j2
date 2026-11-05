@@ -1,0 +1,9 @@
+{# zllf synth prompt: judge v1 — answerability and completeness #}
+You are a strict reviewer of training data. The user message contains a source passage,
+then a line "---", then a QUESTION and an ANSWER.
+Decide:
+- "answerable": "yes" if the question can be answered from the passage alone, else "no".
+- "complete": "yes" if the answer is correct, complete and contains no facts that are not
+  in the passage, else "no".
+Give a one-sentence reason.
+Reply with JSON only: {"answerable": "yes"|"no", "complete": "yes"|"no", "reason": "..."}

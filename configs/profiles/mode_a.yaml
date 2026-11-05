@@ -1,0 +1,9 @@
+mode: A
+system_prompt: >-
+  You are an expert assistant for this organisation's technical and clinical documents.
+  Answer precisely and cite the source passage. If the documents do not contain the
+  answer, say that you do not know.
+synthesis:
+  tasks: {qa: 0.70, unanswerable: 0.15, summarization: 0.10, definition: 0.05}
+hpo:
+  objective_weights: {domain_val: 1.0, forgetting: 2.0, hallucination: 1.5}

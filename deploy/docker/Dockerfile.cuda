@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1.7
+# PLACEHOLDER - future Linux/NVIDIA image (DEVELOPMENT_PLAN P1.10.1, ADR-0001 "vllm" backend).
+#
+# Not built in CI and not usable yet: the `vllm` backend and the PEFT/TRL trainer do not exist
+# (the dev machine is an Apple M4 Pro; locally models run via MLX, see ADR-0001). This file
+# documents the intended shape so the bundle/compose tooling has a stable name to target.
+#
+# Intended design:
+#   * base: nvidia/cuda:<12.x|13.x>-cudnn-runtime-ubuntu24.04 (pin by digest), python 3.12
+#   * deps: same uv.lock, but CUDA torch (default PyPI wheels) + extras: vllm, peft, trl,
+#     bitsandbytes, flash-attn, nvidia-ml-py  -> needs a `gpu` dependency group/extra in
+#     pyproject.toml (owned by the platform track).
+#   * offline install on the appliance: `uv pip install --no-index --find-links /wheelhouse`
+#     (wheelhouse produced by deploy/bundle/build_bundle.sh).
+#   * runtime: identical Appendix A env, non-root uid 10001, read-only root, models mounted
+#     read-only at /data/models, `--gpus all` / compose `deploy.resources.reservations.devices`.
+#   * roles: `zllf worker` (train/synth/eval) and `zllf serve` (vLLM OpenAI server with LoRA).
+#
+# Build (once implemented, on a Linux build host with the NVIDIA container toolkit):
+#   docker build -f deploy/docker/Dockerfile.cuda -t zllf-cuda:dev .
+
+ARG CUDA_IMAGE=nvidia/cuda:12.8.1-cudnn-runtime-ubuntu24.04
+FROM ${CUDA_IMAGE}
+
+RUN echo "Dockerfile.cuda is a placeholder; see comments in deploy/docker/Dockerfile.cuda" >&2 \
+ && exit 1

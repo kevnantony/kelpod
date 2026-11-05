@@ -1,0 +1,188 @@
+# ZLLF sanitize rule pack: language-independent recognisers (applied to every chunk).
+#
+# Format (shared by rules_*.yaml, loaded by zllf.stages.sanitize.rules):
+#   macros:         name -> regex fragment, referenced in patterns as <<NAME>> (packs share
+#                   macros; this file is loaded first so its macros are visible everywhere)
+#   recognizers:    list of
+#     name:             unique rule name (used in reports, never the matched text)
+#     entity_type:      e.g. PERSON, PHONE_NUMBER (policy key)
+#     patterns:         list of regexes (Python `re`). If a pattern has a named group
+#                       `value`, only that group is the PII span (e.g. name after a title).
+#     terms:            optional literal list (gazetteer), matched as whole words
+#     score:            base confidence in [0, 1]
+#     flags:            optional list of re flags: IGNORECASE, MULTILINE
+#     context:          words that raise confidence when found shortly before the match
+#                       (case-insensitive substring match)
+#     context_boost:    added to score when context is found (default 0.35)
+#     context_window:   characters before the match searched for context (default 40)
+#     context_stop:     characters that end the context window early (default "\n")
+#     requires_context: drop the match when no context word is found (default false)
+#     validator:        checksum/format validator: iban | kvnr | de_tax_id | us_ssn | phone
+#     invalid_score:    score used when the validator fails (default 0 = discard)
+#     exclude:          regex; matches whose span text fully matches it are discarded
+#
+# Scores below sanitize.score_threshold (default 0.5) are ignored by the policy engine.
+version: 1
+language: common
+
+macros:
+  TOK: "[A-ZÄÖÜ][a-zäöüßéèáóíñç]+(?:-[A-ZÄÖÜ][a-zäöüßéèáóíñç]+)?"
+  INIT: "[A-ZÄÖÜ]\\."
+  # a person name: optional initials, 1-3 capitalised tokens, optional nobiliary particle
+  NAME: "(?!(?:Tel|Tél|Fax|Mobil|Handy|Phone|Email|E-Mail|Mail|Telefon|Nr|No|Station|Zimmer|Room|Herr|Herrn|Frau|Dr|Prof|Mr|Mrs|Ms|Miss|Patient|Patientin|Schwester|Pfleger)\\b)(?:<<INIT>>[ ]?){0,2}<<TOK>>(?:[ ](?:von[ ]der|von|van[ ]der|van|de|zu|di|da)[ ]<<TOK>>|(?:[ ]<<TOK>>){1,2})?"
+  MONTHS: "(?:Jan(?:uary|uar)?|Feb(?:ruary|ruar)?|M(?:arch|ar|ärz|aerz)|Apr(?:il)?|May|Mai|Jun[ei]?|Jul[iy]?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|O[ck]t(?:ober)?|Nov(?:ember)?|De[cz](?:ember)?)\\.?"
+  DATE: "(?:\\d{1,2}[./-]\\d{1,2}[./-](?:19|20)\\d{2}|\\d{1,2}[./]\\d{1,2}[./]\\d{2}(?!\\d)|(?:19|20)\\d{2}-\\d{2}-\\d{2}|\\d{1,2}(?:\\.|st|nd|rd|th)?[ ]<<MONTHS>>[ ](?:19|20)\\d{2}|<<MONTHS>>[ ]\\d{1,2}(?:st|nd|rd|th)?,?[ ](?:19|20)\\d{2})"
+
+recognizers:
+  # ------------------------------------------------------------------ contact data
+  - name: email
+    entity_type: EMAIL_ADDRESS
+    score: 0.95
+    patterns:
+      - "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}\\b"
+
+  - name: phone_international
+    entity_type: PHONE_NUMBER
+    score: 0.75
+    validator: phone
+    patterns:
+      - "(?<![\\w+])(?:\\+|00)[1-9]\\d{0,2}(?:[ .-]?\\(0\\))?[ .-]?\\(?\\d{1,5}\\)?(?:[ .-]?\\d{2,8}){1,4}(?!\\d)"
+
+  - name: phone_national_de
+    entity_type: PHONE_NUMBER
+    score: 0.45
+    validator: phone
+    context: [tel, phone, fon, fax, mobil, handy, mobile, cell, ruf, call, erreichbar, durchwahl, kontakt, contact, nummer, number]
+    patterns:
+      - "(?<![\\w/.,-])\\(?0[1-9]\\d{1,4}\\)?(?:[ ]?/[ ]?|[ -])?\\d{3,9}(?:[ -]\\d{1,5})?(?!\\d|[.,]\\d)"
+
+  - name: phone_national_de_formatted
+    entity_type: PHONE_NUMBER
+    score: 0.6
+    validator: phone
+    context: [tel, phone, fon, fax, mobil, handy, mobile, cell, ruf, call, erreichbar, durchwahl, kontakt, contact]
+    patterns:
+      # 030 12345678 / 0171-2345678 / 0221/123456 - area code + separator
+      - "(?<![\\w/.,-])\\(?0[1-9]\\d{1,4}\\)?(?:[ ]?/[ ]?|[ -])\\d{4,9}(?:[ -]\\d{1,5})?(?!\\d|[.,]\\d)"
+
+  - name: phone_us
+    entity_type: PHONE_NUMBER
+    score: 0.6
+    validator: phone
+    context: [tel, phone, fax, mobile, cell, call, contact, pager]
+    patterns:
+      - "(?<![\\d-])(?:\\(\\d{3}\\)[ ]?|\\d{3}[.-])\\d{3}[.-]\\d{4}(?![\\d-])"
+
+  # ------------------------------------------------------------------ financial / national IDs
+  - name: iban
+    entity_type: IBAN_CODE
+    score: 0.9
+    validator: iban
+    context: [iban, konto, account, bank]
+    patterns:
+      - "\\b[A-Z]{2}\\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?\\b"
+
+  - name: de_kvnr
+    entity_type: DE_KVNR
+    score: 0.9
+    validator: kvnr
+    invalid_score: 0.3
+    context: [versichert, kvnr, krankenversicherung, krankenkasse, kasse, egk, insurance, insured, member]
+    patterns:
+      - "\\b[A-Z][ ]?\\d{9}\\b"
+
+  - name: de_tax_id
+    entity_type: DE_TAX_ID
+    score: 0.75
+    validator: de_tax_id
+    invalid_score: 0.3
+    context: [steuer, idnr, identifikationsnummer, tax, tin, st.-id, finanzamt]
+    patterns:
+      - "(?<![\\d+])[1-9]\\d(?:[ ]?\\d{3}){3}(?!\\d)"
+
+  - name: us_ssn
+    entity_type: US_SSN
+    score: 0.7
+    validator: us_ssn
+    context: [ssn, social security, sozialversicherung, ss#]
+    patterns:
+      - "(?<![\\d-])\\d{3}-\\d{2}-\\d{4}(?![\\d-])"
+
+  - name: us_ssn_plain
+    entity_type: US_SSN
+    score: 0.6
+    validator: us_ssn
+    requires_context: true
+    context: [ssn, social security, ss#]
+    patterns:
+      - "(?<![\\d-])\\d{3}[ ]\\d{2}[ ]\\d{4}(?![\\d-])|(?<!\\d)\\d{9}(?!\\d)"
+
+  # ------------------------------------------------------------------ patient / case identifiers
+  - name: patient_id_labelled
+    entity_type: PATIENT_ID
+    score: 0.8
+    patterns:
+      - "(?i:\\b(?:patient(?:en)?[ -]?(?:id|nr\\.?|nummer|no\\.?|number)|pat\\.?[ -]?(?:id|nr\\.?)|pid|mrn|medical[ ]record(?:[ ]number|[ ]no\\.?)?|fall(?:nummer|[ -]?nr\\.?|[ -]?id)|case[ ](?:no\\.?|number|id|ref\\.?)|aufnahme(?:nummer|[ -]?nr\\.?)|akten(?:zeichen|nummer|[ -]?nr\\.?)|record[ ](?:no\\.?|number|id)|encounter[ ]id|admission[ ](?:no\\.?|number)))[ \\t]*[:#]?[ \\t]*(?P<value>(?=[A-Za-z0-9/-]*\\d)[A-Z0-9][A-Z0-9/-]{3,}[A-Z0-9])"
+
+  - name: patient_id_format
+    entity_type: PATIENT_ID
+    score: 0.75
+    patterns:
+      - "\\b(?:PAT|PID|MRN|FALL|FN|CASE|KH|ADM)[-_/]?(?:\\d{2,4}[-/])?\\d{4,10}\\b"
+
+  # ------------------------------------------------------------------ names (title based)
+  - name: person_academic_title
+    entity_type: PERSON
+    score: 0.75
+    patterns:
+      - "\\b(?:Dr|Prof|PD|Dipl\\.-Ing|Dipl\\.-Med)\\.?(?:[ ](?:Dr\\.|Prof\\.|med\\.|dent\\.|vet\\.|rer\\.[ ]nat\\.|phil\\.|habil\\.|h\\.c\\.))*[ ](?P<value><<NAME>>)"
+
+  - name: person_before_birth_marker
+    entity_type: PERSON
+    score: 0.7
+    patterns:
+      - "(?P<value><<NAME>>)(?=,?[ ](?:geb\\.|geboren|born|DOB|d\\.o\\.b\\.|\\*[ ]?\\d))"
+
+  # ------------------------------------------------------------------ locations
+  - name: city_gazetteer
+    entity_type: LOCATION
+    score: 0.55
+    terms: [Berlin, Hamburg, München, Munich, Köln, Cologne, Frankfurt am Main, Frankfurt,
+            Stuttgart, Düsseldorf, Leipzig, Dortmund, Bremen, Dresden, Hannover,
+            Nürnberg, Duisburg, Bochum, Wuppertal, Bielefeld, Bonn, Münster, Mannheim,
+            Karlsruhe, Augsburg, Wiesbaden, Freiburg, Heidelberg, Potsdam, Kiel, Rostock,
+            Mainz, Erfurt, Magdeburg, Wien, Vienna, Zürich, Zurich, Basel, Bern, Graz,
+            London, Manchester, Birmingham, Glasgow, Edinburgh, Dublin, New York, Los Angeles,
+            Chicago, Houston, Phoenix, Philadelphia, San Antonio, San Diego, Dallas, Boston,
+            Seattle, Denver, Atlanta, Miami, Baltimore, Pittsburgh, Cleveland, Minneapolis]
+
+  # ------------------------------------------------------------------ classification markings
+  - name: classification_en
+    entity_type: CLASSIFICATION_MARKING
+    score: 0.9
+    patterns:
+      - "\\bTOP[ ]SECRET(?://[A-Z][A-Z/ ,-]*[A-Z])?\\b"
+      - "\\bSECRET(?://[A-Z][A-Z/ ,-]*[A-Z])?\\b"
+      - "\\b(?:STRICTLY[ ])?CONFIDENTIAL\\b"
+      - "\\bNOFORN\\b"
+      - "\\bINTERNAL[ ]USE[ ]ONLY\\b"
+      - "\\bOFFICIAL[ -]SENSITIVE\\b"
+      - "\\b(?:FOUO|FOR[ ]OFFICIAL[ ]USE[ ]ONLY)\\b"
+
+  - name: classification_de
+    entity_type: CLASSIFICATION_MARKING
+    score: 0.9
+    patterns:
+      - "\\bVS-NUR[ ]FÜR[ ]DEN[ ]DIENSTGEBRAUCH\\b"
+      - "\\bNUR[ ]FÜR[ ]DEN[ ]DIENSTGEBRAUCH\\b"
+      - "\\bVS-NfD\\b"
+      - "\\bVS-(?:VERTRAULICH|Vertraulich)\\b"
+      - "\\b(?:STRENG[ ])?GEHEIM\\b"
+      - "\\bVERTRAULICH\\b"
+
+  - name: classification_header_line
+    entity_type: CLASSIFICATION_MARKING
+    score: 0.7
+    flags: [MULTILINE]
+    patterns:
+      - "^[ \\t]*(?P<value>(?:Streng[ ])?[Vv]ertraulich|(?:Strictly[ ])?Confidential|Geheim|Secret)[ \\t]*$"

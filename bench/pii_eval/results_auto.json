@@ -1,0 +1,91 @@
+{
+  "ner_mode": "spacy",
+  "notes": 200,
+  "language_accuracy": 1.0,
+  "overall": {
+    "gold": 1458,
+    "predicted": 1664,
+    "recall": 0.9753,
+    "protected": 0.9973,
+    "precision": 0.8534
+  },
+  "per_type": {
+    "CLASSIFICATION_MARKING": {
+      "gold": 31,
+      "predicted": 31,
+      "recall": 1.0,
+      "protected": 1.0,
+      "precision": 1.0
+    },
+    "DATE_OF_BIRTH": {
+      "gold": 62,
+      "predicted": 62,
+      "recall": 1.0,
+      "protected": 1.0,
+      "precision": 1.0
+    },
+    "DE_KVNR": {
+      "gold": 23,
+      "predicted": 23,
+      "recall": 1.0,
+      "protected": 1.0,
+      "precision": 1.0
+    },
+    "DE_TAX_ID": {
+      "gold": 23,
+      "predicted": 23,
+      "recall": 1.0,
+      "protected": 1.0,
+      "precision": 1.0
+    },
+    "EMAIL_ADDRESS": {
+      "gold": 83,
+      "predicted": 83,
+      "recall": 1.0,
+      "protected": 1.0,
+      "precision": 1.0
+    },
+    "IBAN_CODE": {
+      "gold": 70,
+      "predicted": 70,
+      "recall": 1.0,
+      "protected": 1.0,
+      "precision": 1.0
+    },
+    "LOCATION": {
+      "gold": 287,
+      "predicted": 365,
+      "recall": 0.9199,
+      "protected": 1.0,
+      "precision": 0.7178
+    },
+    "PATIENT_ID": {
+      "gold": 48,
+      "predicted": 46,
+      "recall": 0.9583,
+      "protected": 1.0,
+      "precision": 1.0
+    },
+    "PERSON": {
+      "gold": 692,
+      "predicted": 822,
+      "recall": 0.9841,
+      "protected": 0.9942,
+      "precision": 0.8285
+    },
+    "PHONE_NUMBER": {
+      "gold": 126,
+      "predicted": 126,
+      "recall": 1.0,
+      "protected": 1.0,
+      "precision": 1.0
+    },
+    "US_SSN": {
+      "gold": 13,
+      "predicted": 13,
+      "recall": 1.0,
+      "protected": 1.0,
+      "precision": 1.0
+    }
+  }
+}

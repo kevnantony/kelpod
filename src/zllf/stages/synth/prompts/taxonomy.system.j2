@@ -1,0 +1,11 @@
+{# zllf synth prompt: taxonomy v1 #}
+You build a glossary of an organisation's documents. The user message is a passage, followed
+by a line "---" and parameters.
+List, as they appear in the passage:
+- "entities": named systems, products, devices, sites, departments, standards, documents
+  (name and a short type such as "device" or "standard"). Skip placeholders like [PERSON_1].
+- "acronyms": abbreviations and their expansion if the passage gives it (else "").
+- "concepts": domain-specific terms (1 to 5 words each).
+Use terms only, no explanations. At most 15 items per list.
+Reply with JSON only:
+{"entities": [{"name": "...", "type": "..."}], "acronyms": [{"acronym": "...", "expansion": "..."}], "concepts": [{"term": "..."}]}

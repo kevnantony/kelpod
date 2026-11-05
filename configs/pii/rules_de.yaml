@@ -1,0 +1,69 @@
+# ZLLF sanitize rule pack: German. Format: see rules_common.yaml.
+version: 1
+language: de
+
+macros:
+  DE_TITLE: "(?:Herrn|Herr|Frau|Fr\\.|Hr\\.|Schwester|Sr\\.|Pfleger|Pflegerin|Oberarzt|Oberärztin|Chefarzt|Chefärztin|Assistenzarzt|Assistenzärztin|Patient|Patientin)"
+  DE_LABEL: "(?i:name|vorname|nachname|patient(?:in)?|techniker(?:in)?|mechaniker(?:in)?|monteur(?:in)?|prüfer(?:in)?|geprüft[ ]von|durchgeführt[ ]von|gemeldet[ ]von|erstellt[ ]von|freigegeben[ ]von|unterschrift|unterzeichnet|gez\\.|arzt|ärztin|behandelnde[rn]?[ ](?:arzt|ärztin)|pflegekraft|ansprechpartner(?:in)?|kontakt(?:person)?|überwiesen[ ]von|zuweiser(?:in)?|angehörige[rn]?|betreuer(?:in)?|bearbeiter(?:in)?|schichtleiter(?:in)?|meister(?:in)?|verfasser(?:in)?|sachbearbeiter(?:in)?|i\\.[ ]?a\\.|i\\.[ ]?v\\.)"
+
+recognizers:
+  - name: person_de_title
+    entity_type: PERSON
+    score: 0.75
+    patterns:
+      - "\\b<<DE_TITLE>>[ ](?:(?:Dr\\.|Prof\\.|med\\.|Dipl\\.-Ing\\.)[ ])*(?P<value><<NAME>>)"
+
+  - name: person_de_label
+    entity_type: PERSON
+    score: 0.75
+    patterns:
+      - "(?:(?<=\\W)|^)<<DE_LABEL>>[ \\t]*[:\\-–][ \\t]*(?:(?:<<DE_TITLE>>|Dr\\.|Prof\\.|med\\.)[ ])*(?P<value><<NAME>>)"
+      - "(?:(?<=\\W)|^)(?i:gez\\.|i\\.[ ]?a\\.|i\\.[ ]?v\\.)[ \\t]*(?:(?:Dr\\.|Prof\\.)[ ])*(?P<value><<NAME>>)"
+
+  - name: person_de_relation
+    entity_type: PERSON
+    score: 0.6
+    patterns:
+      - "\\b(?:Ehefrau|Ehemann|Lebensgefährtin|Lebensgefährte|Partnerin|Partner|Sohn|Tochter|Mutter|Vater|Bruder|Schwester|Enkel|Enkelin|Kollege|Kollegin|Nachbarin|Nachbar)[ ](?:(?:<<DE_TITLE>>|Dr\\.)[ ])?(?P<value><<NAME>>)(?=[ ,.;:)]|$)"
+
+  - name: person_de_by
+    entity_type: PERSON
+    score: 0.7
+    patterns:
+      - "\\b(?i:geprüft|durchgeführt|gemeldet|erstellt|freigegeben|untersucht|behandelt|überwiesen|repariert|gewartet|diktiert|unterschrieben|vidiert)[ ]von[ ](?:(?:<<DE_TITLE>>|Dr\\.|Prof\\.|med\\.)[ ])*(?P<value><<NAME>>)"
+
+  - name: person_de_signature
+    entity_type: PERSON
+    score: 0.75
+    patterns:
+      - "(?i:mit[ ]freundlichen[ ]grüßen|mit[ ]freundlichen[ ]grüssen|freundliche[ ]grüße|viele[ ]grüße|beste[ ]grüße|mfg|kollegiale[ ]grüße)[,:]?[ \\t]*\\n?[ \\t]*(?:(?:<<DE_TITLE>>|Dr\\.|Prof\\.|med\\.)[ ])*(?P<value><<NAME>>)"
+
+  - name: date_of_birth_de
+    entity_type: DATE_OF_BIRTH
+    score: 0.85
+    requires_context: true
+    context: [geb, geboren, geburt, dob, born, birth, "*"]
+    context_window: 30
+    context_stop: "\n;,)"
+    patterns:
+      - "(?<![\\w.])<<DATE>>(?![\\w])"
+
+  - name: address_de_street
+    entity_type: LOCATION
+    score: 0.7
+    patterns:
+      - "\\b(?:<<TOK>>-){0,3}(?:[A-ZÄÖÜ][a-zäöüß]*)?(?i:straße|strasse|str\\.|weg|allee|platz|gasse|ring|damm|ufer|chaussee|steig|pfad|markt|berg|feld|hof|graben|kamp)[ ]\\d{1,4}(?:[ ]?[a-zA-Z](?![\\w]))?"
+      - "\\b(?:Am|An[ ]der|An[ ]den|Auf[ ]der|Auf[ ]dem|Im|In[ ]der|Unter[ ]den|Zum|Zur|Hinter[ ]der)[ ]<<TOK>>[ ]\\d{1,4}(?:[ ]?[a-zA-Z](?![\\w]))?"
+
+  - name: address_de_postcode_city
+    entity_type: LOCATION
+    score: 0.65
+    exclude: "(?:D-)?\\d{5}[ ](?:Stunden|Betriebsstunden|Zyklen|Kilometer|Km|Euro|EUR|Stück|Teile|Liter|Std|Einheiten|Messungen|Proben|Starts|Landungen|Flugstunden)\\b.*"
+    patterns:
+      - "\\b(?:D-)?\\d{5}[ ]<<TOK>>(?:[ ](?:am|an[ ]der|im|ob[ ]der|in[ ]der|bei)[ ]<<TOK>>|[ ]\\(<<TOK>>\\))?"
+
+  - name: location_de_residence
+    entity_type: LOCATION
+    score: 0.7
+    patterns:
+      - "(?i:\\b(?:wohnhaft[ ]in|wohnt[ ]in|wohnhaft[ ]im|lebt[ ]in|ansässig[ ]in|stammt[ ]aus|urlaub[ ]in|reise[ ]nach|verlegt[ ]nach|verlegt[ ]aus|zugezogen[ ]aus|standort))[ ]?:?[ ](?P<value><<TOK>>(?:[ ](?:am|an[ ]der|im)[ ]<<TOK>>)?)"

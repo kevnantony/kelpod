@@ -1,0 +1,14 @@
+{
+  "replay": {
+    "attribution": "databricks-dolly-15k, Copyright Databricks, Inc., CC BY-SA 3.0",
+    "config": "default",
+    "dataset": "databricks/databricks-dolly-15k",
+    "fetched": "2026-11-05",
+    "licence": "CC BY-SA 3.0",
+    "rows": 1000,
+    "seed": 1234,
+    "sha256": "508881a1fbdbfda1e8fffd565d4c56af13f4c71317619106780c19efe15615f1",
+    "split": "train",
+    "url": "https://huggingface.co/datasets/databricks/databricks-dolly-15k"
+  }
+}

@@ -248,7 +248,7 @@ kelpod/
 | **gpu-demo** | Linux, 1–2× 48–80 GB GPU | 8B student, 14–32B AWQ teacher | Reference runs, timings, final demo |
 | **air-gapped test** | gpu-demo machine with egress firewall / unplugged | Same as demo | Egress test, install-from-bundle test |
 
-> The current dev Mac has no NVIDIA GPU, so vLLM (CUDA), bitsandbytes and FlashAttention will not run there. Plan on SSH + VS Code Remote / Claude Code on a Linux GPU server for all GPU work.
+> The current dev Mac has no NVIDIA GPU, so vLLM (CUDA), bitsandbytes and FlashAttention will not run there. Until a Linux GPU server is available, the **`mac` profile** uses Apple's MLX (`mlx-lm`) for generation, LoRA/QLoRA training on 4-bit models and serving — see [ADR-0001](adr/0001-apple-silicon-mlx-local-profile.md). Hardware presets: `fake` (tests/CI), `toy` (0.5B models, minutes), `mac` (1.5B student, 7B teacher, M4 Pro 24 GB).
 
 ### 4.2 Model inventory to pre-download (online build host → bundle)
 

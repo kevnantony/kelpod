@@ -1,0 +1,298 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:zllf:report:1.0",
+  "title": "ZLLF run audit report",
+  "description": "Immutable audit report of one ZLLF run (FR-09). Counts, hashes, parameters and metrics only: never document text or redacted values (NFR-SEC-06).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "run_id", "workspace", "created_at", "run_created_at", "mode", "profile",
+    "hardware", "ready", "versions", "config", "config_sha256", "seeds", "inputs", "redaction",
+    "synthesis", "training", "evaluation", "timings", "adapter", "licenses", "artefacts",
+    "signing"
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "timestamp": {"type": ["string", "null"], "format": "date-time"},
+    "numeric_tree": {
+      "description": "Numbers/bools only (free-form stage report reduced for privacy).",
+      "type": ["object", "null"],
+      "additionalProperties": {"$ref": "#/$defs/numeric_node"}
+    },
+    "numeric_node": {
+      "anyOf": [
+        {"type": ["number", "boolean"]},
+        {"type": "array", "items": {"$ref": "#/$defs/numeric_node"}},
+        {"type": "object", "additionalProperties": {"$ref": "#/$defs/numeric_node"}}
+      ]
+    },
+    "absent": {
+      "type": "object",
+      "properties": {"present": {"const": false}},
+      "required": ["present"],
+      "additionalProperties": false
+    },
+    "metric": {
+      "type": "object",
+      "required": ["value", "ci_low", "ci_high", "n"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {"type": "number"},
+        "ci_low": {"type": ["number", "null"]},
+        "ci_high": {"type": ["number", "null"]},
+        "n": {"type": ["integer", "null"]}
+      }
+    },
+    "curve": {
+      "type": "array",
+      "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
+    }
+  },
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "minLength": 1},
+    "workspace": {"type": ["string", "null"]},
+    "created_at": {"$ref": "#/$defs/timestamp"},
+    "run_created_at": {"$ref": "#/$defs/timestamp"},
+    "mode": {"enum": ["A", "B", "C"]},
+    "profile": {"type": "string"},
+    "hardware": {"type": "string"},
+    "ready": {"type": "boolean"},
+    "versions": {
+      "type": "object",
+      "required": ["zllf", "python", "platform", "libraries"],
+      "properties": {
+        "zllf": {"type": "string"},
+        "python": {"type": "string"},
+        "platform": {"type": "object"},
+        "libraries": {
+          "type": "object",
+          "additionalProperties": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "config": {"type": "object"},
+    "config_sha256": {"$ref": "#/$defs/sha256"},
+    "seeds": {
+      "type": "object",
+      "required": ["seed"],
+      "properties": {"seed": {"type": "integer"}}
+    },
+    "inputs": {
+      "oneOf": [
+        {"$ref": "#/$defs/absent"},
+        {
+          "type": "object",
+          "required": ["present", "n_documents", "by_status", "corpus_sha256", "documents"],
+          "properties": {
+            "present": {"const": true},
+            "n_documents": {"type": "integer", "minimum": 0},
+            "by_status": {"type": "object", "additionalProperties": {"type": "integer"}},
+            "n_pages": {"type": "integer"},
+            "n_ocr_pages": {"type": "integer"},
+            "n_chars": {"type": "integer"},
+            "corpus_sha256": {"$ref": "#/$defs/sha256"},
+            "documents": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["doc_id", "sha256", "status"],
+                "not": {"anyOf": [{"required": ["path"]}, {"required": ["text"]}]},
+                "properties": {
+                  "doc_id": {"type": "string"},
+                  "sha256": {"$ref": "#/$defs/sha256"},
+                  "mime": {"type": ["string", "null"]},
+                  "status": {"enum": ["parsed", "skipped", "failed"]}
+                }
+              }
+            },
+            "report": {"$ref": "#/$defs/numeric_tree"}
+          }
+        }
+      ]
+    },
+    "redaction": {
+      "oneOf": [
+        {"$ref": "#/$defs/absent"},
+        {
+          "type": "object",
+          "required": ["present", "counts", "report"],
+          "additionalProperties": false,
+          "properties": {
+            "present": {"const": true},
+            "counts": {
+              "type": ["object", "null"],
+              "required": ["n_redactions", "n_chunks_affected", "by_entity_type", "by_action"],
+              "additionalProperties": false,
+              "properties": {
+                "n_redactions": {"type": "integer"},
+                "n_chunks_affected": {"type": "integer"},
+                "by_entity_type": {"type": "object", "additionalProperties": {"type": "integer"}},
+                "by_action": {"type": "object", "additionalProperties": {"type": "integer"}}
+              }
+            },
+            "report": {"$ref": "#/$defs/numeric_tree"}
+          }
+        }
+      ]
+    },
+    "synthesis": {
+      "oneOf": [
+        {"$ref": "#/$defs/absent"},
+        {
+          "type": "object",
+          "required": ["present", "splits", "files_sha256", "report"],
+          "properties": {
+            "present": {"const": true},
+            "splits": {"type": ["object", "null"]},
+            "n_canaries": {"type": ["integer", "null"]},
+            "files_sha256": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+            "report": {"$ref": "#/$defs/numeric_tree"}
+          }
+        }
+      ]
+    },
+    "training": {
+      "oneOf": [
+        {"$ref": "#/$defs/absent"},
+        {
+          "type": "object",
+          "required": ["present", "hardware_profile", "trials", "final_params", "loss_curves"],
+          "properties": {
+            "present": {"const": true},
+            "hardware_profile": {"type": ["object", "null"]},
+            "n_trials": {"type": ["integer", "null"]},
+            "trials": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["number", "params", "state"],
+                "properties": {
+                  "number": {"type": "integer"},
+                  "params": {"type": "object"},
+                  "state": {"enum": ["complete", "pruned", "failed", "failed_oom", "running"]},
+                  "objective": {"type": ["number", "null"]}
+                }
+              }
+            },
+            "final_params": {"type": ["object", "null"]},
+            "loss_curves": {"type": "object", "additionalProperties": {"$ref": "#/$defs/curve"}},
+            "report": {"$ref": "#/$defs/numeric_tree"}
+          }
+        }
+      ]
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["present", "ready", "gates", "metrics"],
+      "properties": {
+        "present": {"const": true},
+        "ready": {"type": "boolean"},
+        "gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["gate", "label", "passed", "value", "threshold", "details"],
+            "additionalProperties": false,
+            "properties": {
+              "gate": {"enum": ["G1_domain", "G2_forgetting", "G3_hallucination",
+                                "G4_memorization", "G5_schema"]},
+              "label": {"type": "string"},
+              "passed": {"type": "boolean"},
+              "value": {"type": "number"},
+              "threshold": {"type": "number"},
+              "details": {"type": "object", "additionalProperties": {"$ref": "#/$defs/numeric_node"}}
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "propertyNames": {"enum": ["base", "base_rag", "adapter", "adapter_rag"]},
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {"$ref": "#/$defs/metric"}
+          }
+        },
+        "results_present": {"type": "boolean"},
+        "report": {"$ref": "#/$defs/numeric_tree"}
+      }
+    },
+    "timings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status", "started_at", "finished_at", "seconds"],
+        "properties": {
+          "status": {"type": "string"},
+          "started_at": {"$ref": "#/$defs/timestamp"},
+          "finished_at": {"$ref": "#/$defs/timestamp"},
+          "seconds": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "required": ["path", "sha256", "size_bytes", "n_files", "within_size_limit", "files"],
+      "properties": {
+        "path": {"const": "adapter"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 1},
+        "n_files": {"type": "integer", "minimum": 1},
+        "within_size_limit": {"type": "boolean"},
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["path", "sha256", "size_bytes"],
+            "properties": {
+              "path": {"type": "string"},
+              "sha256": {"$ref": "#/$defs/sha256"},
+              "size_bytes": {"type": "integer"}
+            }
+          }
+        }
+      }
+    },
+    "licenses": {
+      "type": "object",
+      "required": ["models", "datasets"],
+      "properties": {
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "roles", "license", "source"],
+            "properties": {
+              "name": {"type": "string"},
+              "roles": {"type": "array", "items": {"type": "string"}},
+              "license": {"type": ["string", "null"]},
+              "revision": {"type": ["string", "null"]},
+              "source": {"type": "string"}
+            }
+          }
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "license"],
+            "properties": {
+              "name": {"type": "string"},
+              "license": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    },
+    "artefacts": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "signing": {
+      "type": "object",
+      "required": ["algorithm", "key_id"],
+      "properties": {
+        "algorithm": {"const": "Ed25519"},
+        "key_id": {"type": ["string", "null"]}
+      }
+    }
+  }
+}
