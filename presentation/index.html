@@ -1,0 +1,498 @@
+<meta charset="utf-8">
+<title>Kelpod Pitch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: 1600x900 stage. Beamer (Madrid-like) frame as in the skill-following v3 deck: blue title bar, three-part footline, blocks, triangle bullets. */
+:root{
+  --bg:#ffffff; --paper:#ffffff; --ink:#1a1a1a; --mute:#555566; --line:#d6d6e6;
+  --blue:#3333b2; --blue-d:#26268a; --blue-t:#e6e6f6; --orange:#c62828; --orange-t:#f8e1e0; --amber:#d08a00; --amber-t:#fbf0d9; --green:#2e7d32; --grey:#8f8fa8;
+  --sans:'Source Sans 3',system-ui,-apple-system,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center;user-select:none}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s}
+.slide.on{opacity:1;visibility:visible;transition:opacity .35s ease}
+.a{position:absolute}
+.cap{font-size:26px;color:var(--mute)}
+.mono{font-family:var(--mono)}
+.card{background:var(--paper);border:2px solid var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:28px;font-weight:500;text-align:center;box-sizing:border-box}
+.card svg{width:56px;height:56px}
+.blue{color:var(--blue)} .orange{color:var(--orange)} .muted{color:var(--mute)}
+/* UI chrome */
+#prog{position:fixed;left:0;bottom:0;height:3px;background:var(--blue);transition:width .3s;z-index:5}
+#ui{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center;z-index:6;font-family:var(--mono);font-size:13px;color:var(--mute)}
+#ui button{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
+#ui button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;background:var(--paper);border-top:1px solid var(--line);
+  padding:18px max(24px,env(safe-area-inset-right,0px)) calc(56px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));
+  font-size:18px;line-height:1.55;z-index:4;box-shadow:0 -8px 30px rgba(0,0,0,.08)}
+#notes .meta{font-family:var(--mono);font-size:13px;color:var(--mute);margin-bottom:8px}
+#notes p{max-width:75ch;margin:0 0 10px}
+#notes .click{font-family:var(--mono);font-size:13px;color:var(--blue);border:1px solid var(--blue);border-radius:5px;padding:1px 6px;margin-right:4px}
+#hint{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));font-family:var(--mono);font-size:13px;color:var(--mute);z-index:6}
+@media (prefers-reduced-motion: reduce){.slide,.slide.on{transition:none}}
+/* Beamer chrome */
+.h{position:absolute;left:0;top:0;width:1600px;height:104px;box-sizing:border-box;padding:0 64px;font-size:46px;line-height:104px;font-weight:600;color:#fff;white-space:nowrap;
+  background:linear-gradient(180deg,#4646c4 0%,#3333b2 55%,#2b2b99 100%);box-shadow:0 4px 8px rgba(51,51,178,.3);z-index:2}
+.sbody{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;transform:translate(96px,70px) scale(.88)}
+#foot{position:absolute;left:0;bottom:0;width:1600px;height:50px;display:flex;font-size:22px;color:#fff;z-index:3}
+#foot div{display:flex;align-items:center;padding:0 40px;box-sizing:border-box}
+#foot .f1{width:420px;background:#262686} #foot .f2{width:840px;background:#2b2b97;justify-content:center} #foot .f3{width:340px;background:#3333b2}
+#stage.plain #foot{display:none}
+.blk{border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.blk .bh{background:var(--blue);color:#fff;font-size:26px;font-weight:600;padding:8px 22px}
+.blk .bb{background:var(--blue-t);color:var(--ink);padding:18px 22px;font-size:28px;line-height:1.3}
+.blk.al .bh{background:var(--orange)} .blk.al .bb{background:var(--orange-t)}
+.tri{display:inline-block;width:0;height:0;border-left:18px solid var(--blue);border-top:11px solid transparent;border-bottom:11px solid transparent;flex:none}
+.tri.o{border-left-color:var(--orange)}
+.big{font-family:var(--mono);font-weight:600;color:var(--blue);line-height:1}
+#ui{opacity:.4} #ui:hover{opacity:1}
+/* print / PDF export (?print=slides | ?print=frames) */
+@page{size:1600px 900px;margin:0}
+body.printing{overflow:visible;padding:0;margin:0;height:auto}
+body.printing #ui,body.printing #hint,body.printing #prog,body.printing #notes{display:none}
+/* Chrome's PDF output rasterises soft shadows into uneven grey frames; use flat borders instead */
+body.printing *{box-shadow:none!important}
+body.printing .blk{outline:2px solid #d6d6e6}
+.ppage{position:relative;width:1600px;height:900px;overflow:hidden;break-after:page}
+.ppage #stage{position:absolute;left:0;top:0;transform:none!important}
+</style>
+
+<div id="stage">
+<div id="foot"><div class="f1">Antony &amp; Tajdeen</div><div class="f2">Kelpod</div><div class="f3"><span id="fpg"></span></div></div>
+
+<!-- 1 Title -->
+<section class="slide" id="s-title">
+  <div class="a t-in" style="left:150px;top:150px;width:1300px;padding:50px 40px 44px;text-align:center;box-sizing:border-box;border-radius:14px;background:linear-gradient(180deg,#e8e8f8 0%,#ffffff 100%);border:2px solid var(--blue);box-shadow:0 4px 14px rgba(51,51,178,.18)">
+    <div style="font-size:96px;font-weight:700;color:var(--blue);line-height:1.05">Kelpod</div>
+    <div style="font-size:38px;color:var(--ink);margin-top:22px;line-height:1.3">Custom AI for hospitals and power plants.<br>Their data never leaves the building.</div></div>
+  <div class="a t-in" style="left:150px;top:500px;width:1300px;text-align:center;font-size:30px;color:var(--mute)">Status update 1 · Team: Kevin Antony · Arsha Fahima Tajdeen</div>
+  <div class="a t-in" style="left:700px;top:568px;width:200px;height:6px;background:var(--blue);border-radius:3px"></div>
+  <div class="a t-in" style="left:150px;top:608px;width:1300px;text-align:center;font-size:48px;font-weight:700">Presented by Kevin Antony</div>
+  <div class="a t-in" style="left:150px;top:678px;width:1300px;text-align:center;font-size:30px">Matriculation Number: 10084971</div>
+  <div class="a t-in" style="left:150px;top:728px;width:1300px;text-align:center;font-size:30px;color:var(--blue);font-weight:600">Frontier Systems 2026/27 · AI for Good</div>
+</section>
+
+<!-- 2 Problem -->
+<section class="slide" id="s-prob">
+  <div class="h">Hospitals sit on knowledge they can't use with AI</div>
+  <div class="a card p-hos" style="left:100px;top:170px;width:330px;height:300px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" style="width:96px;height:96px"><path d="M3 21V8l9-5 9 5v13z"/><path d="M12 9v6M9 12h6M3 21h18M10 21v-3h4v3"/></svg>
+    <span style="font-weight:600">Hospital</span><span class="cap" style="font-size:24px">patient notes · studies<br>maintenance logs</span></div>
+  <svg class="a" width="1600" height="900" style="left:0;top:0;overflow:visible" aria-hidden="true">
+    <line class="ln p-ln" x1="450" y1="320" x2="1010" y2="320" stroke="var(--mute)" stroke-width="3" stroke-dasharray="10 10"/>
+    <path class="p-ah" d="M1006 310 L1024 320 L1006 330 Z" fill="var(--mute)"/>
+  </svg>
+  <div class="a card p-cld" style="left:1040px;top:200px;width:330px;height:240px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" style="width:96px;height:96px"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9a4.5 4.5 0 0 0 1 9z"/></svg>
+    <span style="font-weight:600">Cloud AI</span></div>
+  <div class="a p-x" style="left:690px;top:270px;width:100px;height:100px;color:var(--orange)">
+    <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></div>
+  <div class="a p-xl" style="left:540px;top:390px;width:400px;text-align:center;font-size:30px;font-weight:600;color:var(--orange)">Not allowed: GDPR, HIPAA</div>
+  <div class="a p-b blk" style="left:100px;top:560px;width:430px"><div class="bh">1 · Data can't leave</div><div class="bb">Privacy law and security rules</div></div>
+  <div class="a p-b blk" style="left:585px;top:560px;width:430px"><div class="bh">2 · No ML engineers</div><div class="bb">Doctors and IT staff, not AI experts</div></div>
+  <div class="a p-b blk" style="left:1070px;top:560px;width:430px"><div class="bh">3 · Generic AI misses jargon</div><div class="bb">Codes, acronyms, strict formats</div></div>
+</section>
+
+<!-- 3 Solution -->
+<section class="slide" id="s-sol">
+  <div class="h">Drop in a folder. Get a tested AI by morning.</div>
+  <div class="a s-box" style="left:80px;top:150px;width:1440px;height:470px;border:3px dashed var(--blue);border-radius:18px;background:#fbfbff"></div>
+  <div class="a s-box" style="left:110px;top:170px;display:flex;align-items:center;gap:14px;font-size:28px;font-weight:600;color:var(--blue)">
+    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Inside the hospital · no internet</div>
+  <div class="a card s-fold" style="left:120px;top:290px;width:170px;height:170px;font-size:24px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h6l2 2h10v11H3z"/></svg>Documents</div>
+  <div class="a s-stages" style="left:0;top:0"></div>
+  <svg class="a" width="1600" height="900" style="left:0;top:0;overflow:visible" aria-hidden="true">
+    <line class="ln s-ln" x1="340" y1="480" x2="1500" y2="480" stroke="var(--blue)" stroke-width="5" stroke-linecap="round"/>
+    <line class="ln s-dn" x1="800" y1="625" x2="800" y2="680" stroke="var(--mute)" stroke-width="3"/>
+    <path class="s-ah" d="M792 676 L800 690 L808 676 Z" fill="var(--mute)"/>
+  </svg>
+  <div class="a s-cap cap" style="left:340px;top:520px;width:1160px;text-align:center">Each step is an AI agent doing part of an ML engineer's job</div>
+  <div class="a card s-out" style="left:470px;top:700px;width:300px;height:120px;border-color:var(--blue);color:var(--blue)">Scorecard</div>
+  <div class="a card s-out" style="left:830px;top:700px;width:300px;height:120px;border-color:var(--blue);color:var(--blue)">Your own chat + API</div>
+</section>
+
+<!-- 4 AI for good -->
+<section class="slide" id="s-good">
+  <div class="h">The "good" part is measurable</div>
+  <div class="a g-b blk" style="left:100px;top:190px;width:430px"><div class="bh">Privacy</div><div class="bb" style="height:300px;box-sizing:border-box">
+    <div class="big g-n" style="font-size:130px">0</div><div style="margin-top:20px">data packets leave the building</div></div></div>
+  <div class="a g-b blk" style="left:585px;top:190px;width:430px"><div class="bh">Safety</div><div class="bb" style="height:300px;box-sizing:border-box">
+    <div class="big g-n" style="font-size:130px">4</div><div style="margin-top:20px">checks before any model is used: no made-up answers, no leaked patient data</div></div></div>
+  <div class="a g-b blk" style="left:1070px;top:190px;width:430px"><div class="bh">Access</div><div class="bb" style="height:300px;box-sizing:border-box">
+    <div class="big g-n" style="font-size:130px">0</div><div style="margin-top:20px">ML engineers needed to build one</div></div></div>
+  <div class="a g-cap" style="left:0;top:620px;width:1600px;text-align:center;font-size:36px;font-weight:600">First users: hospitals, biobanks, clean-energy operators</div>
+</section>
+
+<!-- 5 Business -->
+<section class="slide" id="s-biz">
+  <div class="h">Who pays, and who we compete with</div>
+  <div class="a b-l blk" style="left:100px;top:160px;width:620px"><div class="bh">Users</div><div class="bb">Doctors, researchers, plant engineers</div></div>
+  <div class="a b-l blk" style="left:100px;top:340px;width:620px"><div class="bh">Buyer</div><div class="bb">Hospital IT and security leads</div></div>
+  <div class="a b-l blk" style="left:100px;top:520px;width:620px"><div class="bh">Revenue</div><div class="bb">Yearly licence per GPU server, plus paid pilots and pre-built hardware</div></div>
+  <svg class="a" width="1600" height="900" style="left:0;top:0;overflow:visible" aria-hidden="true">
+    <g class="b-ax">
+      <line x1="860" y1="170" x2="860" y2="760" stroke="var(--ink)" stroke-width="3"/>
+      <line x1="860" y1="760" x2="1500" y2="760" stroke="var(--ink)" stroke-width="3"/>
+      <path d="M852 182 L860 166 L868 182 Z" fill="var(--ink)"/><path d="M1488 752 L1504 760 L1488 768 Z" fill="var(--ink)"/>
+      <line x1="1180" y1="180" x2="1180" y2="755" stroke="var(--line)" stroke-width="2" stroke-dasharray="8 8"/>
+      <line x1="865" y1="465" x2="1495" y2="465" stroke="var(--line)" stroke-width="2" stroke-dasharray="8 8"/>
+    </g>
+  </svg>
+  <div class="a b-ax cap" style="left:860px;top:775px;width:640px;text-align:right">Data stays on site →</div>
+  <div class="a b-ax cap" style="left:530px;top:450px;width:600px;text-align:center;transform:rotate(-90deg);transform-origin:center">Custom model, no experts needed →</div>
+  <div class="a b-c" style="left:930px;top:440px;display:flex;align-items:center;gap:14px;font-size:26px"><span style="width:28px;height:28px;border-radius:50%;background:var(--grey);flex:none"></span>Cloud fine-tuning</div>
+  <div class="a b-c" style="left:1210px;top:650px;display:flex;align-items:center;gap:14px;font-size:26px"><span style="width:28px;height:28px;border-radius:50%;background:var(--grey);flex:none"></span>Consultancies</div>
+  <div class="a b-c" style="left:1210px;top:560px;display:flex;align-items:center;gap:14px;font-size:26px"><span style="width:28px;height:28px;border-radius:50%;background:var(--grey);flex:none"></span>Self-hosted chatbots</div>
+  <div class="a b-z" style="left:1260px;top:230px;display:flex;align-items:center;gap:16px;font-size:34px;font-weight:700;color:var(--blue)"><span style="width:44px;height:44px;border-radius:50%;background:var(--blue);flex:none;box-shadow:0 0 0 8px var(--blue-t)"></span>Us</div>
+</section>
+
+<!-- 6 Progress -->
+<section class="slide" id="s-prog">
+  <div class="h">Since the two-pager: it runs, end to end</div>
+  <div class="a k-t card" style="left:100px;top:190px;width:320px;height:320px;gap:22px;border-color:var(--blue)"><div class="big k-n" style="font-size:110px">6/6</div><div style="padding:0 20px">pipeline steps working</div></div>
+  <div class="a k-t card" style="left:460px;top:190px;width:320px;height:320px;gap:22px;border-color:var(--blue)"><div class="big k-n" style="font-size:110px">430</div><div style="padding:0 20px">automated tests passing</div></div>
+  <div class="a k-t card" style="left:820px;top:190px;width:320px;height:320px;gap:22px;border-color:var(--blue)"><div class="big k-n" style="font-size:110px">0</div><div style="padding:0 20px">connections out, in a full real run</div></div>
+  <div class="a k-t card" style="left:1180px;top:190px;width:320px;height:320px;gap:22px;border-color:var(--blue)"><div class="big" style="font-size:96px"><span class="k-n">3.5</span><span style="font-size:40px">&nbsp;min</span></div><div style="padding:0 20px">full run on a MacBook</div></div>
+  <div class="a k-cap cap" style="left:100px;top:580px;width:1400px;text-align:center">Also done: requirements document, development plan, web interface, our domain kelpod.eu.org</div>
+</section>
+
+<!-- 7 Agents as employees -->
+<section class="slide" id="s-agents">
+  <div class="h">Our team: 2 founders, 10 AI agents</div>
+  <div class="a a-grid" style="left:0;top:0"></div>
+  <div class="a a-r" style="left:1110px;top:200px;display:flex;align-items:center;gap:20px;font-size:32px"><span class="tri"></span>We wrote the plan</div>
+  <div class="a a-r" style="left:1110px;top:280px;display:flex;align-items:center;gap:20px;font-size:32px"><span class="tri"></span>Agents wrote the code</div>
+  <div class="a a-r" style="left:1110px;top:360px;display:flex;align-items:center;gap:20px;font-size:32px"><span class="tri"></span>We checked every piece</div>
+  <div class="a a-res blk" style="left:100px;top:540px;width:1400px"><div class="bh">Result</div><div class="bb" style="font-size:40px;font-weight:600">~46,000 lines of code in one week, all 10 agents working in parallel</div></div>
+  <div class="a a-cap cap" style="left:100px;top:720px;width:1400px">Humans still mattered: we caught a login bug and a privacy check using the wrong key.</div>
+</section>
+
+<!-- 8 Failed gates -->
+<section class="slide" id="s-gates">
+  <div class="h">Our first model failed its safety checks. Good.</div>
+  <div class="a cap gt-h" style="left:100px;top:150px">Safety check</div>
+  <div class="a cap gt-h" style="left:640px;top:150px">What our first model did</div>
+  <div class="a gt-rows" style="left:0;top:0"></div>
+  <div class="a gt-cap" style="left:100px;top:700px;width:1400px;font-size:36px;font-weight:600">The checks work. The test data was tiny: 12 files, about 35 examples.</div>
+</section>
+
+<!-- 9 Obstacles -->
+<section class="slide" id="s-obst">
+  <div class="h">What went wrong, and what we changed</div>
+  <div class="a cap ob-h" style="left:142px;top:160px">Obstacle</div>
+  <div class="a cap ob-h" style="left:800px;top:160px">What we did</div>
+  <div class="a ob-rows" style="left:0;top:0"></div>
+</section>
+
+<!-- 10 Customers -->
+<section class="slide" id="s-cust">
+  <div class="h">Customers: the conversations start now</div>
+  <div class="a c-l blk al" style="left:100px;top:180px;width:600px"><div class="bh">So far</div><div class="bb" style="font-size:34px;height:260px;box-sizing:border-box">No customer interviews yet.<br><b>This is our biggest gap.</b></div></div>
+  <div class="a c-r blk" style="left:760px;top:180px;width:740px"><div class="bh">Next: 5 interviews by 10 Dec</div><div class="bb" style="height:260px;box-sizing:border-box">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:16px"><span class="tri"></span>Hospital research IT</div>
+      <div style="display:flex;align-items:center;gap:16px"><span class="tri"></span>A data-protection officer</div>
+      <div style="display:flex;align-items:center;gap:16px"><span class="tri"></span>Clinical researchers</div>
+      <div style="display:flex;align-items:center;gap:16px"><span class="tri"></span>An energy operator</div></div></div></div>
+  <div class="a c-q" style="left:100px;top:560px;width:1400px;font-size:34px;font-weight:600">We want to learn:</div>
+  <div class="a c-q" style="left:100px;top:620px;width:1400px;display:flex;gap:60px;font-size:32px">
+    <span>Would they pay?</span><span>Who signs off?</span><span>What hardware do they have?</span></div>
+</section>
+
+<!-- 11 Next steps -->
+<section class="slide" id="s-next">
+  <div class="h">Next steps, with numbers and dates</div>
+  <svg class="a" width="1600" height="900" style="left:0;top:0;overflow:visible" aria-hidden="true">
+    <line class="ln n-ln" x1="120" y1="430" x2="1480" y2="430" stroke="var(--blue)" stroke-width="6" stroke-linecap="round"/>
+  </svg>
+  <div class="a n-ms" style="left:0;top:0"></div>
+</section>
+
+<!-- 12 Takeaway -->
+<section class="slide" id="s-end">
+  <div class="h">Takeaway</div>
+  <div class="a e1 blk" style="left:100px;top:200px;width:1400px"><div class="bh">One thing to remember</div><div class="bb" style="font-size:54px;font-weight:700;line-height:1.25;padding:30px 32px">Hospitals can't send their data to AI.<br>We bring tested AI to their data.</div></div>
+  <div class="a e2" style="left:100px;top:540px;width:1400px;display:flex;gap:40px">
+    <div class="blk" style="flex:1"><div class="bh">We need</div><div class="bb" style="font-size:38px;font-weight:600">GPU time</div></div>
+    <div class="blk al" style="flex:1"><div class="bh">We need</div><div class="bb" style="font-size:38px;font-weight:600">An intro to a hospital IT lead</div></div></div>
+</section>
+
+</div>
+
+<div id="prog"></div>
+<div id="hint">→ / click: next · ← back · N: notes · F: fullscreen</div>
+<aside id="notes" hidden><div class="meta"></div><div class="body"></div></aside>
+<div id="ui">
+  <button id="bPrev" type="button" aria-label="Previous">←</button>
+  <button id="bNext" type="button" aria-label="Next">→</button>
+  <button id="bNotes" type="button">Notes</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TL=()=>gsap.timeline();
+function counter(tl, el, from, to, opts={}){
+  const o={v:from}, dec=opts.dec||0, suf=opts.suf||'';
+  const fmt=v=>Math.abs(v).toFixed(dec)+suf;
+  el.textContent=fmt(from);
+  tl.to(o,{v:to,duration:opts.dur||1,ease:opts.ease||'power2.out',onUpdate:()=>el.textContent=fmt(o.v)},opts.at);
+  return tl;
+}
+function lineInit(l){const L=Math.hypot(l.x2.baseVal.value-l.x1.baseVal.value,l.y2.baseVal.value-l.y1.baseVal.value);gsap.set(l,{strokeDasharray:L,strokeDashoffset:L});}
+
+/* ---------- icons ---------- */
+const I={
+ doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 15h6M9 18h4"/>',
+ eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><path d="M4 20L20 4"/>',
+ pen:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+ train:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+ box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+ chip:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+ chart:'<path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
+ server:'<rect x="4" y="4" width="16" height="6" rx="1"/><rect x="4" y="14" width="16" height="6" rx="1"/><path d="M8 7h.01M8 17h.01"/>',
+ window:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+};
+const ico=(k,s=44,w=1.6)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
+
+/* ---------- build generated parts ---------- */
+// slide 3: six pipeline steps
+const STG=[['doc','Read'],['eye','Hide names'],['pen','Write examples'],['train','Train'],['shield','Safety check'],['box','Package']];
+(()=>{let h='';STG.forEach(([k,n],i)=>{const x=340+i*196;
+  h+=`<div class="a card s-st" data-i="${i}" style="left:${x}px;top:290px;width:176px;height:170px;font-size:24px;line-height:1.15;padding:0 8px">${ico(k,52)}${n}</div>`;});
+  $('#s-sol .s-stages').innerHTML=h;})();
+
+// slide 7: ten agents
+const AG=[['doc','Reader'],['eye','Privacy'],['chip','Model runtime'],['pen','Teacher'],['train','Trainer'],['chart','Evaluator'],['box','Packager'],['server','Backend'],['window','Web UI'],['gear','DevOps']];
+(()=>{let h='';AG.forEach(([k,n],i)=>{const c=i%5,r=Math.floor(i/5);
+  h+=`<div class="a card a-c" style="left:${100+c*190}px;top:${180+r*160}px;width:172px;height:142px;font-size:24px;gap:8px;color:var(--blue)">${ico(k,46)}<span style="color:var(--ink)">${n}</span></div>`;});
+  $('#s-agents .a-grid').innerHTML=h;})();
+
+// slide 8: four safety checks (state: r = failed, a = not proven)
+const GT=[['Accuracy on your documents','+67%, but only 5 test questions','a'],['Keeps general skills','Broke JSON output: 10/10 → 0/10','r'],['Admits when it doesn\'t know','Said "I don\'t know" 80% of the time (needs 90%)','r'],['Doesn\'t leak private data','Repeated 3 of 3 planted secrets','r']];
+(()=>{let h='';GT.forEach(([n,w,s],i)=>{const y=205+i*118;
+  h+=`<div class="a gt-band" style="left:90px;top:${y-12}px;width:1420px;height:96px;border-radius:10px;background:${s==='r'?'var(--orange-t)':'var(--amber-t)'}"></div>`;
+  h+=`<div class="a gt-n" style="left:110px;top:${y}px;width:510px;line-height:72px;font-size:32px;font-weight:600">${n}</div>`;
+  h+=`<div class="a gt-w" style="left:640px;top:${y}px;width:720px;line-height:1.2;height:72px;display:flex;align-items:center;font-size:30px">${w}</div>`;
+  h+=`<div class="a gt-l" data-s="${s}" style="left:1400px;top:${y+8}px;width:56px;height:56px;border-radius:50%;background:var(--line)"></div>`;});
+  $('#s-gates .gt-rows').innerHTML=h;})();
+
+// slide 9: obstacles
+const OB=[['No GPU','Run everything on a MacBook with Apple\'s MLX'],['Internet at 60 KB/s','Small models now, big ones on campus'],['Grading AI with AI is circular','Humans write the final test questions']];
+const ARROW='<svg viewBox="0 0 60 24" width="90" height="36" fill="none" stroke="var(--mute)" stroke-width="2.5" stroke-linecap="round"><path d="M2 12h52M44 4l10 8-10 8"/></svg>';
+(()=>{let h='';OB.forEach(([p,f],i)=>{const y=240+i*170;
+  h+=`<div class="a ob-p" style="left:100px;top:${y}px;width:580px;display:flex;align-items:center;gap:24px;font-size:40px;font-weight:600"><span class="tri o"></span>${p}</div>`;
+  h+=`<div class="a ob-a" style="left:680px;top:${y+4}px">${ARROW}</div>`;
+  h+=`<div class="a ob-f" style="left:800px;top:${y}px;width:720px;font-size:36px;color:var(--blue);line-height:1.2">${f}</div>`;});
+  $('#s-obst .ob-rows').innerHTML=h;})();
+
+// slide 11: milestones
+const MS=[['Week 6 · 26 Nov','500 real documents through the pipeline'],['Week 8 · 10 Dec','150 human-checked test questions, 5 interviews'],['Week 10','≥ 12% better than the base model on those questions'],['End of semester','A non-expert goes from folder to working AI, alone']];
+(()=>{let h='';MS.forEach(([d,t],i)=>{const x=200+i*400;
+  h+=`<div class="a n-d mono" style="left:${x-170}px;top:340px;width:340px;text-align:center;font-size:28px;font-weight:600;color:var(--blue)">${d}</div>`;
+  h+=`<div class="a n-c" style="left:${x-24}px;top:406px;width:48px;height:48px;border-radius:50%;background:var(--paper);border:6px solid var(--blue);box-sizing:border-box"></div>`;
+  h+=`<div class="a n-t" style="left:${x-170}px;top:490px;width:340px;text-align:center;font-size:30px;line-height:1.25">${t}</div>`;});
+  $('#s-next .n-ms').innerHTML=h;})();
+
+/* ---------- slides: init + steps ---------- */
+const SL=[
+{ id:'s-title',
+  init:e=>gsap.set($$('.t-in',e),{opacity:0,y:24}),
+  steps:[e=>TL().to($$('.t-in',e),{opacity:1,y:0,duration:.8,stagger:.14,ease:'power3.out'})],
+  notes:`Hi everyone. We're Kevin and Arsha, and our startup is the Kelpod.
+In one sentence: we help hospitals and power plants build their own custom AI, and their data never leaves the building. In the next six minutes I'll show you the problem, what we built since the two-pager, what failed, and what's next.` },
+
+{ id:'s-prob',
+  init:e=>{gsap.set($('.p-hos',e),{opacity:0,y:20});gsap.set($('.p-cld',e),{opacity:0,y:20});$$('.ln',e).forEach(lineInit);gsap.set($('.p-ah',e),{opacity:0});
+    gsap.set($('.p-x',e),{opacity:0,scale:.3});gsap.set($('.p-xl',e),{opacity:0});gsap.set($$('.p-b',e),{opacity:0,y:20});},
+  steps:[
+    e=>TL().to($('.p-hos',e),{opacity:1,y:0,duration:.6,ease:'power2.out'}),
+    e=>TL().to($('.p-cld',e),{opacity:1,y:0,duration:.5}).to($('.p-ln',e),{strokeDashoffset:0,duration:.6},'<.1').to($('.p-ah',e),{opacity:1,duration:.15})
+           .to($('.p-x',e),{opacity:1,scale:1,duration:.45,ease:'back.out(2.5)'},'+=.15').to($('.p-xl',e),{opacity:1,duration:.4},'<.1'),
+    e=>TL().to($$('.p-b',e),{opacity:1,y:0,duration:.5,stagger:.2,ease:'power2.out'})
+  ],
+  notes:`Hospitals, biobanks and energy operators sit on huge piles of text: patient notes, study reports, thirty years of maintenance logs.
+[click] Normally you'd send that to a cloud AI. They can't. GDPR and security rules forbid it.
+[click] So they're stuck for three reasons. The data can't leave. They have no ML engineers who could train a model in-house. And generic AI doesn't understand their codes, acronyms and strict formats.` },
+
+{ id:'s-sol',
+  init:e=>{gsap.set($$('.s-box',e),{opacity:0});gsap.set($('.s-fold',e),{opacity:0,x:-20});gsap.set($$('.s-st',e),{opacity:0,y:16});
+    $$('.ln',e).forEach(lineInit);gsap.set($('.s-ah',e),{opacity:0});gsap.set($('.s-cap',e),{opacity:0});gsap.set($$('.s-out',e),{opacity:0,y:20});},
+  steps:[
+    e=>TL().to($$('.s-box',e),{opacity:1,duration:.5}).to($('.s-fold',e),{opacity:1,x:0,duration:.5},'<.2'),
+    e=>{const t=TL().to($('.s-ln',e),{strokeDashoffset:0,duration:1.6,ease:'none'});
+        $$('.s-st',e).forEach((c,i)=>t.to(c,{opacity:1,y:0,duration:.35,ease:'back.out(2)'},i*.26));
+        return t.to($('.s-cap',e),{opacity:1,duration:.4});},
+    e=>TL().to($('.s-dn',e),{strokeDashoffset:0,duration:.3}).to($('.s-ah',e),{opacity:1,duration:.1})
+           .to($$('.s-out',e),{opacity:1,y:0,duration:.5,stagger:.15,ease:'back.out(1.6)'})
+  ],
+  notes:`Our product is software that runs entirely inside the hospital, with no internet connection.
+[click] A doctor drops in a folder of documents and picks a goal. Then six steps run on their own: read the documents, hide names and IDs, have a larger "teacher" model write practice questions, train a small custom model, run safety checks, and package it.
+Each step is an AI agent doing part of what an ML engineer would do.
+[click] The next morning they get a scorecard, and their own chat and API.` },
+
+{ id:'s-good',
+  init:e=>{gsap.set($$('.g-b',e),{opacity:0,y:20});gsap.set($('.g-cap',e),{opacity:0,y:16});},
+  steps:[
+    e=>TL().to($$('.g-b',e),{opacity:1,y:0,duration:.55,stagger:.22,ease:'power2.out'}),
+    e=>TL().to($('.g-cap',e),{opacity:1,y:0,duration:.5})
+  ],
+  notes:`Why is this AI for Good? Because each benefit is a number you can check.
+[click] Privacy: zero data packets leave the building, and we test that automatically. Safety: four checks have to pass before anyone can use a model. They block made-up answers and leaked patient data. Access: you don't need an ML engineer.
+[click] Our first users are hospitals, biobanks and clean-energy operators: public institutions that can't afford an AI team.` },
+
+{ id:'s-biz',
+  init:e=>{gsap.set($$('.b-l',e),{opacity:0,x:-20});gsap.set($$('.b-ax',e),{opacity:0});gsap.set($$('.b-c',e),{opacity:0,scale:.8});gsap.set($('.b-z',e),{opacity:0,scale:.5});},
+  steps:[
+    e=>TL().to($$('.b-l',e),{opacity:1,x:0,duration:.5,stagger:.18}),
+    e=>TL().to($$('.b-ax',e),{opacity:1,duration:.4}).to($$('.b-c',e),{opacity:1,scale:1,duration:.4,stagger:.15,ease:'back.out(2)'}),
+    e=>TL().to($('.b-z',e),{opacity:1,scale:1,duration:.55,ease:'back.out(2.5)'})
+  ],
+  notes:`The users are doctors, researchers and plant engineers. But the buyer is the hospital's IT and security lead, because they approve anything that touches patient data.
+We make money with a yearly licence per GPU server, plus paid pilots and pre-built hardware.
+[click] The alternatives: cloud fine-tuning gives you a custom model, but your data leaves. Self-hosted chatbots stay on site, but they don't learn your vocabulary. Consultancies can do both, but they take months and need experts.
+[click] We aim for the top right: on site, custom, no experts.` },
+
+{ id:'s-prog',
+  init:e=>{gsap.set($$('.k-t',e),{opacity:0,y:20});gsap.set($('.k-cap',e),{opacity:0});const n=$$('.k-n',e);n[0].textContent='0/6';n[1].textContent='0';n[2].textContent='0';n[3].textContent='0.0';},
+  steps:[
+    e=>{const t=TL().to($$('.k-t',e),{opacity:1,y:0,duration:.5,stagger:.15}),n=$$('.k-n',e);
+        counter(t,n[0],0,6,{suf:'/6',at:.1,dur:.8});counter(t,n[1],0,430,{at:.25,dur:1.2});counter(t,n[3],0,3.5,{dec:1,at:.55,dur:1});
+        return t.to($('.k-cap',e),{opacity:1,duration:.4});}
+  ],
+  notes:`Here's our progress since the two-pager. The whole pipeline now runs end to end. All six steps work, with 430 automated tests.
+We ran it with real AI models and watched the network: zero connections out.
+And a full run takes three and a half minutes on a MacBook. That's with small models and a small test set, but it's the complete product loop.` },
+
+{ id:'s-agents',
+  init:e=>{gsap.set($$('.a-c',e),{opacity:0,scale:.7});gsap.set($$('.a-r',e),{opacity:0,x:-20});gsap.set($('.a-res',e),{opacity:0,y:20});gsap.set($('.a-cap',e),{opacity:0});},
+  steps:[
+    e=>TL().to($$('.a-c',e),{opacity:1,scale:1,duration:.35,stagger:.07,ease:'back.out(2)'}),
+    e=>TL().to($$('.a-r',e),{opacity:1,x:0,duration:.45,stagger:.2}),
+    e=>TL().to($('.a-res',e),{opacity:1,y:0,duration:.5}).to($('.a-cap',e),{opacity:1,duration:.4},'+=.2')
+  ],
+  notes:`The course asks us to use agents as employees, and that's exactly how we built it.
+[click] Ten coding agents, each owning one part of the product.
+[click] We wrote the plan and the interfaces between the parts. The agents wrote the code in parallel. We checked and connected every piece.
+[click] That gave us about 46,000 lines in one week. But humans still mattered: we caught a bug that stopped the web app from logging in, and a privacy check that was using the wrong key.` },
+
+{ id:'s-gates',
+  init:e=>{gsap.set($$('.gt-h',e),{opacity:0});gsap.set($$('.gt-n',e),{opacity:0,x:-16});gsap.set($$('.gt-w,.gt-band',e),{opacity:0});gsap.set($$('.gt-l',e),{backgroundColor:'#d6d6e6',scale:1});gsap.set($('.gt-cap',e),{opacity:0,y:16});},
+  steps:[
+    e=>TL().to($$('.gt-h',e),{opacity:1,duration:.3}).to($$('.gt-n',e),{opacity:1,x:0,duration:.4,stagger:.1},'<'),
+    e=>{const t=TL();$$('.gt-n',e).forEach((_,i)=>{const at=i*.45, l=$$('.gt-l',e)[i];
+          t.to($$('.gt-w',e)[i],{opacity:1,duration:.35},at).to($$('.gt-band',e)[i],{opacity:1,duration:.35},at)
+           .to(l,{backgroundColor:l.dataset.s==='r'?'#c62828':'#d08a00',duration:.3},at+.2).fromTo(l,{scale:1},{scale:1.25,duration:.15,yoyo:true,repeat:1},at+.2);});
+        return t;},
+    e=>TL().to($('.gt-cap',e),{opacity:1,y:0,duration:.5})
+  ],
+  notes:`Now the honest part. Our first real model did not pass its safety checks.
+[click] Accuracy went up 67 percent, but on only five test questions, so it doesn't count as proven. It got worse at writing JSON: ten out of ten before, zero after. It admitted "I don't know" only 80 percent of the time, and we require 90. And it repeated all three secret strings we had planted in its training data.
+[click] That's what we want: the checks caught a bad model. The test set was tiny, twelve files and about thirty-five examples. Real data comes next.` },
+
+{ id:'s-obst',
+  init:e=>{gsap.set($$('.ob-h',e),{opacity:0});gsap.set($$('.ob-p',e),{opacity:0,x:-20});gsap.set($$('.ob-a,.ob-f',e),{opacity:0,x:-12});},
+  steps:[
+    e=>{const t=TL().to($$('.ob-h',e),{opacity:1,duration:.3});
+        $$('.ob-p',e).forEach((p,i)=>t.to(p,{opacity:1,x:0,duration:.4},.2+i*.5).to([$$('.ob-a',e)[i],$$('.ob-f',e)[i]],{opacity:1,x:0,duration:.4,stagger:.1},.45+i*.5));
+        return t;}
+  ],
+  notes:`Three obstacles, and what we changed.
+We have no GPU. So we made everything run on a MacBook using Apple's MLX framework.
+Our internet was sixty kilobytes per second, which makes a 4 gigabyte model a twenty-hour download. So we use small models for now and will download the big ones on campus.
+And grading AI with AI is circular: if the same model writes the questions and the answers, scores look better than they are. So humans will write the final test questions.` },
+
+{ id:'s-cust',
+  init:e=>{gsap.set($('.c-l',e),{opacity:0,y:20});gsap.set($('.c-r',e),{opacity:0,y:20});gsap.set($$('.c-q',e),{opacity:0,y:12});},
+  steps:[
+    e=>TL().to($('.c-l',e),{opacity:1,y:0,duration:.5}),
+    e=>TL().to($('.c-r',e),{opacity:1,y:0,duration:.5}),
+    e=>TL().to($$('.c-q',e),{opacity:1,y:0,duration:.45,stagger:.15})
+  ],
+  notes:`On customers, I'll be direct.
+[click] We haven't interviewed any customers yet. That's our biggest gap, and it's the top priority for the next weeks.
+[click] By the 10th of December we want five interviews: hospital research IT, a data-protection officer, clinical researchers, and an energy operator.
+[click] We want to learn three things: would they pay, who signs off on a purchase, and what hardware they already have.` },
+
+{ id:'s-next',
+  init:e=>{$$('.ln',e).forEach(lineInit);gsap.set($$('.n-c',e),{scale:0});gsap.set($$('.n-d,.n-t',e),{opacity:0,y:12});},
+  steps:[
+    e=>{const t=TL().to($('.n-ln',e),{strokeDashoffset:0,duration:1.2,ease:'power2.inOut'});
+        $$('.n-c',e).forEach((c,i)=>t.to(c,{scale:1,duration:.35,ease:'back.out(2.5)'},.25+i*.3).to([$$('.n-d',e)[i],$$('.n-t',e)[i]],{opacity:1,y:0,duration:.4},.35+i*.3));
+        return t;}
+  ],
+  notes:`Next steps, with numbers and dates.
+By week 6, the 26th of November: run 500 real documents through the pipeline.
+By week 8, the 10th of December: 150 test questions written and checked by humans, and our five interviews.
+By week 10: beat the base model by at least 12 percent on those questions. That's the target from our two-pager.
+And by the end of the semester: someone who isn't an ML expert goes from a folder to a working AI, on their own, in our web interface.` },
+
+{ id:'s-end',
+  init:e=>gsap.set($$('.e1,.e2',e),{opacity:0,y:20}),
+  steps:[
+    e=>TL().to($('.e1',e),{opacity:1,y:0,duration:.7,ease:'power3.out'}),
+    e=>TL().to($('.e2',e),{opacity:1,y:0,duration:.6})
+  ],
+  notes:`So, one thing to remember: hospitals can't send their data to AI, so we bring tested AI to their data.
+[click] Two asks. We need GPU time, and an introduction to a hospital IT lead or a clinician. If you can help with either, please talk to us. Thank you.` }
+];
+
+/* ---------- engine ---------- */
+$$('.slide').forEach(sl=>{const h=$('.h',sl);if(!h)return;const w=document.createElement('div');w.className='sbody';[...sl.children].forEach(c=>{if(c!==h)w.appendChild(c);});sl.appendChild(w);});
+SL.forEach(s=>s.el=document.getElementById(s.id));
+let cur=0, step=0, active=[];
+function render(i,k,animate){
+  active.forEach(t=>t.kill()); active=[];
+  SL.forEach(s=>s.el.classList.toggle('on',s===SL[i]));
+  const S=SL[i]; gsap.killTweensOf($$('*',S.el)); S.init(S.el);
+  for(let j=0;j<=k;j++){const t=S.steps[j](S.el); active.push(t); if(j<k||!animate||RM) t.progress(1,false);}
+  cur=i; step=k; ui();
+}
+function next(){const S=SL[cur]; if(step<S.steps.length-1){step++;const t=S.steps[step](S.el);active.push(t);if(RM)t.progress(1,false);ui();}
+  else if(cur<SL.length-1) render(cur+1,0,true);}
+function prev(){if(step>0) render(cur,step-1,false); else if(cur>0) render(cur-1,SL[cur-1].steps.length-1,false);}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function ui(){
+  const total=SL.reduce((a,s)=>a+s.steps.length,0), done=SL.slice(0,cur).reduce((a,s)=>a+s.steps.length,0)+step+1;
+  $('#prog').style.width=(done/total*100)+'%';
+  $('#hint').style.opacity=cur===0?1:0;
+  const S=SL[cur];
+  $('#fpg').textContent=`${cur+1} / ${SL.length}`;$('#stage').classList.toggle('plain',cur<=0);
+  $('#notes .meta').textContent=`Slide ${cur+1} of ${SL.length} · step ${step+1} of ${S.steps.length}`;
+  $('#notes .body').innerHTML=S.notes.split('\n').map(p=>'<p>'+esc(p).replace(/\[click\]/g,'<span class="click">click</span>')+'</p>').join('');
+}
+function fit(){const s=Math.min(innerWidth/1600,innerHeight/900);$('#stage').style.transform=`translate(-50%,-50%) scale(${s})`;}
+
+const PRINT=new URLSearchParams(location.search).get('print');
+if(PRINT){
+  // ?print=slides: one page per slide (final state) · ?print=frames: one page per click step
+  document.body.classList.add('printing');
+  const stage=$('#stage'), out=document.createElement('div'); document.body.appendChild(out);
+  SL.forEach((S,i)=>{const ks=PRINT==='frames'?S.steps.map((_,k)=>k):[S.steps.length-1];
+    ks.forEach(k=>{render(i,k,false);const pg=document.createElement('div');pg.className='ppage';pg.appendChild(stage.cloneNode(true));out.appendChild(pg);});});
+  stage.remove(); document.title+=' ('+PRINT+')';
+}else{
+  addEventListener('resize',fit); fit();
+  addEventListener('keydown',ev=>{
+    if(['ArrowRight','PageDown',' ','Enter'].includes(ev.key)){ev.preventDefault();next();}
+    else if(['ArrowLeft','PageUp','Backspace'].includes(ev.key)){ev.preventDefault();prev();}
+    else if(ev.key==='n'||ev.key==='N'){$('#notes').hidden=!$('#notes').hidden;}
+    else if(ev.key==='f'||ev.key==='F'){const d=document;(d.fullscreenElement?d.exitFullscreen():d.documentElement.requestFullscreen?.())?.catch?.(()=>{});}
+    else if(ev.key==='Home') render(0,0,true);
+  });
+  $('#stage').addEventListener('click',next);
+  $('#bNext').addEventListener('click',e=>{e.stopPropagation();next();});
+  $('#bPrev').addEventListener('click',e=>{e.stopPropagation();prev();});
+  $('#bNotes').addEventListener('click',e=>{e.stopPropagation();$('#notes').hidden=!$('#notes').hidden;});
+  render(0,0,true);
+}
+</script>
