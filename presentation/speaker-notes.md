@@ -50,8 +50,6 @@ Six steps. We clean the scan.
 
 **[click]** And export the 3D model.
 
-**[click]** Each step is its own AI agent.
-
 ## 6. Integrate first, then replace
 
 Our strategy has two phases. Today the expert starts from an old plan.
