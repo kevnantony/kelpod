@@ -2,7 +2,7 @@
 
 Generated from `main.tex` (one section per slide, in order). Edit the `\note{}` blocks in `main.tex` and regenerate, rather than editing this file by hand.
 
-## 1. Title
+## 1. Title slide
 
 Hi everyone. We are Arsha and Kevin, and our project is Kelpod. In one sentence: Kelpod turns incomplete building information into a renovation roadmap an owner can actually afford and implement. Here is the problem, what we built, and where we are.
 

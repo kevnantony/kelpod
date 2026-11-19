@@ -309,16 +309,14 @@
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Semester targets}
-  \begin{center}
-  \begin{tikzpicture}
-    \node<2->[tile, minimum width=4.1cm] at (0,1.2) {\Large\bfseries $\geq$10\\[2pt]{\scriptsize buildings}};
-    \node<3->[tile, minimum width=4.1cm] at (4.4,1.2) {\Large\bfseries 100\%\\[2pt]{\scriptsize inputs sourced}};
-    \node<4->[tile, minimum width=4.1cm] at (8.8,1.2) {\Large\bfseries $\leq$20\%\\[2pt]{\scriptsize CV(RMSE)}};
-    \node<5->[tile, minimum width=4.1cm] at (0,-1.2) {\Large\bfseries 100\%\\[2pt]{\scriptsize scenarios checked}};
-    \node<6->[tile, minimum width=4.1cm] at (4.4,-1.2) {\Large\bfseries $\geq$3\\[2pt]{\scriptsize scenarios each}};
-    \node<7->[tile, minimum width=4.1cm] at (8.8,-1.2) {\Large\bfseries $\geq$50\%\\[2pt]{\scriptsize less work}};
-  \end{tikzpicture}
-  \end{center}
+  \begin{itemize}
+    \item<2-> Process at least 10 residential buildings
+    \item<3-> Every calculation input has a source
+    \item<4-> Model error at most 20\% on reference buildings
+    \item<5-> Every feasible scenario passes budget and technical checks
+    \item<6-> At least 3 scenarios per building
+    \item<7-> At least 50\% less first-pass preparation time
+  \end{itemize}
   \note{These are our targets for the semester. They are development targets, not validated product
   claims. Completeness: at least 10 residential buildings with at least 85 percent of required
   attributes extracted or flagged. Speed: at least 50 percent less first-pass preparation time than
