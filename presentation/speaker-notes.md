@@ -190,9 +190,7 @@ What's next?
 
 **[click]** We interview consultants and housing companies.
 
-**[click]** We only train on plans we have permission to use.
-
-**[click]** And one honest reminder: all the numbers you saw today are targets, not results yet. Thank you, and we are happy to take questions.
+**[click]** We only train on plans we have permission to use. Thank you, and we are happy to take questions.
 
 ## If someone asks: the technical terms
 
