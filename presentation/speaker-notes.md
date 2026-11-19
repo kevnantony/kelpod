@@ -74,7 +74,9 @@ That's where this leads.
 
 **[click]** Suggest renovation options with their costs.
 
-**[click]** And find the best order within the owner's budget. The picture is a NASA thermal image: the colours show which homes lose the most heat.
+**[click]** And find the best order within the owner's budget.
+
+**[click]** The end goal: our own certified energy calculation, so experts need only one tool. The picture is a NASA thermal image: the colours show which homes lose the most heat.
 
 ## 8. Our difference
 
@@ -110,15 +112,17 @@ How do we make money? First, per plan: 30 to 80 euros each.
 
 **[click]** And customers choose whether it runs in our secure cloud in Germany or on their own computers.
 
-## 11. We feed HottCAD, we don't replace it
+## 11. Integrate first, then replace
 
-We don't compete with the software experts already use. We start from the old plan.
+Our strategy has two phases. Today an energy expert starts from an old plan.
 
 **[click]** Kelpod turns it into a model.
 
-**[click]** And that model goes straight into the experts' own software.
+**[click]** And that model goes into HottCAD, the software experts already use for the official calculation. This saves them hours, and it earns us their trust and real data.
 
-**[click]** So we save them the hours of manual work, and the official calculation stays in the tool they already trust.
+**[click]** Later, Kelpod does the official calculation itself, so the expert no longer needs a separate tool. We go from feeding HottCAD to replacing it.
+
+**[click]** That second phase is the big one: the official calculation has to be certified. So we start with the part we can win now, and build towards the rest.
 
 ## 12. Traction
 
@@ -204,3 +208,4 @@ Not on the slides on purpose. Use these only if a question goes deeper.
 - **"Energy estimates within 20%"** is a CV(RMSE) of at most 20% against reference buildings.
 - **"Our own computers"** means an on-premise Docker container on the customer's NVIDIA GPUs; the cloud runs in Frankfurt under GDPR.
 - **Tech stack:** Next.js, FastAPI, fine-tuned DeepFloorPlan / RoomFormer, OCR (Tesseract or Donut / TrOCR), Shapely for geometry, IfcOpenShell for the model file.
+- **"Replace HottCAD later"** means building our own engine for the official GEG energy calculation. That calculation must be certified, so phase 2 is a large, regulated project; phase 1 (feeding HottCAD) is what earns the trust, data and revenue to get there.

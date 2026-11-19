@@ -195,6 +195,7 @@
         \item<3-> Where the building loses energy
         \item<4-> Renovation options with costs
         \item<5-> The best order within budget
+        \item<6-> Our own certified energy calculation
       \end{enumerate}
     \column{0.40\textwidth}
       \centering
@@ -205,8 +206,9 @@
   [click] The 3D model is our first product.
   [click] On top of it, we can show where a building loses energy.
   [click] Suggest renovation options with their costs.
-  [click] And find the best order within the owner's budget. The picture is a NASA thermal image: the
-  colours show which homes lose the most heat.}
+  [click] And find the best order within the owner's budget.
+  [click] The end goal: our own certified energy calculation, so experts need only one tool. The picture
+  is a NASA thermal image: the colours show which homes lose the most heat.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -281,23 +283,31 @@
 \end{frame}
 
 % ---------------------------------------------------------------------------
-\begin{frame}{We feed HottCAD, we don't replace it}
+\begin{frame}{Integrate first, then replace}
   \begin{center}
   \begin{tikzpicture}
-    \node[box, minimum width=3.4cm] (plan) at (0,0) {Old plan};
-    \node<2->[box, minimum width=3.4cm, fill=kblue, text=white] (k) at (5.0,0) {Kelpod};
-    \node<3->[box, minimum width=3.4cm] (tool) at (10.0,0) {HottCAD};
-    \draw<2->[arr] (plan) -- (k);
-    \draw<3->[arr] (k) -- (tool);
+    \node[font=\bfseries\small, kblue, anchor=east] at (-2.0,0) {Now};
+    \node[box, minimum width=3.0cm] (p1) at (0,0) {Old plan};
+    \node<2->[box, minimum width=3.0cm, fill=kblue, text=white] (k1) at (4.4,0) {Kelpod};
+    \node<3->[box, minimum width=3.0cm] (h1) at (8.8,0) {HottCAD};
+    \draw<2->[arr] (p1) -- (k1);
+    \draw<3->[arr] (k1) -- (h1);
+    \node<4->[font=\bfseries\small, kblue, anchor=east] at (-2.0,-2.0) {Later};
+    \node<4->[box, minimum width=3.0cm] (p2) at (0,-2.0) {Old plan};
+    \node<4->[box, minimum width=7.4cm, fill=kblue, text=white] (k2) at (6.6,-2.0) {Kelpod: model \emph{and} certified calculation};
+    \draw<4->[arr] (p2) -- (k2);
   \end{tikzpicture}
   \end{center}
-  \vspace{0.6em}
-  \uncover<4->{We remove 3--6 hours of manual entry. Certified calculations stay in HottCAD.}
-  \note{We don't compete with the software experts already use. We start from the old plan.
+  \vspace{0.4em}
+  \uncover<5->{\small Phase 1 wins trust and data. Phase 2 needs a certified calculation engine.}
+  \note{Our strategy has two phases. Today an energy expert starts from an old plan.
   [click] Kelpod turns it into a model.
-  [click] And that model goes straight into the experts' own software.
-  [click] So we save them the hours of manual work, and the official calculation stays in the tool they
-  already trust.}
+  [click] And that model goes into HottCAD, the software experts already use for the official
+  calculation. This saves them hours, and it earns us their trust and real data.
+  [click] Later, Kelpod does the official calculation itself, so the expert no longer needs a separate
+  tool. We go from feeding HottCAD to replacing it.
+  [click] That second phase is the big one: the official calculation has to be certified. So we start
+  with the part we can win now, and build towards the rest.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
