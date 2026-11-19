@@ -210,51 +210,6 @@
 \end{frame}
 
 % ---------------------------------------------------------------------------
-\begin{frame}{What changed: two pivots}
-  \begin{center}
-  \begin{tikzpicture}
-    \node[box, minimum width=3.4cm, minimum height=1.4cm] (z) at (0,0) {Offline LLM tuning\\(ZLLF)};
-    \node<2->[box, minimum width=3.4cm, minimum height=1.4cm] (r) at (4.9,0) {Renovation\\planner};
-    \node<3->[box, minimum width=3.4cm, minimum height=1.4cm, fill=kblue, text=white] (k) at (9.8,0) {Old plans\\to IFC};
-    \draw<2->[arr] (z) -- (r);
-    \draw<3->[arr] (r) -- (k);
-  \end{tikzpicture}
-  \end{center}
-  \vspace{0.6em}
-  \uncover<4->{\begin{exampleblock}{Lesson from our pilot expert}
-    A generic AI platform adds little. Old plans are the real bottleneck.
-  \end{exampleblock}}
-  \note{Since our last update, the project has changed a lot. We started with ZLLF, an offline tool for
-  training custom AI models on sensitive data.
-  [click] Then we pivoted to an energy renovation planner.
-  [click] And after talking to our pilot expert, we narrowed it down to one problem: turning old plans into
-  3D models.
-  [click] The lesson: another generic AI platform adds little. The real bottleneck is the old plans, so
-  that is where we start.}
-\end{frame}
-
-% ---------------------------------------------------------------------------
-\begin{frame}{Obstacles and how we work}
-  \begin{itemize}
-    \item<2-> No GPU: first prototype built on Apple MLX
-    \item<3-> First model failed its safety checks: test data too small
-    \item<4-> Real German plans are hard to get: pilot gives access
-  \end{itemize}
-  \vspace{0.6em}
-  \uncover<5->{\begin{block}{Agents as employees}
-    Coding, research and sales agents. Founders decide.
-  \end{block}}
-  \note{Some things went wrong along the way.
-  [click] We had no GPU, so we built our first prototype on a MacBook, using Apple's MLX framework.
-  [click] Our first trained model failed its own safety checks, because the test data was tiny. The lesson:
-  test on real data early.
-  [click] For Kelpod, the hard part is getting real German plans to train on. Our pilot expert gives us
-  access to theirs.
-  [click] And we run the company with AI agents as employees: coding, research and sales agents. The two of
-  us make the decisions.}
-\end{frame}
-
-% ---------------------------------------------------------------------------
 \begin{frame}{Traction and roadmap}
   \begin{exampleblock}{1 pilot customer locked in}
   \end{exampleblock}
@@ -274,7 +229,8 @@
   \end{tikzpicture}
   \end{center}
   \note{One pilot customer is locked in: an energy expert. They get Kelpod for free, and we get real plans
-  and feedback.
+  and feedback. We also build the company with AI agents as employees: coding, research and sales
+  agents, with the two of us making the decisions.
   [click] By week 6: plan to IFC model on three sample plans.
   [click] By week 10: energy estimates and three renovation options per building.
   [click] By the end of the semester: a demo on ten buildings. Thank you, we are happy to take questions.}

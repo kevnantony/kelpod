@@ -1,4 +1,4 @@
-# Kelpod pivot: speaker notes (6-minute version)
+# Kelpod pivot: speaker notes
 
 Generated from `main.tex` (one section per slide, in order). **[click]** means: advance one step in the PDF. Edit the `\note{}` blocks in `main.tex` and regenerate, rather than editing this file by hand.
 
@@ -68,31 +68,9 @@ Who pays? Energy-efficiency experts, surveyors, architects, and housing companie
 
 **[click]** Our competitors are the established energy software vendors: Hottgenroth with HottCAD, and ENVISYS with EVEBI. For now we feed their tools; later we compete with them.
 
-## 8. What changed: two pivots
+## 8. Traction and roadmap
 
-Since our last update, the project has changed a lot. We started with ZLLF, an offline tool for training custom AI models on sensitive data.
-
-**[click]** Then we pivoted to an energy renovation planner.
-
-**[click]** And after talking to our pilot expert, we narrowed it down to one problem: turning old plans into 3D models.
-
-**[click]** The lesson: another generic AI platform adds little. The real bottleneck is the old plans, so that is where we start.
-
-## 9. Obstacles and how we work
-
-Some things went wrong along the way.
-
-**[click]** We had no GPU, so we built our first prototype on a MacBook, using Apple's MLX framework.
-
-**[click]** Our first trained model failed its own safety checks, because the test data was tiny. The lesson: test on real data early.
-
-**[click]** For Kelpod, the hard part is getting real German plans to train on. Our pilot expert gives us access to theirs.
-
-**[click]** And we run the company with AI agents as employees: coding, research and sales agents. The two of us make the decisions.
-
-## 10. Traction and roadmap
-
-One pilot customer is locked in: an energy expert. They get Kelpod for free, and we get real plans and feedback.
+One pilot customer is locked in: an energy expert. They get Kelpod for free, and we get real plans and feedback. We also build the company with AI agents as employees: coding, research and sales agents, with the two of us making the decisions.
 
 **[click]** By week 6: plan to IFC model on three sample plans.
 
