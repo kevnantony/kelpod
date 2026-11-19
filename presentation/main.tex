@@ -140,18 +140,26 @@
 
 % ---------------------------------------------------------------------------
 \begin{frame}{What Kelpod does}
-  \begin{enumerate}
-    \item<2-> Digital building model from documents
-    \item<3-> Source and confidence for every attribute
-    \item<4-> 3D view of where energy is lost
-    \item<5-> Energy simulation
-    \item<6-> Costed renovation packages
-    \item<7-> Best order under budget and rules
-    \item<8-> Phased plan for expert review
-  \end{enumerate}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.56\textwidth}
+      \begin{enumerate}
+        \item<2-> Digital building model from documents
+        \item<3-> Source and confidence for every attribute
+        \item<4-> 3D view of where energy is lost
+        \item<5-> Energy simulation
+        \item<6-> Costed renovation packages
+        \item<7-> Best order under budget and rules
+        \item<8-> Phased plan for expert review
+      \end{enumerate}
+    \column{0.40\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,keepaspectratio]{images/nasa-thermograph-cleveland.jpg}\\[3pt]
+      {\tiny Thermal image of homes losing heat, Cleveland (1977). NASA, public domain, Wikimedia Commons}
+  \end{columns}
   \note{Seven steps from upload to a plan a professional can review. Steps 1 to 3 build the building
   record. Steps 4 to 6 compare options. Step 7 is the output, and a qualified person still signs it
-  off. The full list of constraints is budget, technical, regulatory and disruption.}
+  off. The picture is a NASA thermograph from 1977: the colours show which homes lose the most heat.
+  This is the question Kelpod answers for a whole estate, not one house at a time.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -326,6 +334,16 @@
 \end{frame}
 
 % ---------------------------------------------------------------------------
+\begin{frame}{Renovation in practice}
+  \begin{center}
+  \includegraphics[height=0.62\textheight,keepaspectratio]{images/renovation-germany.jpg}\\[3pt]
+  {\tiny A residential building in Germany under renovation. Photo: PantheraLeo1359531, CC BY 4.0, Wikimedia Commons}
+  \end{center}
+  \note{This is the kind of building Kelpod plans for: an existing residential building that is being
+  renovated. The work is done in phases, and the order matters. Our roadmap tells the owner which
+  phase comes first, what it costs and what it saves.}
+\end{frame}
+
 \begin{frame}{Roadmap}
   \begin{center}
   \begin{tikzpicture}
