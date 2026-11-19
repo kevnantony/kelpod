@@ -121,11 +121,14 @@
   \end{center}
   \vspace{0.8em}
   \uncover<4->{\begin{center}\Large Under 3 minutes instead of 3--6 hours\end{center}}
+  \uncover<5->{\begin{center}Faster audits $\rightarrow$ more renovations $\rightarrow$ less CO$_2$\end{center}}
   \note{That's what Kelpod does. You give it the old scan.
   [click] Kelpod reads it.
   [click] And produces a 3D model in IFC, the standard building-model format, which HottCAD opens directly.
   [click] Our goal is under three minutes per plan instead of three to six hours. The expert only checks
-  the result.}
+  the result.
+  [click] And this matters beyond saving time: faster audits mean more buildings get renovated, and less
+  CO2. That is our AI for Good.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -178,25 +181,77 @@
 \end{frame}
 
 % ---------------------------------------------------------------------------
-\begin{frame}{Customers and revenue}
+\begin{frame}{Customers, revenue, competitors}
   \begin{columns}[T,onlytextwidth]
-    \column{0.48\textwidth}
+    \column{0.31\textwidth}
       \begin{block}{Customers}
         Energy experts (EEE)\\
         Surveyors, architects\\
         Housing companies
       \end{block}
-    \column{0.48\textwidth}
+    \column{0.31\textwidth}
       \uncover<2->{\begin{block}{Revenue}
         30--80 EUR per plan\\
         Monthly licence\\
         API / white-label
       \end{block}}
+    \column{0.31\textwidth}
+      \uncover<3->{\begin{block}{Competitors}
+        Hottgenroth (HottCAD)\\
+        ENVISYS EVEBI
+      \end{block}}
   \end{columns}
   \note{Who pays? Energy-efficiency experts, surveyors, architects, and housing companies with thousands of
   flats.
   [click] We charge 30 to 80 euros per plan, or a monthly licence, and larger clients can build Kelpod into
-  their own software.}
+  their own software.
+  [click] Our competitors are the established energy software vendors: Hottgenroth with HottCAD, and
+  ENVISYS with EVEBI. For now we feed their tools; later we compete with them.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{What changed: two pivots}
+  \begin{center}
+  \begin{tikzpicture}
+    \node[box, minimum width=3.4cm, minimum height=1.4cm] (z) at (0,0) {Offline LLM tuning\\(ZLLF)};
+    \node<2->[box, minimum width=3.4cm, minimum height=1.4cm] (r) at (4.9,0) {Renovation\\planner};
+    \node<3->[box, minimum width=3.4cm, minimum height=1.4cm, fill=kblue, text=white] (k) at (9.8,0) {Old plans\\to IFC};
+    \draw<2->[arr] (z) -- (r);
+    \draw<3->[arr] (r) -- (k);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.6em}
+  \uncover<4->{\begin{exampleblock}{Lesson from our pilot expert}
+    A generic AI platform adds little. Old plans are the real bottleneck.
+  \end{exampleblock}}
+  \note{Since our last update, the project has changed a lot. We started with ZLLF, an offline tool for
+  training custom AI models on sensitive data.
+  [click] Then we pivoted to an energy renovation planner.
+  [click] And after talking to our pilot expert, we narrowed it down to one problem: turning old plans into
+  3D models.
+  [click] The lesson: another generic AI platform adds little. The real bottleneck is the old plans, so
+  that is where we start.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Obstacles and how we work}
+  \begin{itemize}
+    \item<2-> No GPU: first prototype built on Apple MLX
+    \item<3-> First model failed its safety checks: test data too small
+    \item<4-> Real German plans are hard to get: pilot gives access
+  \end{itemize}
+  \vspace{0.6em}
+  \uncover<5->{\begin{block}{Agents as employees}
+    Coding, research and sales agents. Founders decide.
+  \end{block}}
+  \note{Some things went wrong along the way.
+  [click] We had no GPU, so we built our first prototype on a MacBook, using Apple's MLX framework.
+  [click] Our first trained model failed its own safety checks, because the test data was tiny. The lesson:
+  test on real data early.
+  [click] For Kelpod, the hard part is getting real German plans to train on. Our pilot expert gives us
+  access to theirs.
+  [click] And we run the company with AI agents as employees: coding, research and sales agents. The two of
+  us make the decisions.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -219,8 +274,7 @@
   \end{tikzpicture}
   \end{center}
   \note{One pilot customer is locked in: an energy expert. They get Kelpod for free, and we get real plans
-  and feedback. We build the company with AI agents too: coding, research and sales agents, with the
-  founders making the decisions.
+  and feedback.
   [click] By week 6: plan to IFC model on three sample plans.
   [click] By week 10: energy estimates and three renovation options per building.
   [click] By the end of the semester: a demo on ten buildings. Thank you, we are happy to take questions.}

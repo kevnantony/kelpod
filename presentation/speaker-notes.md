@@ -1,4 +1,4 @@
-# Kelpod pivot: speaker notes (5-minute version)
+# Kelpod pivot: speaker notes (6-minute version)
 
 Generated from `main.tex` (one section per slide, in order). **[click]** means: advance one step in the PDF. Edit the `\note{}` blocks in `main.tex` and regenerate, rather than editing this file by hand.
 
@@ -36,6 +36,8 @@ That's what Kelpod does. You give it the old scan.
 
 **[click]** Our goal is under three minutes per plan instead of three to six hours. The expert only checks the result.
 
+**[click]** And this matters beyond saving time: faster audits mean more buildings get renovated, and less CO2. That is our AI for Good.
+
 ## 5. How it works
 
 Six steps. We clean the scan.
@@ -58,15 +60,39 @@ Our strategy has two phases. Today the expert starts from an old plan.
 
 **[click]** Later, Kelpod does the official calculation itself, and the expert no longer needs HottCAD. That needs a certified calculation engine, so we start with the part we can win now.
 
-## 7. Customers and revenue
+## 7. Customers, revenue, competitors
 
 Who pays? Energy-efficiency experts, surveyors, architects, and housing companies with thousands of flats.
 
 **[click]** We charge 30 to 80 euros per plan, or a monthly licence, and larger clients can build Kelpod into their own software.
 
-## 8. Traction and roadmap
+**[click]** Our competitors are the established energy software vendors: Hottgenroth with HottCAD, and ENVISYS with EVEBI. For now we feed their tools; later we compete with them.
 
-One pilot customer is locked in: an energy expert. They get Kelpod for free, and we get real plans and feedback. We build the company with AI agents too: coding, research and sales agents, with the founders making the decisions.
+## 8. What changed: two pivots
+
+Since our last update, the project has changed a lot. We started with ZLLF, an offline tool for training custom AI models on sensitive data.
+
+**[click]** Then we pivoted to an energy renovation planner.
+
+**[click]** And after talking to our pilot expert, we narrowed it down to one problem: turning old plans into 3D models.
+
+**[click]** The lesson: another generic AI platform adds little. The real bottleneck is the old plans, so that is where we start.
+
+## 9. Obstacles and how we work
+
+Some things went wrong along the way.
+
+**[click]** We had no GPU, so we built our first prototype on a MacBook, using Apple's MLX framework.
+
+**[click]** Our first trained model failed its own safety checks, because the test data was tiny. The lesson: test on real data early.
+
+**[click]** For Kelpod, the hard part is getting real German plans to train on. Our pilot expert gives us access to theirs.
+
+**[click]** And we run the company with AI agents as employees: coding, research and sales agents. The two of us make the decisions.
+
+## 10. Traction and roadmap
+
+One pilot customer is locked in: an energy expert. They get Kelpod for free, and we get real plans and feedback.
 
 **[click]** By week 6: plan to IFC model on three sample plans.
 
