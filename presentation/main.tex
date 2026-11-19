@@ -103,21 +103,29 @@
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Wrong order: heating first}
-  \begin{center}
-  \begin{tikzpicture}
-    \node[box, minimum width=4.2cm] (h) at (0,0) {1. Bigger heating system};
-    \node<2->[box, minimum width=4.2cm] (i) at (6.2,0) {2. Insulation later};
-    \draw<2->[arr] (h) -- (i);
-    \node<3->[kred, font=\bfseries] at (3.1,-1.2) {Oversized system: paid for twice};
-  \end{tikzpicture}
-  \end{center}
-  \vspace{0.6em}
-  \uncover<4->{\begin{exampleblock}{Kelpod's job}
-    Order the measures so the cheapest savings come first.
-  \end{exampleblock}}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.58\textwidth}
+      \begin{center}
+      \begin{tikzpicture}
+        \node[box, minimum width=4.0cm] (h) at (0,0) {1. Bigger heating system};
+        \node<2->[box, minimum width=4.0cm] (i) at (0,-2.0) {2. Insulation later};
+        \draw<2->[arr] (h) -- (i);
+        \node<3->[kred, font=\bfseries\small] at (0,-3.2) {Oversized system: paid for twice};
+      \end{tikzpicture}
+      \end{center}
+      \uncover<4->{\begin{exampleblock}{Kelpod's job}
+        Order the measures so the cheapest savings come first.
+      \end{exampleblock}}
+    \column{0.38\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,keepaspectratio]{images/xkcd-2790-heat-pump.png}\\[3pt]
+      {\tiny xkcd 2790 "Heat Pump", Randall Munroe, \mbox{CC BY-NC 2.5}, xkcd.com/2790}
+  \end{columns}
   \note{If you size a new heating system first, you pay for a system that is too big once the house
   is insulated. The right order is the measures that reduce demand first. Kelpod works out that
-  order.}
+  order. The cartoon is from xkcd: a heat pump you power yourself, and the open door is the heat
+  loss joke. Note that xkcd is licensed non-commercially, so this image is fine in the course deck
+  but must be removed before any commercial use.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -292,12 +300,16 @@
     Experts make the final call.
   \end{alertblock}
   \vspace{0.6em}
-  \begin{itemize}
-    \item<2-> Missing inputs are flagged, not guessed.
-    \item<3-> A human approves every roadmap.
-  \end{itemize}
+  \begin{center}
+  \begin{tikzpicture}
+    \node[box, minimum width=5.0cm, minimum height=1.3cm] (a) at (0,0) {AI: ``This wall is fine.''};
+    \node<2->[box, minimum width=5.0cm, minimum height=1.3cm, fill=kblue, text=white] (b) at (6.4,0) {Expert: ``Which wall? Show me the plans.''};
+    \draw<2->[arr] (a) -- (b);
+  \end{tikzpicture}
+  \end{center}
   \note{This is the principle we will not compromise on. The software can be wrong about a wall. So it
-  must always show what it assumed, and a professional makes the final call.}
+  must always show what it assumed, and a professional makes the final call. The two boxes are our
+  own joke, not a copied meme: the AI answers fast, the expert asks which wall.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
