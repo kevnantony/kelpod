@@ -14,7 +14,7 @@ Europe has to renovate a huge number of old buildings.
 
 **[click]** But most old buildings only have paper plans or poor scans.
 
-**[click]** So before an energy expert can do anything, they redraw each plan by hand in HottCAD, the standard software for the official energy calculation. That takes three to six hours per plan.
+**[click]** So before an energy expert can do anything, they redraw each plan by hand. That takes three to six hours per plan.
 
 **[click]** That is the bottleneck: hours of drawing before the real work even starts. The photo is a real old apartment building in Saxony, the kind of building this is about.
 
@@ -22,37 +22,37 @@ Europe has to renovate a huge number of old buildings.
 
 You might think AI already solves this. It doesn't, for three reasons.
 
-**[click]** The AI models that read floor plans, like DeepFloorPlan and RoomFormer, were trained on US plans.
+**[click]** The AI models that read floor plans were trained on plans from other countries, mostly the US.
 
-**[click]** German plans follow the standard DIN 1356-1: their own hatching for walls, door swings and dimension chains. Those models misread them.
+**[click]** German plans use their own symbols for walls, doors and measurements, and those models misread them.
 
-**[click]** And they only produce pixel masks, a coloured picture of the plan. Energy software can't use that; it needs a closed vector model where every wall meets and every room is closed.
+**[click]** And they only produce a coloured picture of the plan. Energy software can't use a picture; it needs a proper model with closed walls and rooms.
 
 ## 4. First product: old plan in, 3D model out
 
 So here is our first product. It starts with an old plan, on paper or scanned.
 
-**[click]** Kelpod reads the plan with computer vision and OCR, and rebuilds the geometry.
+**[click]** Kelpod reads the plan and rebuilds the building.
 
-**[click]** Out comes a 3D model in IFC, the standard building-model format, which HottCAD opens directly.
+**[click]** Out comes a 3D model that energy software can open directly.
 
-**[click]** The goal: under three minutes per plan and over 95 percent closed geometry. The expert only checks and corrects, instead of redrawing.
+**[click]** The goal: a few minutes instead of hours. The expert only checks and corrects, instead of redrawing.
 
 ## 5. How it works
 
 How does it work? Six steps, each handled by its own AI agent. First, we clean up the scan.
 
-**[click]** Then we segment the walls, doors and windows with a fine-tuned vision model.
+**[click]** Then we spot the walls and doors.
 
-**[click]** OCR reads the dimension chains, sill heights and room labels.
+**[click]** We read the measurements written on the plan.
 
-**[click]** We fit the geometry to those dimensions, because the drawing itself is often slightly off.
+**[click]** We move the walls so they match those measurements, because the drawing itself is often slightly off.
 
-**[click]** We check the layout as a graph of walls, doors and rooms: no gaps, every room closed.
+**[click]** We check that everything connects: no gaps in walls, every room closed.
 
-**[click]** And we export the 3D model as IFC.
+**[click]** And we build the 3D model.
 
-**[click]** Each step is an AI agent, but geometry and calculations are done by deterministic tools. The AI reads and explains; it doesn't invent numbers.
+**[click]** Each step is an AI agent, but the actual calculations are done by proven engineering tools. The AI reads and explains; it doesn't invent numbers.
 
 ## 6. Wrong order: heating first
 
@@ -106,27 +106,27 @@ How do we make money? First, per plan: 30 to 80 euros each.
 
 **[click]** Second, a monthly subscription for consulting firms.
 
-**[click]** Third, larger clients get an API or white-label licence to build Kelpod into their own software.
+**[click]** Third, larger clients can license Kelpod and build it into their own software.
 
-**[click]** And customers choose: our cloud in Frankfurt under GDPR, or on-premise on their own GPUs.
+**[click]** And customers choose whether it runs in our secure cloud in Germany or on their own computers.
 
 ## 11. We feed HottCAD, we don't replace it
 
-HottCAD dominates the certified energy calculations in Germany. We don't compete with it. We start from the old plan.
+We don't compete with the software experts already use. We start from the old plan.
 
 **[click]** Kelpod turns it into a model.
 
-**[click]** And that model goes straight into HottCAD.
+**[click]** And that model goes straight into the experts' own software.
 
-**[click]** So we remove the three to six hours of manual entry, and the certified calculation stays in HottCAD.
+**[click]** So we save them the hours of manual work, and the official calculation stays in the tool they already trust.
 
 ## 12. Traction
 
 Where are we? One customer is locked in for our pilot: an energy expert.
 
-**[click]** They get a free alpha version, running on their own GPU server.
+**[click]** They get an early version for free, running on their own computers.
 
-**[click]** In return we get real plans to train on, and their know-how about exactly what HottCAD needs.
+**[click]** In return we get real plans to learn from and their feedback on what their software needs.
 
 **[click]** Our targets for this semester are 15 interviews, 2 pilot partners and 3 conversations about pricing. These are targets, not results yet.
 
@@ -160,7 +160,7 @@ Our targets for this semester.
 
 **[click]** Every number shows its source.
 
-**[click]** An energy model error, measured as CV(RMSE), of at most 20 percent.
+**[click]** Energy estimates within 20 percent of reference data.
 
 **[click]** Every suggestion passes budget and technical checks.
 
@@ -172,7 +172,7 @@ Our targets for this semester.
 
 Our roadmap has three milestones.
 
-**[click]** By week 6: plan to IFC model, working on three sample plans.
+**[click]** By week 6: old plan to 3D model, working on three sample plans.
 
 **[click]** By week 10: energy estimates and three renovation options per building.
 
@@ -182,7 +182,7 @@ Our roadmap has three milestones.
 
 What's next?
 
-**[click]** First, we sit down with our pilot expert and map exactly which fields HottCAD needs.
+**[click]** First, we sit down with our pilot expert and learn exactly what their software needs.
 
 **[click]** We interview consultants and housing companies.
 
