@@ -147,24 +147,31 @@
     \node[stage] (a) {1 Clean the scan};
     \node<2->[stage, right=of a] (b) {2 Find walls \& doors};
     \node<3->[stage, right=of b] (c) {3 Read dimensions};
-    \node<4->[stage, below=of c] (d) {4 Close the shapes};
-    \node<5->[stage, left=of d] (e) {5 Export IFC};
+    \node<4->[stage, below=of c] (d) {4 Fit to dimensions};
+    \node<5->[stage, left=of d] (e) {5 Check as a graph};
+    \node<6->[stage, left=of e] (f) {6 Export IFC};
     \draw<2->[arr] (a) -- (b);
     \draw<3->[arr] (b) -- (c);
     \draw<4->[arr] (c) -- (d);
     \draw<5->[arr] (d) -- (e);
+    \draw<6->[arr] (e) -- (f);
   \end{tikzpicture}
   \end{center}
   \vspace{0.2em}
-  \uncover<6->{\small Built for German plans: DIN 1356-1 symbols, \emph{Maßketten}, sill heights, room labels.}
-  \note{Step 1 straightens the scan, removes stains and fold marks, and fixes the scale. Step 2 is a
-  DeepFloorplan or RoomFormer model fine-tuned on DIN 1356-1 plans: it finds wall types from their
-  hatching, windows and doors from their swing arcs, and stairs. Step 3 is OCR, with Tesseract or a
-  fine-tuned Donut or TrOCR model: it reads dimension chains to correct the scale, sill heights like
-  BRH 87.5, and room labels like Wohnen, 14.5 square metres. Step 4 is a geometry solver with Shapely:
-  walls snap to the right angles, corners close, every room becomes a closed polygon, and it is
-  extruded to 3D with standard room heights of 2.50 to 2.75 metres. Step 5 builds the IFC file with
-  IfcOpenShell. The app is Next.js on a FastAPI backend.}
+  \uncover<7->{\small Cross-checked against sections and elevations of the same building.}
+  \note{Step 1 straightens the scan, removes stains and fold marks, and fixes the scale. Step 2 uses
+  DeepFloorPlan and RoomFormer fine-tuned on DIN 1356-1 plans. DeepFloorPlan already uses attention for
+  room boundaries; we want to adapt it to interrupted wall lines, junctions and unclear boundaries in
+  old German plans. For RoomFormer we want stronger geometric links between neighbouring corners, so the
+  layouts come out consistent. Step 3 is OCR: dimension chains, sill heights like BRH 87.5, and room
+  labels. Step 4 is the key idea: detected walls can still sit in the wrong place, so we attach each
+  dimension annotation to its wall segment and use them as constraints in a geometric optimisation.
+  Step 5 treats walls, openings and rooms as one connected spatial graph instead of separate pieces,
+  which lets us find disconnected walls and invalid room boundaries and compare alternative layouts
+  before we build the model. Step 6 builds the IFC file with IfcOpenShell. On top of that, floor plans,
+  sections and elevations describe the same building, so matching them lets us cross-check dimensions,
+  find missing information, and tell real building changes apart from errors in the drawings. These
+  are ideas we will test with our pilot expert's plans; they are not built yet.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
