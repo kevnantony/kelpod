@@ -168,7 +168,7 @@ Our targets for this semester.
 
 **[click]** Every suggestion passes budget and technical checks.
 
-**[click]** At least three options per building.
+**[click]** At least three renovation options per building.
 
 **[click]** And half the preparation time. Again: these are targets, not results.
 
