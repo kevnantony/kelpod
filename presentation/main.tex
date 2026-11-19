@@ -1,0 +1,367 @@
+% Kelpod status-update slides (Frontier Systems, WiSe 2026/2027).
+% Build:   make slides   -> pdf/kelpod-slides.pdf
+%          make notes   -> pdf/kelpod-notes.pdf  (slides with speaker notes, 2 per page)
+% Speaker notes live in \note{...} and only show up in the notes build.
+
+\ifdefined\SHOWNOTES
+  \documentclass[aspectratio=169,notes=show]{beamer}
+  \usepackage{pgfpages}
+  \pgfpagesuselayout{2 on 1}[a4paper,landscape,border shrink=5mm]
+\else
+  \documentclass[aspectratio=169]{beamer}
+\fi
+
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc}
+
+% --- Colours: same palette as the earlier Kelpod and skill-following decks ------
+\definecolor{kblue}{HTML}{3333B2}
+\definecolor{kbluedark}{HTML}{26268A}
+\definecolor{kred}{HTML}{C62828}
+\definecolor{kgreen}{HTML}{2E7D32}
+\definecolor{kgrey}{HTML}{555566}
+
+\usetheme{Madrid}
+\setbeamercolor{structure}{fg=kblue}
+\setbeamercolor{palette primary}{bg=kblue,fg=white}
+\setbeamercolor{palette secondary}{bg=kbluedark,fg=white}
+\setbeamercolor{palette tertiary}{bg=kbluedark,fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{subtitle}{fg=white}
+\setbeamercolor{author}{fg=black}
+\setbeamercolor{frametitle}{bg=kblue,fg=white}
+\setbeamercolor{block title}{bg=kblue,fg=white}
+\setbeamercolor{block body}{bg=kblue!12,fg=black}
+\setbeamercolor{block title alerted}{bg=kred,fg=white}
+\setbeamercolor{block body alerted}{bg=kred!12,fg=black}
+\setbeamercolor{block title example}{bg=kgreen,fg=white}
+\setbeamercolor{block body example}{bg=kgreen!12,fg=black}
+\setbeamercolor{alerted text}{fg=kred}
+\setbeamercolor{example text}{fg=kgreen}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{itemize items}[triangle]
+\setbeamercolor{itemize item}{fg=kblue}
+\setbeamercolor{itemize subitem}{fg=kblue}
+\setbeamerfont{block title}{series=\bfseries}
+
+\title[Kelpod]{Kelpod}
+\subtitle{AI-powered energy renovation planning}
+\author[Tajdeen \& Antony]{Arsha Fahima Tajdeen \and Kevin Antony}
+\institute[Frontier Systems]{Frontier Systems, WiSe 2026/2027}
+\date{}
+
+\begin{document}
+
+% ---------------------------------------------------------------------------
+\begin{frame}[plain]
+  \titlepage
+  \note{Hi everyone. We are Arsha and Kevin, and our project is Kelpod. In one sentence:
+  Kelpod turns incomplete building information into a renovation roadmap that an owner can
+  actually afford and implement. Here is the problem, what we built, and where we are.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Europe has to renovate its buildings}
+  Europe must renovate its existing building stock, but the information needed to decide is
+  scattered and incomplete.
+  \vspace{0.6em}
+
+  \begin{itemize}
+    \item Owners and housing cooperatives struggle to find \alert{where energy is lost}.
+    \item They cannot easily compare feasible measures, estimate costs or choose the right order.
+  \end{itemize}
+  \vspace{0.6em}
+
+  \begin{block}{Wrong order wastes money}
+    Example: sizing a new heating system \emph{before} reducing the heat demand.
+  \end{block}
+  \note{Start with the building, not the software. Many owners decide on the heating system first,
+  and then find the building still loses most of its heat. The order of work matters as much as the
+  measures themselves.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Kelpod: from incomplete information to a roadmap}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.30\textwidth}
+      \begin{block}{Users upload}
+        \small
+        Plans\\ Photos\\ Energy bills\\ Renovation records
+      \end{block}
+
+    \column{0.08\textwidth}
+      \vspace{2.6em}\centering\Large$\rightarrow$
+
+    \column{0.34\textwidth}
+      \begin{block}{Kelpod}
+        \small
+        Transparent, budget-aware, uncertainty-aware
+      \end{block}
+
+    \column{0.08\textwidth}
+      \vspace{2.6em}\centering\Large$\rightarrow$
+
+    \column{0.20\textwidth}
+      \begin{block}{Output}
+        \small
+        A phased renovation roadmap
+      \end{block}
+  \end{columns}
+  \vspace{1em}
+  Every attribute keeps its source, confidence and verification status.
+  \note{Users give us what they already have: plans, photos, bills and records. Kelpod turns this
+  into a building model and a roadmap. Every number on the roadmap can be traced back to where it
+  came from.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{What Kelpod does}
+  \begin{enumerate}
+    \item Extracts building attributes and builds a \textbf{simplified digital model}.
+    \item Labels each attribute with its \textbf{source, confidence and verification status}.
+    \item Reconstructs the building in 3D to show \textbf{where energy is lost}.
+    \item Simulates energy demand and likely heat-loss areas.
+    \item Generates renovation packages with \textbf{cost, savings and carbon} estimates.
+    \item Optimises combinations and sequencing under \textbf{budget, technical, regulatory and
+      disruption} constraints.
+    \item Produces a \textbf{phased plan} and draft contractor specifications for professional review.
+  \end{enumerate}
+  \note{Seven steps from upload to a plan a professional can review. Steps 1 to 3 build the
+  building record. Steps 4 to 6 compare options. Step 7 is the output, and a qualified person
+  still signs it off.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Our difference: the option you can actually build}
+  \begin{block}{Recommendation, not theory}
+    Kelpod recommends the best \emph{implementable} option, not the theoretically most efficient one.
+  \end{block}
+  \vspace{0.6em}
+  \begin{itemize}
+    \item \textbf{Uncertain inputs stay visible} instead of being hidden in a single score.
+    \item \textbf{Expert decisions are flagged}: the platform says when a professional must check.
+    \item \textbf{Traceable calculations}: every input carries a source or an assumption label.
+  \end{itemize}
+  \note{This is the claim that sets us apart. A theoretically perfect measure that the building
+  cannot take, or that the owner cannot pay for, is worth nothing. We show the trade-offs, and we
+  show what we do not know.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Who we are for, and the impact}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.50\textwidth}
+      \begin{block}{Customers}
+        \begin{itemize}
+          \item Housing cooperatives
+          \item Property managers
+          \item Energy consultancies
+          \item Contractors
+          \item Municipal and public housing organisations
+        \end{itemize}
+      \end{block}
+
+    \column{0.46\textwidth}
+      \begin{block}{Impact}
+        \begin{itemize}
+          \item Lower building energy use and emissions
+          \item More affordable heating
+          \item Better-targeted renovation investment
+        \end{itemize}
+      \end{block}
+  \end{columns}
+  \vspace{0.4em}
+  Start: existing multi-family residential buildings in Germany.
+  \note{Our first market is German multi-family housing. The buyers are the people who manage
+  these buildings and decide on the money. The impact is measurable: energy, CO\textsubscript{2},
+  and whether the money goes to the right measures.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{How Kelpod makes money}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.32\textwidth}
+      \begin{block}{Per building}
+        Assessment fee for each building analysed.
+      \end{block}
+    \column{0.32\textwidth}
+      \begin{block}{Per portfolio}
+        Annual subscription for a whole housing portfolio.
+      \end{block}
+    \column{0.32\textwidth}
+      \begin{block}{Enterprise}
+        API licensing or white-label integration.
+      \end{block}
+  \end{columns}
+  \note{Three revenue streams: one-off assessments for a single building, a subscription for
+  portfolios, and licences for organisations that want to build Kelpod into their own tools.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Competition: we complement, we do not replace}
+  \begin{itemize}
+    \item Existing calculation tools include \textbf{Hottgenroth / ETU} and \textbf{ENVISYS EVEBI}.
+    \item Kelpod \textbf{complements} these tools.
+    \item Kelpod does \textbf{not} replace certified consultants or statutory calculations.
+  \end{itemize}
+  \vspace{0.8em}
+  \begin{block}{Our role}
+    Plan the order of work, make the uncertainty visible, and prepare what professionals need to check.
+  \end{block}
+  \note{We are not competing with certified calculation tools, and we say so. Our value is the
+  planning layer on top: which measure first, what it costs, and what is still uncertain.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Traction}
+  \begin{exampleblock}{One customer is already locked in for the pilot}
+  \end{exampleblock}
+  \vspace{0.6em}
+  Next steps to validate the market:
+  \begin{itemize}
+    \item \textbf{15} discovery interviews with cooperatives, managers and consultants
+    \item \textbf{2} pilot partners giving feedback from at least \textbf{5} end users
+    \item \textbf{3} willingness-to-pay conversations
+  \end{itemize}
+  \note{Be precise about this. One customer is locked in for the pilot. The other numbers are
+  targets for this semester, not results yet.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Six agents, one controlled workflow}
+  \begin{center}
+  \begin{tikzpicture}[
+      node distance=0.9cm and 0.9cm,
+      stage/.style={draw=kblue, very thick, rounded corners, fill=kblue!12,
+                    minimum width=3.0cm, minimum height=1.05cm, align=center, font=\small},
+      arr/.style={-{Stealth[length=2.2mm]}, very thick, kblue}]
+    \node[stage] (a) {1 Ingestion \& data quality};
+    \node[stage, right=of a] (b) {2 Building reconstruction};
+    \node[stage, right=of b] (c) {3 Energy diagnosis};
+    \node[stage, below=of c] (d) {4 Scenario generation};
+    \node[stage, left=of d] (e) {5 Optimisation};
+    \node[stage, left=of e] (f) {6 Validation \& reporting};
+    \draw[arr] (a) -- (b);
+    \draw[arr] (b) -- (c);
+    \draw[arr] (c) -- (d);
+    \draw[arr] (d) -- (e);
+    \draw[arr] (e) -- (f);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.2em}
+  \small Deterministic engineering tools calculate. Language and vision models extract and explain.
+  \note{Six agents pass structured data along one workflow. The important design choice: the
+  calculations come from deterministic engineering tools, and the language and vision models only
+  extract information and explain it. Planned stack: Python with FastAPI, PostgreSQL with PostGIS,
+  OCR and vision-language models, EnergyPlus with OpenStudio, and pymoo for optimisation.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Safety principle}
+  \begin{alertblock}{AI output is not a certified measurement}
+    Calculations and uncertainty ranges stay traceable. Final designs and compliance decisions stay
+    with qualified professionals.
+  \end{alertblock}
+  \vspace{0.6em}
+  \begin{itemize}
+    \item Ingestion flags missing or conflicting inputs instead of guessing them.
+    \item Validation lists the expert checks each roadmap requires.
+    \item The roadmap goes to a human for approval before anyone acts on it.
+  \end{itemize}
+  \note{This is the principle we will not compromise on. The software can be wrong about a wall. So
+  it must always show what it assumed, and a professional makes the final call.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Agents as employees}
+  \begin{itemize}
+    \item \textbf{Coding agents} help build the FastAPI backend and write the tests.
+    \item \textbf{Research and QA agents} map data sources, check the pipeline and prepare interviews.
+    \item \textbf{GTM agents} maintain the pilot pipeline and the customer outreach.
+  \end{itemize}
+  \vspace{0.8em}
+  \begin{block}{What stays with the founders}
+    Technical decisions, customer relationships, and every claim we make to users.
+  \end{block}
+  \note{We run the company with agents as employees, the way the course asks. The founders stay
+  responsible for the decisions and for every claim we make to a customer.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Success metrics for this semester}
+  \begin{itemize}
+    \item \textbf{Completeness:} at least 10 residential buildings; at least 85\% of required
+      attributes extracted or flagged.
+    \item \textbf{Traceability:} 100\% of calculation inputs carry a source or assumption label.
+    \item \textbf{Model validity:} CV(RMSE) of at most 20\% on reference buildings where data allows.
+    \item \textbf{Feasibility:} 100\% of feasible-shown scenarios pass budget and technical checks.
+    \item \textbf{Decision usefulness:} at least 3 scenarios per building, each with investment range,
+      energy and carbon impact, and sequence.
+    \item \textbf{Speed:} at least 50\% less first-pass preparation time than the manual baseline.
+  \end{itemize}
+  \note{These are our targets for the semester. They are development targets, not validated product
+  claims. We will report against each of them at the end.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Roadmap}
+  \begin{center}
+  \begin{tikzpicture}[
+      ms/.style={circle, draw=kblue, very thick, fill=white, minimum size=5mm, inner sep=0pt},
+      lab/.style={align=center, font=\footnotesize, text width=3.9cm}]
+    \draw[very thick, kblue] (0,0) -- (11,0);
+    \node[ms] at (0.5,0) {};
+    \node[ms] at (5.5,0) {};
+    \node[ms] at (10.5,0) {};
+    \node[above=3mm of {(0.5,0)}, font=\bfseries\small, kblue] {Weeks 3--6};
+    \node[above=3mm of {(5.5,0)}, font=\bfseries\small, kblue] {Weeks 7--10};
+    \node[above=3mm of {(10.5,0)}, font=\bfseries\small, kblue] {End of semester};
+    \node[below=3mm of {(0.5,0)}, lab] {\textbf{Goal 1: Data-to-building MVP}\\
+      Upload and extraction; a structured record with confidence labels; a simplified model on 3 sample buildings.};
+    \node[below=3mm of {(5.5,0)}, lab] {\textbf{Goal 2: Energy \& scenario engine}\\
+      Baseline simulation checked against reference data; 3 scenarios per building; a first budget ranking.};
+    \node[below=3mm of {(10.5,0)}, lab] {\textbf{End goal: pilot-ready demo}\\
+      Upload-to-report demo tested on 10 buildings, reviewed with 2 pilot partners.};
+  \end{tikzpicture}
+  \end{center}
+  \note{The semester splits into three milestones. The first gives us an upload pipeline that works
+  on three sample buildings. The second gives us the energy engine and scenario comparison. The end
+  goal is a demo that we test on ten buildings and review with two pilot partners.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Validation and next steps}
+  \begin{enumerate}
+    \item \textbf{Interview first:} housing cooperatives, property managers and energy consultants,
+      before we finalise the workflow.
+    \item \textbf{Validate with real documents:} permissioned data and expert reference models where
+      available.
+    \item \textbf{Check data licensing} before any commercial use.
+  \end{enumerate}
+  \vspace{0.6em}
+  \textit{Later:} BIM reconstruction, automated procurement, pan-European regulation.
+  \vspace{0.6em}
+  \begin{alertblock}{Careful with numbers}
+    Performance values are development targets, not validated product claims.
+  \end{alertblock}
+  \note{Our next step is listening, not building. We interview the people who manage these
+  buildings before we fix the workflow. The later items are real, but out of scope for this
+  semester.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Takeaway}
+  \begin{block}{One thing to remember}
+    \Large Kelpod recommends what can actually be built, and shows what it does not know.
+  \end{block}
+  \vspace{1em}
+  \begin{exampleblock}{Next}
+    Interviews with housing cooperatives, property managers and energy consultants.
+  \end{exampleblock}
+  \note{So, the one thing to remember: an energy renovation plan has to be implementable and honest
+  about its uncertainty. That is what Kelpod does. Our next step is to talk to the people who would
+  use it. Thank you, and we are happy to take questions.}
+\end{frame}
+
+\end{document}

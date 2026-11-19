@@ -1,19 +1,30 @@
-# Kelpod pitch
+# Kelpod slides
 
-Status-update pitch (6–7 minutes, one speaker) for Frontier Systems 2026/27. Same format as the skill-following talk: blue Beamer (Madrid-style) frame, one claim per slide, click-by-click animations, full speaker script.
+Beamer slides for the Kelpod status update (Frontier Systems, WiSe 2026/2027). Madrid theme, in the same blue palette as the earlier decks.
 
-- `index.html`: the deck. Open it in a browser. Arrow keys or click to step, `N` for speaker notes, `F` for fullscreen.
-- `pdf/zllf-pitch-slides.pdf`: one page per slide (final state). Send this one to the course organisers for the shared deck.
-- `pdf/zllf-pitch-frames.pdf`: one page per click step.
+## Files
 
-Re-export the PDFs after editing:
+| File | What it is |
+|---|---|
+| `main.tex` | The slides, with speaker notes in `\note{...}` |
+| `notes.tex` | Wrapper that builds the notes version (`make notes`) |
+| `Makefile` | `make slides`, `make notes`, `make clean` |
+| `pdf/kelpod-slides.pdf` | Built slides (commit this one for the course) |
+| `pdf/kelpod-notes.pdf` | Slides with speaker notes, two per page |
+| `archive/zllf-v1/` | The earlier Zero-Leak LoRA Factory deck (HTML), kept for history |
+
+## Build
+
+You need [Tectonic](https://tectonic-typesetting.github.io/) (`brew install tectonic`). The first build downloads the TeX packages it needs, so it takes a while and needs internet access.
 
 ```bash
-CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-for m in slides frames; do
-  "$CH" --headless=new --no-pdf-header-footer --virtual-time-budget=25000 \
-    --print-to-pdf="$PWD/pdf/zllf-pitch-$m.pdf" "file://$PWD/index.html?print=$m"
-done
+cd presentation
+make slides   # -> pdf/kelpod-slides.pdf
+make notes    # -> pdf/kelpod-notes.pdf
 ```
 
-Fonts and the animation library load from the web, so present from the PDF if the room has no internet.
+## Editing
+
+- Each slide is one `\begin{frame}...\end{frame}`. Put the speaking notes in `\note{...}` at the end of the frame.
+- Colours are defined at the top of `main.tex`.
+- Numbers on the slides come from the pivot document (`Kelpod_Final.pdf`). Targets are development targets, not validated results, and the slides say so.
