@@ -61,19 +61,18 @@
 }
 
 \title[Kelpod]{Kelpod}
-\subtitle{AI-powered energy renovation planning}
+\subtitle{From old floor plans to renovation roadmaps}
 \author[Tajdeen \& Antony]{Arsha Fahima Tajdeen \and Kevin Antony}
 \institute[Frontier Systems]{Frontier Systems, WiSe 2026/2027}
 \date{}
 
 \begin{document}
 
-% ---------------------------------------------------------------------------
 \begin{frame}[plain]
   \titlepage
-  \note{Hi everyone. We are Arsha and Kevin, and our project is Kelpod. In one sentence: Kelpod
-  turns incomplete building information into a renovation roadmap an owner can actually afford and
-  implement. Here is the problem, what we built, and where we are.}
+  \note{Hi everyone. We are Arsha and Kevin, and our project is Kelpod. Kelpod turns old German floor
+  plans into 3D building models that energy software can use, and builds renovation roadmaps on top.
+  Here is the problem, our first product, and where we are.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -81,13 +80,13 @@
   \begin{columns}[T,onlytextwidth]
     \column{0.56\textwidth}
       \begin{itemize}
-        \item<2-> Building data is scattered.
-        \item<3-> Owners can't see where energy is lost.
-        \item<4-> Measures are hard to compare.
+        \item<2-> GEG and EU rules: millions of buildings need energy audits.
+        \item<3-> Most old buildings only have PDF scans or paper plans.
+        \item<4-> Experts redraw each plan by hand: 3--6 hours.
       \end{itemize}
       \vspace{0.8em}
-      \uncover<5->{\begin{block}{Wrong order wastes money}
-        Heating system first, insulation later.
+      \uncover<5->{\begin{block}{The bottleneck}
+        Every plan is typed into HottCAD by hand.
       \end{block}}
 
     \column{0.40\textwidth}
@@ -95,10 +94,77 @@
       \includegraphics[height=0.50\textheight,keepaspectratio]{images/multifamily-house-saxony.jpg}\\[3pt]
       {\tiny Listed multi-family house in Saxony. Photo: August Geyler, \mbox{CC BY-SA 4.0} (Wikimedia Commons)}
   \end{columns}
-  \note{Start with the building, not the software. Many owners decide on the heating system first,
-  and then find the building still loses most of its heat. The order of work matters as much as the
-  measures themselves. This photo is a real multi-family house in Saxony that is a listed monument,
-  so every renovation has to work around its protection status.}
+  \note{Because of the German Building Energy Act (GEG) and EU rules, millions of existing buildings
+  need digital energy audits, heat-load calculations and renovation roadmaps (iSFP). But most old
+  buildings only have degraded PDF scans or 1970s blueprints. Our project plan puts this at over
+  80 percent; we still need a source before we state that number on a slide. Highly paid engineers
+  spend 3 to 6 hours redrawing each plan into HottCAD by hand. The photo is a real listed
+  multi-family house in Saxony, the kind of building this applies to.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Why today's AI fails on German plans}
+  \begin{itemize}
+    \item<2-> Trained on US floor plans.
+    \item<3-> Can't read DIN 1356-1 symbols or wall hatching.
+    \item<4-> Misses rotated dimension chains (\emph{Maßketten}).
+  \end{itemize}
+  \vspace{0.8em}
+  \uncover<5->{\begin{alertblock}{Pixels are not a model}
+    BIM software needs closed vector shapes, not pixel masks.
+  \end{alertblock}}
+  \note{Models like DeepFloorplan and RoomFormer use room-boundary attention and work on US-style
+  plans. German solid construction (Massivbau) plans are different: DIN 1356-1 symbols, multi-layer
+  masonry hatching, and dimension chains that are often rotated. On top of that, these models output
+  pixel masks, and BIM software crashes on them unless they are turned into closed vector geometry.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{First product: scan in, 3D model out}
+  \begin{center}
+  \begin{tikzpicture}
+    \node[box, minimum width=3.4cm, minimum height=1.8cm] (in) at (0,0) {\textbf{Old floor plan}\\PDF or scan};
+    \node<2->[box, minimum width=3.4cm, minimum height=1.8cm, fill=kblue, text=white] (k) at (5.2,0) {\textbf{Kelpod}\\Read and rebuild};
+    \node<3->[box, minimum width=3.4cm, minimum height=1.8cm] (out) at (10.0,0) {\textbf{3D model}\\IFC for HottCAD};
+    \draw<2->[arr] (in) -- (k);
+    \draw<3->[arr] (k) -- (out);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.6em}
+  \uncover<4->{Goal: under 3 minutes per plan. The expert checks, not redraws.}
+  \note{Our first product turns an old floor plan into a 3D building model in IFC, versions 2x3 and
+  IFC4, which HottCAD imports directly. We also export DWG or DXF, and gbXML for other energy
+  simulation tools. The goals are more than 95 percent closed geometry and under three minutes per
+  plan, on a local GPU or in the cloud. The engineer verifies and tweaks instead of redrawing from
+  scratch. This is the first building block of the full renovation platform.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{How it works}
+  \begin{center}
+  \begin{tikzpicture}[node distance=0.9cm and 0.9cm,
+      stage/.style={box, minimum width=3.0cm, font=\small}]
+    \node[stage] (a) {1 Clean the scan};
+    \node<2->[stage, right=of a] (b) {2 Find walls \& doors};
+    \node<3->[stage, right=of b] (c) {3 Read dimensions};
+    \node<4->[stage, below=of c] (d) {4 Close the shapes};
+    \node<5->[stage, left=of d] (e) {5 Export IFC};
+    \draw<2->[arr] (a) -- (b);
+    \draw<3->[arr] (b) -- (c);
+    \draw<4->[arr] (c) -- (d);
+    \draw<5->[arr] (d) -- (e);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.2em}
+  \uncover<6->{\small Built for German plans: DIN 1356-1 symbols, \emph{Maßketten}, sill heights, room labels.}
+  \note{Step 1 straightens the scan, removes stains and fold marks, and fixes the scale. Step 2 is a
+  DeepFloorplan or RoomFormer model fine-tuned on DIN 1356-1 plans: it finds wall types from their
+  hatching, windows and doors from their swing arcs, and stairs. Step 3 is OCR, with Tesseract or a
+  fine-tuned Donut or TrOCR model: it reads dimension chains to correct the scale, sill heights like
+  BRH 87.5, and room labels like Wohnen, 14.5 square metres. Step 4 is a geometry solver with Shapely:
+  walls snap to the right angles, corners close, every room becomes a closed polygon, and it is
+  extruded to 3D with standard room heights of 2.50 to 2.75 metres. Step 5 builds the IFC file with
+  IfcOpenShell. The app is Next.js on a FastAPI backend.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -119,45 +185,25 @@
 \end{frame}
 
 % ---------------------------------------------------------------------------
-\begin{frame}{Kelpod: uploads in, roadmap out}
-  \begin{center}
-  \begin{tikzpicture}
-    \node[box, minimum width=3.4cm, minimum height=1.8cm] (in) at (0,0) {\textbf{Upload}\\Plans, bills, photos};
-    \node<2->[box, minimum width=3.4cm, minimum height=1.8cm, fill=kblue, text=white] (k) at (5.2,0) {\textbf{Kelpod}\\Model and check};
-    \node<3->[box, minimum width=3.4cm, minimum height=1.8cm] (out) at (10.0,0) {\textbf{Roadmap}\\Phased plan};
-    \draw<2->[arr] (in) -- (k);
-    \draw<3->[arr] (k) -- (out);
-  \end{tikzpicture}
-  \end{center}
-  \vspace{0.6em}
-  \uncover<4->{Every number traces back to its source.}
-  \note{Users give us what they already have: plans, photos, bills and records. Kelpod turns this
-  into a building model and a roadmap. Every number on the roadmap can be traced back to where it
-  came from.}
-\end{frame}
-
-% ---------------------------------------------------------------------------
-\begin{frame}{What Kelpod does}
+\begin{frame}{Where it leads: the full platform}
   \begin{columns}[T,onlytextwidth]
     \column{0.56\textwidth}
       \begin{enumerate}
-        \item<2-> Digital building model from documents
-        \item<3-> Source and confidence for every attribute
-        \item<4-> 3D view of where energy is lost
-        \item<5-> Energy simulation
-        \item<6-> Costed renovation packages
-        \item<7-> Best order under budget and rules
-        \item<8-> Phased plan for expert review
+        \item<2-> Building model (our first product)
+        \item<3-> Where energy is lost
+        \item<4-> Costed renovation packages
+        \item<5-> Best order under budget
+        \item<6-> Phased plan for expert review
       \end{enumerate}
     \column{0.40\textwidth}
       \centering
       \includegraphics[width=\linewidth,keepaspectratio]{images/nasa-thermograph-cleveland.jpg}\\[3pt]
       {\tiny Thermal image of homes losing heat, Cleveland (1977). NASA, public domain, Wikimedia Commons}
   \end{columns}
-  \note{Seven steps from upload to a plan a professional can review. Steps 1 to 3 build the building
-  record. Steps 4 to 6 compare options. Step 7 is the output, and a qualified person still signs it
-  off. The picture is a NASA thermograph from 1977: the colours show which homes lose the most heat.
-  This is the question Kelpod answers for a whole estate, not one house at a time.}
+  \note{The floor-plan model is step one. On top of it, the platform simulates where energy is lost,
+  builds costed renovation packages, finds the best order of work under budget and regulatory
+  constraints, and produces a phased plan for an expert to review. The picture is a NASA thermograph
+  from 1977: the colours show which homes lose the most heat.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -179,66 +225,74 @@
 % ---------------------------------------------------------------------------
 \begin{frame}{Who we serve}
   \begin{columns}[T,onlytextwidth]
-    \column{0.50\textwidth}
+    \column{0.44\textwidth}
       \begin{block}{Customers}
         \begin{itemize}
-          \item<2-> Housing cooperatives
-          \item<2-> Property managers
-          \item<3-> Energy consultants
-          \item<3-> Contractors
-          \item<4-> Public housing
+          \item<2-> Energy-efficiency experts
+          \item<2-> Building surveyors
+          \item<3-> Architects
+          \item<3-> Housing associations
         \end{itemize}
       \end{block}
-    \column{0.46\textwidth}
-      \begin{block}{Impact}
+    \column{0.52\textwidth}
+      \begin{block}{Two users we design for}
         \begin{itemize}
-          \item<5-> Less energy and CO\textsubscript{2}
-          \item<6-> Cheaper heating
-          \item<7-> Better-targeted investment
+          \item<4-> \textbf{Independent expert:} own GPUs, wants a near-perfect HottCAD import.
+          \item<5-> \textbf{Housing association:} 10,000+ units, needs batch processing.
         \end{itemize}
       \end{block}
   \end{columns}
-  \note{Our first market is German multi-family housing. The buyers are the people who manage these
-  buildings and decide on the money. The impact is measurable: energy, CO\textsubscript{2}, and
-  whether the money goes to the right measures.}
+  \vspace{0.6em}
+  \uncover<6->{Impact: faster audits, more buildings renovated, less CO\textsubscript{2}.}
+  \note{Our market is the DACH region: energy-efficiency experts (Energieeffizienz-Experten),
+  building surveyors, architects and housing associations. We design for two users. The independent
+  expert is highly technical, hates manual CAD tracing, cares about data sovereignty and runs local
+  hardware; they need imports that are more than 95 percent accurate. The draftsman at a large
+  housing association manages over 10,000 units and needs to batch-process archive PDFs into IFC
+  files for portfolio-wide ESG reporting.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
 \begin{frame}{How we make money}
   \begin{columns}[T,onlytextwidth]
     \column{0.32\textwidth}
-      \begin{block}{Per building}
-        Assessment fee
-      \end{block}
+      \uncover<1->{\begin{block}{Per scan}
+        30--80 EUR per floor plan
+      \end{block}}
     \column{0.32\textwidth}
-      \uncover<2->{\begin{block}{Per portfolio}
-        Yearly subscription
+      \uncover<2->{\begin{block}{Monthly}
+        Licence for consulting firms
       \end{block}}
     \column{0.32\textwidth}
       \uncover<3->{\begin{block}{Enterprise}
         API or white-label licence
       \end{block}}
   \end{columns}
-  \note{Three revenue streams: one-off assessments for a single building, a subscription for
-  portfolios, and licences for organisations that want to build Kelpod into their own tools.}
+  \vspace{0.8em}
+  \uncover<4->{\small Runs in the cloud (Frankfurt, GDPR) or on-premise in Docker.}
+  \note{We charge 30 to 80 euros per scanned plan, or a monthly licence for consulting firms, and
+  API or white-label licences for larger organisations. Customers choose where it runs: our cloud
+  API on GDPR-compliant servers in Frankfurt, or an on-premise Docker container on their own NVIDIA
+  GPUs for privacy-first clients.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
-\begin{frame}{We complement, we don't replace}
+\begin{frame}{We feed HottCAD, we don't replace it}
   \begin{center}
   \begin{tikzpicture}
-    \node[box, minimum width=4.0cm] (calc) at (0,1.2) {Calculation tools};
-    \node[box, minimum width=4.0cm] (cons) at (0,-1.2) {Certified consultants};
-    \node<2->[box, minimum width=4.0cm, fill=kblue, text=white] (k) at (6.0,0) {Kelpod};
-    \draw<3->[arr] (k) -- (calc.east);
-    \draw<3->[arr] (k) -- (cons.east);
+    \node[box, minimum width=3.4cm] (plan) at (0,0) {Old floor plan};
+    \node<2->[box, minimum width=3.4cm, fill=kblue, text=white] (k) at (5.0,0) {Kelpod};
+    \node<3->[box, minimum width=3.4cm] (hott) at (10.0,0) {HottCAD};
+    \draw<2->[arr] (plan) -- (k);
+    \draw<3->[arr] (k) -- (hott);
   \end{tikzpicture}
   \end{center}
-  \vspace{0.4em}
-  \uncover<4->{Kelpod does not replace statutory calculations.}
-  \note{We are not competing with certified calculation tools, and we say so. Our value is the
-  planning layer on top: which measure first, what it costs, and what is still uncertain. The
-  calculation tools in the market are Hottgenroth / ETU and ENVISYS EVEBI.}
+  \vspace{0.6em}
+  \uncover<4->{We remove the 3--6 hours of manual entry. Certified calculations stay in HottCAD.}
+  \note{Hottgenroth / ETU, with HottCAD, holds a near-monopoly on government-certified compliance
+  calculations. ENVISYS EVEBI is another established tool. We do not compete with them. We feed them:
+  Kelpod replaces the hours of manual redrawing, and the certified calculation still happens in
+  their software.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -246,10 +300,17 @@
   \begin{exampleblock}{One customer is locked in for the pilot}
   \end{exampleblock}
   \vspace{0.6em}
-  \uncover<2->{Targets this semester: 15 interviews, 2 pilot partners, 3 payment conversations.}
-  \note{Be precise about this. One customer is locked in for the pilot. The other numbers are targets
-  for this semester, not results yet. The pilot partners should give feedback from at least five end
-  users.}
+  \begin{itemize}
+    \item<2-> Free alpha on their own GPU server.
+    \item<3-> In return: real plans to train on, and HottCAD know-how.
+  \end{itemize}
+  \vspace{0.6em}
+  \uncover<4->{\small Targets this semester: 15 interviews, 2 pilot partners, 3 payment conversations.}
+  \note{Our pilot partner is an energy-efficiency expert. We install an alpha version as a Docker
+  container on their own GPU server, for free, to remove their manual-entry bottleneck. In return we
+  train our OCR and segmentation on their archive of real plans, and use their expertise to map exactly
+  which IFC attributes HottCAD needs. Once imports work without errors, we package the engine as a paid
+  API for other energy consulting firms. The other numbers are targets for this semester, not results.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -286,10 +347,13 @@
   \vspace{0.6em}
   \begin{itemize}
     \item<2-> Missing inputs are flagged, not guessed.
-    \item<3-> A human approves every roadmap.
+    \item<3-> A human approves every model and roadmap.
+    \item<4-> Cloud uploads are not kept unless you opt in.
   \end{itemize}
-  \note{This is the principle we will not compromise on. The software can be wrong about a wall. So it
-  must always show what it assumed, and a professional makes the final call.}
+  \note{The software can be wrong about a wall. So it must always show what it assumed, and a
+  professional makes the final call. On the cloud tier we keep nothing: uploaded plans are deleted
+  after processing unless the customer explicitly opts in to help with training. That is part of
+  being compliant with the German GDPR, the DSGVO.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -334,33 +398,32 @@
     \node[above=3mm of m1, font=\bfseries\small, kblue] {Weeks 3--6};
     \node[above=3mm of m2, font=\bfseries\small, kblue] {Weeks 7--10};
     \node[above=3mm of m3, font=\bfseries\small, kblue] {End of semester};
-    \node<2->[below=3mm of m1, align=center, font=\footnotesize, text width=3.4cm] {MVP: upload to\\building record};
+    \node<2->[below=3mm of m1, align=center, font=\footnotesize, text width=3.4cm] {Scan to 3D model\\on 3 sample plans};
     \node<3->[below=3mm of m2, align=center, font=\footnotesize, text width=3.4cm] {Energy engine and\\3 scenarios each};
     \node<4->[below=3mm of m3, align=center, font=\footnotesize, text width=3.4cm] {Pilot demo on 10\\buildings};
   \end{tikzpicture}
   \end{center}
-  \note{The semester splits into three milestones. The first gives us an upload pipeline that works on
-  three sample buildings. The second gives us the energy engine and scenario comparison. The end goal
+  \note{The semester splits into three milestones. The first gives us the scan-to-3D pipeline working on three
+  sample plans. The second gives us the energy engine and scenario comparison. The end goal
   is a demo that we test on ten buildings and review with two pilot partners.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Next steps}
   \begin{enumerate}
-    \item<2-> Interview cooperatives, managers and consultants.
-    \item<3-> Test with real, permissioned documents.
-    \item<4-> Check data licensing before any sale.
+    \item<2-> Map HottCAD's import fields with our pilot expert.
+    \item<3-> Interview experts, surveyors and housing associations.
+    \item<4-> Train on real, permissioned plans.
+    \item<5-> Check data licensing before any sale.
   \end{enumerate}
   \vspace{0.6em}
-  \uncover<5->{\begin{alertblock}{Careful with numbers}
+  \uncover<6->{\begin{alertblock}{Careful with numbers}
     Performance values are targets, not validated results.
   \end{alertblock}}
-  \note{Our next step is listening, not building. We interview the people who manage these buildings
-  before we fix the workflow. BIM reconstruction, automated procurement and pan-European regulation
-  come later and are out of scope for this semester.}
+  \note{First we sit down with our pilot expert and map exactly which IFC attributes HottCAD needs for
+  an error-free import. In parallel we interview experts, surveyors and housing associations. We train
+  only on real plans we have permission to use, and we check data licensing before any commercial
+  use.}
 \end{frame}
-
-% ---------------------------------------------------------------------------
-
 
 \end{document}
