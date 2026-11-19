@@ -103,31 +103,19 @@
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Wrong order: heating first}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.56\textwidth}
-      \begin{center}
-      \begin{tikzpicture}
-        \node[box, minimum width=4.0cm] (h) at (0,0) {1. Bigger heating system};
-        \node<2->[box, minimum width=4.0cm] (i) at (0,-2.0) {2. Insulation later};
-        \draw<2->[arr] (h) -- (i);
-        \node<3->[kred, font=\bfseries\small] at (0,-3.2) {Oversized system: paid for twice};
-      \end{tikzpicture}
-      \end{center}
-      \uncover<4->{\begin{exampleblock}{Kelpod's job}
-        Order the measures so the cheapest savings come first.
-      \end{exampleblock}}
-    \column{0.40\textwidth}
-      \centering
-      \begin{tikzpicture}
-        \node[anchor=center, inner sep=0] (img) at (0,0) {\includegraphics[width=\linewidth]{images/this-is-fine-revoy-cc-by.jpg}};
-        \node[white, font=\bfseries\small, align=center, text width=4.4cm] at (0,1.0) {Heating first.\\Insulation later.};
-        \node[black, font=\bfseries\small, align=center] at (0,-1.0) {This is fine.};
-      \end{tikzpicture}\\[2pt]
-      {\tiny ``This is not fine'' by David Revoy, \mbox{CC BY 4.0}}
-  \end{columns}
+  \begin{center}
+  \begin{tikzpicture}
+    \node[box, minimum width=4.0cm] (h) at (0,0) {1. Bigger heating system};
+    \node<2->[box, minimum width=4.0cm] (i) at (0,-2.0) {2. Insulation later};
+    \draw<2->[arr] (h) -- (i);
+    \node<3->[kred, font=\bfseries\small] at (0,-3.2) {Oversized system: paid for twice};
+  \end{tikzpicture}
+  \end{center}
+  \uncover<4->{\begin{exampleblock}{Kelpod's job}
+    Order the measures so the cheapest savings come first.
+  \end{exampleblock}}
   \note{If you size a new heating system first, you pay for a system that is too big once the house is
-  insulated. The right order is the measures that reduce demand first. Kelpod works out that order.
-  The picture is the famous ``This is fine'' meme, redrawn by David Revoy under CC BY 4.0.}
+  insulated. The right order is the measures that reduce demand first. Kelpod works out that order.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
