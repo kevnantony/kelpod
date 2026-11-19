@@ -1,6 +1,6 @@
 # Kelpod pivot: speaker notes
 
-Generated from `main.tex` (one section per slide, in order). Edit the `\note{}` blocks in `main.tex` and regenerate, rather than editing this file by hand.
+Generated from `main.tex` (one section per slide, in order). **[click]** means: advance one step in the PDF. Edit the `\note{}` blocks in `main.tex` and regenerate, rather than editing this file by hand.
 
 ## 1. Title slide
 
@@ -8,67 +8,187 @@ Hi everyone. We are Arsha and Kevin, and our project is Kelpod. Kelpod turns old
 
 ## 2. Europe has to renovate its buildings
 
-German and EU rules mean millions of existing buildings need an energy check and a renovation plan. But most old buildings only have paper plans or poor scans. Before an energy expert can do anything, they redraw each plan by hand in their software, which takes three to six hours. The photo is a real old apartment building in Saxony, the kind of building this is about.
+Europe has to renovate a huge number of old buildings.
+
+**[click]** German and EU rules mean millions of them now need an energy check and a renovation plan.
+
+**[click]** But most old buildings only have paper plans or poor scans.
+
+**[click]** So before an energy expert can do anything, they redraw each plan by hand in HottCAD, the standard software for the official energy calculation. That takes three to six hours per plan.
+
+**[click]** That is the bottleneck: hours of drawing before the real work even starts. The photo is a real old apartment building in Saxony, the kind of building this is about.
 
 ## 3. Why today's AI doesn't solve it
 
-There are AI models that read floor plans, but they were trained on American-style plans. German plans use their own symbols for walls, doors and measurements, and the existing models misread them. And they only produce a coloured picture of the plan, which energy software can't use. It needs a proper model with closed walls and rooms.
+You might think AI already solves this. It doesn't, for three reasons.
+
+**[click]** The AI models that read floor plans, like DeepFloorPlan and RoomFormer, were trained on US plans.
+
+**[click]** German plans follow the standard DIN 1356-1: their own hatching for walls, door swings and dimension chains. Those models misread them.
+
+**[click]** And they only produce pixel masks, a coloured picture of the plan. Energy software can't use that; it needs a closed vector model where every wall meets and every room is closed.
 
 ## 4. First product: old plan in, 3D model out
 
-Our first product takes an old plan and turns it into a 3D model of the building that energy software can open directly. The goal is a few minutes per plan instead of hours, so the expert only checks and corrects the result.
+So here is our first product. It starts with an old plan, on paper or scanned.
+
+**[click]** Kelpod reads the plan with computer vision and OCR, and rebuilds the geometry.
+
+**[click]** Out comes a 3D model in IFC, the standard building-model format, which HottCAD opens directly.
+
+**[click]** The goal: under three minutes per plan and over 95 percent closed geometry. The expert only checks and corrects, instead of redrawing.
 
 ## 5. How it works
 
-Six steps, each handled by its own AI agent. We clean up the scan, find the walls and doors, and read the measurements written on the plan. Then we move the walls so they match those measurements, because the drawing itself is often slightly off. Next we check that everything connects: no gaps in walls, every room closed. Finally we build the 3D model. Where it helps, we also compare against other drawings of the same building. The calculations are done by proven engineering tools; the AI reads and explains.
+How does it work? Six steps, each handled by its own AI agent. First, we clean up the scan.
+
+**[click]** Then we segment the walls, doors and windows with a fine-tuned vision model.
+
+**[click]** OCR reads the dimension chains, sill heights and room labels.
+
+**[click]** We fit the geometry to those dimensions, because the drawing itself is often slightly off.
+
+**[click]** We check the layout as a graph of walls, doors and rooms: no gaps, every room closed.
+
+**[click]** And we export the 3D model as IFC.
+
+**[click]** Each step is an AI agent, but geometry and calculations are done by deterministic tools. The AI reads and explains; it doesn't invent numbers.
 
 ## 6. Wrong order: heating first
 
-Here is why the plan matters. If an owner buys a bigger heating system first and insulates later, the heating system ends up too big, so they paid twice. With a good building model, Kelpod can work out the right order of measures.
+Why does the building model matter so much? Here is a common mistake. An owner buys a bigger heating system first.
+
+**[click]** And insulates later.
+
+**[click]** Now the heating system is too big for the insulated house. They paid twice.
+
+**[click]** With a good building model, Kelpod can put the measures in the right order.
 
 ## 7. Where it leads
 
-The 3D model is step one. On top of it we can show where a building loses energy, suggest renovation options with costs, and find the best order within the owner's budget. The picture is a thermal image from NASA: the colours show which homes lose the most heat.
+That's where this leads.
+
+**[click]** The 3D model is our first product.
+
+**[click]** On top of it, we can show where a building loses energy.
+
+**[click]** Suggest renovation options with their costs.
+
+**[click]** And find the best order within the owner's budget. The picture is a NASA thermal image: the colours show which homes lose the most heat.
 
 ## 8. Our difference
 
-A perfect plan that the building can't take, or that the owner can't pay for, is worth nothing. We show the trade-offs, we are honest about what we don't know, and every number can be traced back to its source.
+What makes us different: we recommend what can actually be built, not a perfect plan on paper.
+
+**[click]** If we are unsure about something, we show it instead of hiding it.
+
+**[click]** We tell the user when an expert needs to look.
+
+**[click]** And every number shows where it came from.
 
 ## 9. Who we serve
 
-We start in Germany, Austria and Switzerland. Our customers are energy consultants, surveyors, architects and housing companies. Two typical users: an independent consultant who wants accurate results without hours of drawing, and a housing company with thousands of flats that needs to process its whole archive at once.
+Who do we serve?
+
+**[click]** Energy consultants and building surveyors.
+
+**[click]** Architects and housing companies. We start in Germany, Austria and Switzerland.
+
+**[click]** Two typical users. An independent consultant who wants accurate results without hours of drawing.
+
+**[click]** And a housing company with thousands of flats that needs to process its whole archive at once.
+
+**[click]** The impact: faster energy checks, so more buildings get renovated, and less CO2.
 
 ## 10. How we make money
 
-We charge 30 to 80 euros per plan, or a monthly subscription for consulting firms. Larger organisations can license Kelpod and build it into their own software. Customers choose whether it runs in our secure cloud in Germany or on their own computers.
+How do we make money? First, per plan: 30 to 80 euros each.
 
-## 11. We work with existing tools
+**[click]** Second, a monthly subscription for consulting firms.
 
-Energy experts already use certified software for the official calculations, and one vendor dominates that market. We don't compete with it. We feed it: Kelpod saves the hours of manual drawing, and the official calculation still happens in the software experts already trust.
+**[click]** Third, larger clients get an API or white-label licence to build Kelpod into their own software.
+
+**[click]** And customers choose: our cloud in Frankfurt under GDPR, or on-premise on their own GPUs.
+
+## 11. We feed HottCAD, we don't replace it
+
+HottCAD dominates the certified energy calculations in Germany. We don't compete with it. We start from the old plan.
+
+**[click]** Kelpod turns it into a model.
+
+**[click]** And that model goes straight into HottCAD.
+
+**[click]** So we remove the three to six hours of manual entry, and the certified calculation stays in HottCAD.
 
 ## 12. Traction
 
-Our pilot customer is an energy expert. They get an early version for free, running on their own computers. In return we get real plans to train on and their feedback on what the energy software needs. The other numbers are targets for this semester, not results yet.
+Where are we? One customer is locked in for our pilot: an energy expert.
+
+**[click]** They get a free alpha version, running on their own GPU server.
+
+**[click]** In return we get real plans to train on, and their know-how about exactly what HottCAD needs.
+
+**[click]** Our targets for this semester are 15 interviews, 2 pilot partners and 3 conversations about pricing. These are targets, not results yet.
 
 ## 13. Safety first
 
-The software can get a wall wrong. So it always shows what it assumed, and a qualified person makes the final call. Uploaded plans are deleted after processing unless the customer agrees to let us keep them, which keeps us in line with German data protection law.
+Safety comes first. The AI suggests, experts decide. Our results are not official measurements.
+
+**[click]** If information is missing, we flag it instead of guessing.
+
+**[click]** A person approves every result.
+
+**[click]** And uploaded plans are deleted after use, unless the customer agrees to let us keep them. That keeps us in line with German data protection law.
 
 ## 14. Agents as employees
 
-We run the company with AI agents as employees, as the course asks. The founders stay responsible for the decisions and for every claim we make to a customer.
+We also run the company with AI agents as employees, as the course asks.
+
+**[click]** Coding agents build the product and its tests.
+
+**[click]** Research agents prepare interviews and find data.
+
+**[click]** Sales agents keep track of our pilot customers.
+
+**[click]** But the founders decide: technical choices, customers, and every claim we make.
 
 ## 15. Semester targets
 
-These are our targets for this semester, not results yet. We want to process ten real buildings, keep a source for every number, get energy estimates within 20 percent of reference data, make sure every suggestion is actually feasible, offer at least three options per building, and cut the preparation time in half.
+Our targets for this semester.
+
+**[click]** Process ten real buildings.
+
+**[click]** Every number shows its source.
+
+**[click]** An energy model error, measured as CV(RMSE), of at most 20 percent.
+
+**[click]** Every suggestion passes budget and technical checks.
+
+**[click]** At least three options per building.
+
+**[click]** And half the preparation time. Again: these are targets, not results.
 
 ## 16. Roadmap
 
-Three milestones. First, old plan to 3D model, working on three sample plans. Second, energy estimates and three renovation options per building. By the end of the semester, a demo tested on ten buildings with our pilot partners.
+Our roadmap has three milestones.
+
+**[click]** By week 6: plan to IFC model, working on three sample plans.
+
+**[click]** By week 10: energy estimates and three renovation options per building.
+
+**[click]** By the end of the semester: a demo tested on ten buildings with our pilot partners.
 
 ## 17. Next steps
 
-First, we sit down with our pilot expert and learn exactly what their software needs from our models. In parallel we interview consultants and housing companies. And we only train on plans we have permission to use. Thank you, and we are happy to take questions.
+What's next?
+
+**[click]** First, we sit down with our pilot expert and map exactly which fields HottCAD needs.
+
+**[click]** We interview consultants and housing companies.
+
+**[click]** We only train on plans we have permission to use.
+
+**[click]** And one honest reminder: all the numbers you saw today are targets, not results yet. Thank you, and we are happy to take questions.
 
 ## If someone asks: the technical terms
 

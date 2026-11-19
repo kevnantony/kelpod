@@ -69,8 +69,8 @@
 \begin{document}
 \begin{frame}[plain]
   \titlepage
-  \note{Hi everyone. We are Arsha and Kevin, and our project is Kelpod. Kelpod turns old building plans
-  into 3D building models, so energy experts can plan renovations faster. Here is the problem, our first
+  \note{Hi everyone. We are Arsha and Kevin, and our project is Kelpod. Kelpod turns old building plans into
+  3D building models, so energy experts can plan renovations faster. Here is the problem, our first
   product, and where we are.}
 \end{frame}
 
@@ -79,13 +79,13 @@
   \begin{columns}[T,onlytextwidth]
     \column{0.56\textwidth}
       \begin{itemize}
-        \item<2-> New laws: millions of buildings need an energy check.
-        \item<3-> Most old buildings only have paper or scanned plans.
-        \item<4-> Experts redraw each plan by hand: 3--6 hours.
+        \item<2-> GEG and EU rules: millions of buildings need an energy audit.
+        \item<3-> Most old buildings only have PDF scans or paper plans.
+        \item<4-> Experts redraw each plan in HottCAD by hand: 3--6 hours.
       \end{itemize}
       \vspace{0.8em}
       \uncover<5->{\begin{block}{The bottleneck}
-        Hours of manual drawing before any real work starts.
+        Manual redrawing before any energy calculation can start.
       \end{block}}
 
     \column{0.40\textwidth}
@@ -93,23 +93,28 @@
       \includegraphics[height=0.50\textheight,keepaspectratio]{images/multifamily-house-saxony.jpg}\\[3pt]
       {\tiny Listed multi-family house in Saxony. Photo: August Geyler, \mbox{CC BY-SA 4.0} (Wikimedia Commons)}
   \end{columns}
-  \note{German and EU rules mean millions of existing buildings need an energy check and a renovation
-  plan. But most old buildings only have paper plans or poor scans. Before an energy expert can do
-  anything, they redraw each plan by hand in their software, which takes three to six hours. The
-  photo is a real old apartment building in Saxony, the kind of building this is about.}
+  \note{Europe has to renovate a huge number of old buildings.
+  [click] German and EU rules mean millions of them now need an energy check and a renovation plan.
+  [click] But most old buildings only have paper plans or poor scans.
+  [click] So before an energy expert can do anything, they redraw each plan by hand in HottCAD, the
+  standard software for the official energy calculation. That takes three to six hours per plan.
+  [click] That is the bottleneck: hours of drawing before the real work even starts. The photo is a real
+  old apartment building in Saxony, the kind of building this is about.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Why today's AI doesn't solve it}
   \begin{itemize}
-    \item<2-> It was trained on plans from other countries.
-    \item<3-> It can't read German drawing symbols and measurements.
-    \item<4-> It outputs a picture, not a building model.
+    \item<2-> Floor-plan models (DeepFloorPlan, RoomFormer) are trained on US plans.
+    \item<3-> They can't read the German standard DIN 1356-1: hatching, door swings, dimension chains.
+    \item<4-> They output pixel masks, not a closed vector model.
   \end{itemize}
-  \note{There are AI models that read floor plans, but they were trained on American-style plans.
-  German plans use their own symbols for walls, doors and measurements, and the existing models
-  misread them. And they only produce a coloured picture of the plan, which energy software can't use.
-  It needs a proper model with closed walls and rooms.}
+  \note{You might think AI already solves this. It doesn't, for three reasons.
+  [click] The AI models that read floor plans, like DeepFloorPlan and RoomFormer, were trained on US plans.
+  [click] German plans follow the standard DIN 1356-1: their own hatching for walls, door swings and
+  dimension chains. Those models misread them.
+  [click] And they only produce pixel masks, a coloured picture of the plan. Energy software can't use
+  that; it needs a closed vector model where every wall meets and every room is closed.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -117,17 +122,19 @@
   \begin{center}
   \begin{tikzpicture}
     \node[box, minimum width=3.4cm, minimum height=1.8cm] (in) at (0,0) {\textbf{Old plan}\\Paper or scan};
-    \node<2->[box, minimum width=3.4cm, minimum height=1.8cm, fill=kblue, text=white] (k) at (5.2,0) {\textbf{Kelpod}\\Reads and rebuilds};
-    \node<3->[box, minimum width=3.4cm, minimum height=1.8cm] (out) at (10.0,0) {\textbf{3D model}\\Ready for energy tools};
+    \node<2->[box, minimum width=3.4cm, minimum height=1.8cm, fill=kblue, text=white] (k) at (5.2,0) {\textbf{Kelpod}\\Vision, OCR, geometry};
+    \node<3->[box, minimum width=3.4cm, minimum height=1.8cm] (out) at (10.0,0) {\textbf{3D model (IFC)}\\Opens in HottCAD};
     \draw<2->[arr] (in) -- (k);
     \draw<3->[arr] (k) -- (out);
   \end{tikzpicture}
   \end{center}
   \vspace{0.6em}
-  \uncover<4->{Goal: minutes instead of hours. The expert checks, not redraws.}
-  \note{Our first product takes an old plan and turns it into a 3D model of the building that energy
-  software can open directly. The goal is a few minutes per plan instead of hours, so the expert only
-  checks and corrects the result.}
+  \uncover<4->{Goal: under 3 minutes per plan, over 95\% closed geometry. The expert checks, not redraws.}
+  \note{So here is our first product. It starts with an old plan, on paper or scanned.
+  [click] Kelpod reads the plan with computer vision and OCR, and rebuilds the geometry.
+  [click] Out comes a 3D model in IFC, the standard building-model format, which HottCAD opens directly.
+  [click] The goal: under three minutes per plan and over 95 percent closed geometry. The expert only
+  checks and corrects, instead of redrawing.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -136,11 +143,11 @@
   \begin{tikzpicture}[node distance=0.9cm and 0.9cm,
       stage/.style={box, minimum width=3.0cm, font=\small}]
     \node[stage] (a) {1 Clean the scan};
-    \node<2->[stage, right=of a] (b) {2 Spot walls \& doors};
-    \node<3->[stage, right=of b] (c) {3 Read measurements};
-    \node<4->[stage, below=of c] (d) {4 Fit walls to them};
-    \node<5->[stage, left=of d] (e) {5 Check it all connects};
-    \node<6->[stage, left=of e] (f) {6 Build the 3D model};
+    \node<2->[stage, right=of a] (b) {2 Segment walls \& doors};
+    \node<3->[stage, right=of b] (c) {3 OCR the dimensions};
+    \node<4->[stage, below=of c] (d) {4 Fit to dimensions};
+    \node<5->[stage, left=of d] (e) {5 Check as a graph};
+    \node<6->[stage, left=of e] (f) {6 Export IFC};
     \draw<2->[arr] (a) -- (b);
     \draw<3->[arr] (b) -- (c);
     \draw<4->[arr] (c) -- (d);
@@ -149,13 +156,15 @@
   \end{tikzpicture}
   \end{center}
   \vspace{0.2em}
-  \uncover<7->{\small Each step is an AI agent. Proven engineering tools do the maths.}
-  \note{Six steps, each handled by its own AI agent. We clean up the scan, find the walls and doors,
-  and read the measurements written on the plan. Then we move the walls so they match those
-  measurements, because the drawing itself is often slightly off. Next we check that everything
-  connects: no gaps in walls, every room closed. Finally we build the 3D model. Where it helps, we also
-  compare against other drawings of the same building. The calculations are done by proven engineering
-  tools; the AI reads and explains.}
+  \uncover<7->{\small Each step is an AI agent. Deterministic tools do the geometry and maths.}
+  \note{How does it work? Six steps, each handled by its own AI agent. First, we clean up the scan.
+  [click] Then we segment the walls, doors and windows with a fine-tuned vision model.
+  [click] OCR reads the dimension chains, sill heights and room labels.
+  [click] We fit the geometry to those dimensions, because the drawing itself is often slightly off.
+  [click] We check the layout as a graph of walls, doors and rooms: no gaps, every room closed.
+  [click] And we export the 3D model as IFC.
+  [click] Each step is an AI agent, but geometry and calculations are done by deterministic tools. The AI
+  reads and explains; it doesn't invent numbers.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -171,9 +180,11 @@
   \uncover<4->{\begin{exampleblock}{Where Kelpod helps next}
     Put the measures in the right order.
   \end{exampleblock}}
-  \note{Here is why the plan matters. If an owner buys a bigger heating system first and insulates later,
-  the heating system ends up too big, so they paid twice. With a good building model, Kelpod can work out
-  the right order of measures.}
+  \note{Why does the building model matter so much? Here is a common mistake. An owner buys a bigger heating
+  system first.
+  [click] And insulates later.
+  [click] Now the heating system is too big for the insulated house. They paid twice.
+  [click] With a good building model, Kelpod can put the measures in the right order.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -191,9 +202,12 @@
       \includegraphics[width=\linewidth,keepaspectratio]{images/nasa-thermograph-cleveland.jpg}\\[3pt]
       {\tiny Thermal image of homes losing heat, Cleveland (1977). NASA, public domain, Wikimedia Commons}
   \end{columns}
-  \note{The 3D model is step one. On top of it we can show where a building loses energy, suggest
-  renovation options with costs, and find the best order within the owner's budget. The picture is a
-  thermal image from NASA: the colours show which homes lose the most heat.}
+  \note{That's where this leads.
+  [click] The 3D model is our first product.
+  [click] On top of it, we can show where a building loses energy.
+  [click] Suggest renovation options with their costs.
+  [click] And find the best order within the owner's budget. The picture is a NASA thermal image: the
+  colours show which homes lose the most heat.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -207,9 +221,10 @@
     \item<3-> We say when an expert needs to look.
     \item<4-> Every number shows where it came from.
   \end{itemize}
-  \note{A perfect plan that the building can't take, or that the owner can't pay for, is worth nothing.
-  We show the trade-offs, we are honest about what we don't know, and every number can be traced back to
-  its source.}
+  \note{What makes us different: we recommend what can actually be built, not a perfect plan on paper.
+  [click] If we are unsure about something, we show it instead of hiding it.
+  [click] We tell the user when an expert needs to look.
+  [click] And every number shows where it came from.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -234,10 +249,12 @@
   \end{columns}
   \vspace{0.6em}
   \uncover<6->{Impact: faster energy checks, more renovations, less CO\textsubscript{2}.}
-  \note{We start in Germany, Austria and Switzerland. Our customers are energy consultants, surveyors,
-  architects and housing companies. Two typical users: an independent consultant who wants accurate
-  results without hours of drawing, and a housing company with thousands of flats that needs to process
-  its whole archive at once.}
+  \note{Who do we serve?
+  [click] Energy consultants and building surveyors.
+  [click] Architects and housing companies. We start in Germany, Austria and Switzerland.
+  [click] Two typical users. An independent consultant who wants accurate results without hours of drawing.
+  [click] And a housing company with thousands of flats that needs to process its whole archive at once.
+  [click] The impact: faster energy checks, so more buildings get renovated, and less CO2.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -253,32 +270,36 @@
       \end{block}}
     \column{0.32\textwidth}
       \uncover<3->{\begin{block}{Large clients}
-        Licence to build us in
+        API or white-label licence
       \end{block}}
   \end{columns}
   \vspace{0.8em}
-  \uncover<4->{\small Runs in our secure cloud or on the customer's own computers.}
-  \note{We charge 30 to 80 euros per plan, or a monthly subscription for consulting firms. Larger
-  organisations can license Kelpod and build it into their own software. Customers choose whether it
-  runs in our secure cloud in Germany or on their own computers.}
+  \uncover<4->{\small Cloud in Frankfurt (GDPR) or on-premise on the customer's own GPUs.}
+  \note{How do we make money? First, per plan: 30 to 80 euros each.
+  [click] Second, a monthly subscription for consulting firms.
+  [click] Third, larger clients get an API or white-label licence to build Kelpod into their own software.
+  [click] And customers choose: our cloud in Frankfurt under GDPR, or on-premise on their own GPUs.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
-\begin{frame}{We work with existing tools}
+\begin{frame}{We feed HottCAD, we don't replace it}
   \begin{center}
   \begin{tikzpicture}
     \node[box, minimum width=3.4cm] (plan) at (0,0) {Old plan};
     \node<2->[box, minimum width=3.4cm, fill=kblue, text=white] (k) at (5.0,0) {Kelpod};
-    \node<3->[box, minimum width=3.4cm] (tool) at (10.0,0) {Experts' software};
+    \node<3->[box, minimum width=3.4cm] (tool) at (10.0,0) {HottCAD};
     \draw<2->[arr] (plan) -- (k);
     \draw<3->[arr] (k) -- (tool);
   \end{tikzpicture}
   \end{center}
   \vspace{0.6em}
-  \uncover<4->{We save the hours of manual work. The official calculation stays where it is.}
-  \note{Energy experts already use certified software for the official calculations, and one vendor
-  dominates that market. We don't compete with it. We feed it: Kelpod saves the hours of manual drawing,
-  and the official calculation still happens in the software experts already trust.}
+  \uncover<4->{We remove 3--6 hours of manual entry. Certified calculations stay in HottCAD.}
+  \note{HottCAD dominates the certified energy calculations in Germany. We don't compete with it. We start
+  from the old plan.
+  [click] Kelpod turns it into a model.
+  [click] And that model goes straight into HottCAD.
+  [click] So we remove the three to six hours of manual entry, and the certified calculation stays in
+  HottCAD.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -287,14 +308,16 @@
   \end{exampleblock}
   \vspace{0.6em}
   \begin{itemize}
-    \item<2-> They get the tool for free.
-    \item<3-> We get real plans and expert feedback.
+    \item<2-> Free alpha, on their own GPU server.
+    \item<3-> In return: real plans to train on, and HottCAD know-how.
   \end{itemize}
   \vspace{0.6em}
   \uncover<4->{\small Targets this semester: 15 interviews, 2 pilot partners, 3 pricing talks.}
-  \note{Our pilot customer is an energy expert. They get an early version for free, running on their own
-  computers. In return we get real plans to train on and their feedback on what the energy software needs.
-  The other numbers are targets for this semester, not results yet.}
+  \note{Where are we? One customer is locked in for our pilot: an energy expert.
+  [click] They get a free alpha version, running on their own GPU server.
+  [click] In return we get real plans to train on, and their know-how about exactly what HottCAD needs.
+  [click] Our targets for this semester are 15 interviews, 2 pilot partners and 3 conversations about
+  pricing. These are targets, not results yet.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -306,11 +329,13 @@
   \begin{itemize}
     \item<2-> Missing information is flagged, not guessed.
     \item<3-> A person approves every result.
-    \item<4-> Uploaded plans are deleted after use.
+    \item<4-> Uploads are deleted after processing (GDPR).
   \end{itemize}
-  \note{The software can get a wall wrong. So it always shows what it assumed, and a qualified person
-  makes the final call. Uploaded plans are deleted after processing unless the customer agrees to let us
-  keep them, which keeps us in line with German data protection law.}
+  \note{Safety comes first. The AI suggests, experts decide. Our results are not official measurements.
+  [click] If information is missing, we flag it instead of guessing.
+  [click] A person approves every result.
+  [click] And uploaded plans are deleted after use, unless the customer agrees to let us keep them. That
+  keeps us in line with German data protection law.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -324,8 +349,11 @@
   \uncover<5->{\begin{block}{Founders decide}
     Technical choices, customers, and every claim.
   \end{block}}
-  \note{We run the company with AI agents as employees, as the course asks. The founders stay
-  responsible for the decisions and for every claim we make to a customer.}
+  \note{We also run the company with AI agents as employees, as the course asks.
+  [click] Coding agents build the product and its tests.
+  [click] Research agents prepare interviews and find data.
+  [click] Sales agents keep track of our pilot customers.
+  [click] But the founders decide: technical choices, customers, and every claim we make.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -333,15 +361,18 @@
   \begin{itemize}
     \item<2-> 10 real buildings processed
     \item<3-> Every number shows its source
-    \item<4-> Energy estimates within 20\% of reference data
+    \item<4-> Energy model error (CV(RMSE)) at most 20\%
     \item<5-> Every suggestion passes budget and technical checks
     \item<6-> At least 3 options per building
     \item<7-> Half the preparation time
   \end{itemize}
-  \note{These are our targets for this semester, not results yet. We want to process ten real buildings,
-  keep a source for every number, get energy estimates within 20 percent of reference data, make sure
-  every suggestion is actually feasible, offer at least three options per building, and cut the
-  preparation time in half.}
+  \note{Our targets for this semester.
+  [click] Process ten real buildings.
+  [click] Every number shows its source.
+  [click] An energy model error, measured as CV(RMSE), of at most 20 percent.
+  [click] Every suggestion passes budget and technical checks.
+  [click] At least three options per building.
+  [click] And half the preparation time. Again: these are targets, not results.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -355,14 +386,15 @@
     \node[above=3mm of m1, font=\bfseries\small, kblue] {Weeks 3--6};
     \node[above=3mm of m2, font=\bfseries\small, kblue] {Weeks 7--10};
     \node[above=3mm of m3, font=\bfseries\small, kblue] {End of semester};
-    \node<2->[below=3mm of m1, align=center, font=\footnotesize, text width=3.4cm] {Old plan to 3D model\\on 3 sample plans};
+    \node<2->[below=3mm of m1, align=center, font=\footnotesize, text width=3.4cm] {Plan to IFC model\\on 3 sample plans};
     \node<3->[below=3mm of m2, align=center, font=\footnotesize, text width=3.4cm] {Energy estimates and\\3 options each};
     \node<4->[below=3mm of m3, align=center, font=\footnotesize, text width=3.4cm] {Demo on 10\\buildings};
   \end{tikzpicture}
   \end{center}
-  \note{Three milestones. First, old plan to 3D model, working on three sample plans. Second, energy
-  estimates and three renovation options per building. By the end of the semester, a demo tested on ten
-  buildings with our pilot partners.}
+  \note{Our roadmap has three milestones.
+  [click] By week 6: plan to IFC model, working on three sample plans.
+  [click] By week 10: energy estimates and three renovation options per building.
+  [click] By the end of the semester: a demo tested on ten buildings with our pilot partners.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -376,9 +408,12 @@
   \uncover<5->{\begin{alertblock}{Careful with numbers}
     All numbers are targets, not results yet.
   \end{alertblock}}
-  \note{First, we sit down with our pilot expert and learn exactly what their software needs from our
-  models. In parallel we interview consultants and housing companies. And we only train on plans we have
-  permission to use. Thank you, and we are happy to take questions.}
+  \note{What's next?
+  [click] First, we sit down with our pilot expert and map exactly which fields HottCAD needs.
+  [click] We interview consultants and housing companies.
+  [click] We only train on plans we have permission to use.
+  [click] And one honest reminder: all the numbers you saw today are targets, not results yet. Thank you,
+  and we are happy to take questions.}
 \end{frame}
 
 \end{document}
