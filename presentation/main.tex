@@ -1,18 +1,23 @@
 % Kelpod status-update slides (Frontier Systems, WiSe 2026/2027).
-% Build:   make slides   -> pdf/kelpod-slides.pdf
-%          make notes   -> pdf/kelpod-notes.pdf  (slides with speaker notes, 2 per page)
-% Speaker notes live in \note{...} and only show up in the notes build.
+% Build:   make slides    -> pdf/kelpod-slides.pdf    (one page per animation step)
+%          make handout   -> pdf/kelpod-handout.pdf   (one page per slide, final state)
+%          make notes     -> pdf/kelpod-notes.pdf     (slides + speaker notes, 2 per page)
+% Animations are Beamer overlays: <2-> reveals an item on the second click, etc.
+% Speaker notes live in \note{...}.
 
 \ifdefined\SHOWNOTES
   \documentclass[aspectratio=169,notes=show]{beamer}
   \usepackage{pgfpages}
   \pgfpagesuselayout{2 on 1}[a4paper,landscape,border shrink=5mm]
+\else\ifdefined\HANDOUT
+  \documentclass[aspectratio=169,handout]{beamer}
 \else
   \documentclass[aspectratio=169]{beamer}
-\fi
+\fi\fi
 
+\usepackage{graphicx}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc}
+\usetikzlibrary{positioning,arrows.meta,calc,shapes.geometric,fit}
 
 % --- Colours: same palette as the earlier Kelpod and skill-following decks ------
 \definecolor{kblue}{HTML}{3333B2}
@@ -20,6 +25,7 @@
 \definecolor{kred}{HTML}{C62828}
 \definecolor{kgreen}{HTML}{2E7D32}
 \definecolor{kgrey}{HTML}{555566}
+\definecolor{kpale}{HTML}{E6E6F6}
 
 \usetheme{Madrid}
 \setbeamercolor{structure}{fg=kblue}
@@ -45,6 +51,15 @@
 \setbeamercolor{itemize subitem}{fg=kblue}
 \setbeamerfont{block title}{series=\bfseries}
 
+% Shared look for diagram boxes
+\tikzset{
+  box/.style={draw=kblue, very thick, rounded corners, fill=kpale, align=center,
+              minimum height=1.0cm, font=\small},
+  arr/.style={-{Stealth[length=2.2mm]}, very thick, kblue},
+  tile/.style={draw=kblue, very thick, rounded corners, fill=white, align=center,
+               minimum width=3.6cm, minimum height=2.0cm},
+}
+
 \title[Kelpod]{Kelpod}
 \subtitle{AI-powered energy renovation planning}
 \author[Tajdeen \& Antony]{Arsha Fahima Tajdeen \and Kevin Antony}
@@ -63,22 +78,52 @@
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Europe has to renovate its buildings}
-  Europe must renovate its existing building stock, but the information needed to decide is
-  scattered and incomplete.
-  \vspace{0.6em}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.56\textwidth}
+      Europe must renovate its existing building stock, but the information needed to decide is
+      scattered and incomplete.
+      \vspace{0.6em}
 
-  \begin{itemize}
-    \item Owners and housing cooperatives struggle to find \alert{where energy is lost}.
-    \item They cannot easily compare feasible measures, estimate costs or choose the right order.
-  \end{itemize}
-  \vspace{0.6em}
+      \begin{itemize}
+        \item<2-> Owners and housing cooperatives struggle to find \alert{where energy is lost}.
+        \item<3-> They cannot easily compare feasible measures, estimate costs or choose the right order.
+      \end{itemize}
+      \vspace{0.6em}
 
-  \begin{block}{Wrong order wastes money}
-    Example: sizing a new heating system \emph{before} reducing the heat demand.
-  \end{block}
+      \only<4->{
+      \begin{block}{Wrong order wastes money}
+        Example: sizing a new heating system \emph{before} reducing the heat demand.
+      \end{block}}
+
+    \column{0.40\textwidth}
+      \centering
+      \includegraphics[height=0.50\textheight,keepaspectratio]{images/multifamily-house-saxony.jpg}\\[3pt]
+      {\tiny Listed multi-family house in Saxony. Photo: August Geyler, \mbox{CC BY-SA 4.0} (Wikimedia Commons)}
+  \end{columns}
   \note{Start with the building, not the software. Many owners decide on the heating system first,
   and then find the building still loses most of its heat. The order of work matters as much as the
-  measures themselves.}
+  measures themselves. This photo is a real multi-family house in Saxony that is a listed
+  monument, so every renovation has to work around its protection status.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Wrong order: the heating system comes first}
+  \begin{center}
+  \begin{tikzpicture}
+    \node[box, minimum width=4.2cm] (h) at (0,0) {1. Bigger heating system\\[-2pt]{\scriptsize sized for today's heat loss}};
+    \node<2->[box, minimum width=4.2cm] (i) at (6.2,0) {2. Insulation later\\[-2pt]{\scriptsize heat demand drops after the fact}};
+    \draw<2->[arr] (h) -- (i);
+    \draw<3->[very thick, kred] (3.1,-1.1) -- (6.2,-0.2) node[midway]{};
+    \node<3->[kred, font=\bfseries\small] at (3.1,-1.4) {Oversized system: paid for twice};
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.3em}
+  \only<4->{\begin{exampleblock}{Kelpod's job}
+    Put the measures in the order that saves money first, and show the cost of each step.
+  \end{exampleblock}}
+  \note{Here is the simplest case. If you size a new heating system first, you pay for a system that
+  is too big once the house is insulated. The right order is the measures that reduce demand first.
+  Kelpod works out that order.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -86,30 +131,23 @@
   \begin{columns}[T,onlytextwidth]
     \column{0.30\textwidth}
       \begin{block}{Users upload}
-        \small
-        Plans\\ Photos\\ Energy bills\\ Renovation records
+        \small Plans\\ Photos\\ Energy bills\\ Renovation records
       \end{block}
-
     \column{0.08\textwidth}
-      \vspace{2.6em}\centering\Large$\rightarrow$
-
+      \vspace{1.6em}\centering\Large$\rightarrow$
     \column{0.34\textwidth}
-      \begin{block}{Kelpod}
-        \small
-        Transparent, budget-aware, uncertainty-aware
-      \end{block}
-
+      \only<2->{\begin{block}{Kelpod}
+        \small Transparent, budget-aware, uncertainty-aware
+      \end{block}}
     \column{0.08\textwidth}
-      \vspace{2.6em}\centering\Large$\rightarrow$
-
+      \vspace{1.6em}\centering\only<3->{\Large$\rightarrow$}
     \column{0.20\textwidth}
-      \begin{block}{Output}
-        \small
-        A phased renovation roadmap
-      \end{block}
+      \only<3->{\begin{block}{Output}
+        \small A phased renovation roadmap
+      \end{block}}
   \end{columns}
-  \vspace{1em}
-  Every attribute keeps its source, confidence and verification status.
+  \vspace{0.4em}
+  \only<4->{Every attribute keeps its source, confidence and verification status.}
   \note{Users give us what they already have: plans, photos, bills and records. Kelpod turns this
   into a building model and a roadmap. Every number on the roadmap can be traced back to where it
   came from.}
@@ -118,14 +156,14 @@
 % ---------------------------------------------------------------------------
 \begin{frame}{What Kelpod does}
   \begin{enumerate}
-    \item Extracts building attributes and builds a \textbf{simplified digital model}.
-    \item Labels each attribute with its \textbf{source, confidence and verification status}.
-    \item Reconstructs the building in 3D to show \textbf{where energy is lost}.
-    \item Simulates energy demand and likely heat-loss areas.
-    \item Generates renovation packages with \textbf{cost, savings and carbon} estimates.
-    \item Optimises combinations and sequencing under \textbf{budget, technical, regulatory and
+    \item<2-> Extracts building attributes and builds a \textbf{simplified digital model}.
+    \item<3-> Labels each attribute with its \textbf{source, confidence and verification status}.
+    \item<4-> Reconstructs the building in 3D to show \textbf{where energy is lost}.
+    \item<5-> Simulates energy demand and likely heat-loss areas.
+    \item<6-> Generates renovation packages with \textbf{cost, savings and carbon} estimates.
+    \item<7-> Optimises combinations and sequencing under \textbf{budget, technical, regulatory and
       disruption} constraints.
-    \item Produces a \textbf{phased plan} and draft contractor specifications for professional review.
+    \item<8-> Produces a \textbf{phased plan} and draft contractor specifications for professional review.
   \end{enumerate}
   \note{Seven steps from upload to a plan a professional can review. Steps 1 to 3 build the
   building record. Steps 4 to 6 compare options. Step 7 is the output, and a qualified person
@@ -139,9 +177,9 @@
   \end{block}
   \vspace{0.6em}
   \begin{itemize}
-    \item \textbf{Uncertain inputs stay visible} instead of being hidden in a single score.
-    \item \textbf{Expert decisions are flagged}: the platform says when a professional must check.
-    \item \textbf{Traceable calculations}: every input carries a source or an assumption label.
+    \item<2-> \textbf{Uncertain inputs stay visible} instead of being hidden in a single score.
+    \item<3-> \textbf{Expert decisions are flagged}: the platform says when a professional must check.
+    \item<4-> \textbf{Traceable calculations}: every input carries a source or an assumption label.
   \end{itemize}
   \note{This is the claim that sets us apart. A theoretically perfect measure that the building
   cannot take, or that the owner cannot pay for, is worth nothing. We show the trade-offs, and we
@@ -154,25 +192,25 @@
     \column{0.50\textwidth}
       \begin{block}{Customers}
         \begin{itemize}
-          \item Housing cooperatives
-          \item Property managers
-          \item Energy consultancies
-          \item Contractors
-          \item Municipal and public housing organisations
+          \item<2-> Housing cooperatives
+          \item<2-> Property managers
+          \item<3-> Energy consultancies
+          \item<3-> Contractors
+          \item<4-> Municipal and public housing organisations
         \end{itemize}
       \end{block}
 
     \column{0.46\textwidth}
       \begin{block}{Impact}
         \begin{itemize}
-          \item Lower building energy use and emissions
-          \item More affordable heating
-          \item Better-targeted renovation investment
+          \item<5-> Lower building energy use and emissions
+          \item<6-> More affordable heating
+          \item<7-> Better-targeted renovation investment
         \end{itemize}
       \end{block}
   \end{columns}
   \vspace{0.4em}
-  Start: existing multi-family residential buildings in Germany.
+  \uncover<8->{Start: existing multi-family residential buildings in Germany.}
   \note{Our first market is German multi-family housing. The buyers are the people who manage
   these buildings and decide on the money. The impact is measurable: energy, CO\textsubscript{2},
   and whether the money goes to the right measures.}
@@ -182,48 +220,54 @@
 \begin{frame}{How Kelpod makes money}
   \begin{columns}[T,onlytextwidth]
     \column{0.32\textwidth}
-      \begin{block}{Per building}
+      \only<1->{\begin{block}{Per building}
         Assessment fee for each building analysed.
-      \end{block}
+      \end{block}}
     \column{0.32\textwidth}
-      \begin{block}{Per portfolio}
+      \only<2->{\begin{block}{Per portfolio}
         Annual subscription for a whole housing portfolio.
-      \end{block}
+      \end{block}}
     \column{0.32\textwidth}
-      \begin{block}{Enterprise}
+      \only<3->{\begin{block}{Enterprise}
         API licensing or white-label integration.
-      \end{block}
+      \end{block}}
   \end{columns}
+  \vspace{0.6em}
+  \only<4->{\centering Three ways to pay, one product.}
   \note{Three revenue streams: one-off assessments for a single building, a subscription for
   portfolios, and licences for organisations that want to build Kelpod into their own tools.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Competition: we complement, we do not replace}
-  \begin{itemize}
-    \item Existing calculation tools include \textbf{Hottgenroth / ETU} and \textbf{ENVISYS EVEBI}.
-    \item Kelpod \textbf{complements} these tools.
-    \item Kelpod does \textbf{not} replace certified consultants or statutory calculations.
-  \end{itemize}
-  \vspace{0.8em}
-  \begin{block}{Our role}
-    Plan the order of work, make the uncertainty visible, and prepare what professionals need to check.
-  \end{block}
+  \begin{center}
+  \begin{tikzpicture}
+    \node<1->[box, minimum width=4.0cm] (calc) at (0,1.4) {Calculation tools\\[-2pt]{\scriptsize Hottgenroth / ETU, ENVISYS EVEBI}};
+    \node<1->[box, minimum width=4.0cm] (cons) at (0,-1.4) {Certified consultants\\[-2pt]{\scriptsize statutory calculations}};
+    \node<2->[box, minimum width=4.0cm, fill=kblue, text=white] (k) at (6.0,0) {Kelpod\\[-2pt]{\scriptsize plans the order of work}};
+    \draw<3->[arr] (k) -- (calc.east) node[midway, above, font=\scriptsize, sloped]{complements};
+    \draw<3->[arr] (k) -- (cons.east) node[midway, below, font=\scriptsize, sloped]{feeds into};
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.2em}
+  \uncover<4->{Kelpod does \textbf{not} replace certified consultants or statutory calculations.}
   \note{We are not competing with certified calculation tools, and we say so. Our value is the
   planning layer on top: which measure first, what it costs, and what is still uncertain.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Traction}
-  \begin{exampleblock}{One customer is already locked in for the pilot}
-  \end{exampleblock}
+  \only<1->{\begin{exampleblock}{One customer is already locked in for the pilot}\end{exampleblock}}
+  \vspace{0.8em}
+  \uncover<2->{Next steps to validate the market:}
   \vspace{0.6em}
-  Next steps to validate the market:
-  \begin{itemize}
-    \item \textbf{15} discovery interviews with cooperatives, managers and consultants
-    \item \textbf{2} pilot partners giving feedback from at least \textbf{5} end users
-    \item \textbf{3} willingness-to-pay conversations
-  \end{itemize}
+  \begin{center}
+  \begin{tikzpicture}
+    \node<3->[tile] at (0,0) {\Huge\bfseries 15\\[2pt]{\small discovery interviews}};
+    \node<4->[tile] at (4.4,0) {\Huge\bfseries 2\\[2pt]{\small pilot partners}\\[-2pt]{\scriptsize feedback from 5+ end users}};
+    \node<5->[tile] at (8.8,0) {\Huge\bfseries 3\\[2pt]{\small willingness-to-pay talks}};
+  \end{tikzpicture}
+  \end{center}
   \note{Be precise about this. One customer is locked in for the pilot. The other numbers are
   targets for this semester, not results yet.}
 \end{frame}
@@ -231,26 +275,23 @@
 % ---------------------------------------------------------------------------
 \begin{frame}{Six agents, one controlled workflow}
   \begin{center}
-  \begin{tikzpicture}[
-      node distance=0.9cm and 0.9cm,
-      stage/.style={draw=kblue, very thick, rounded corners, fill=kblue!12,
-                    minimum width=3.0cm, minimum height=1.05cm, align=center, font=\small},
-      arr/.style={-{Stealth[length=2.2mm]}, very thick, kblue}]
-    \node[stage] (a) {1 Ingestion \& data quality};
-    \node[stage, right=of a] (b) {2 Building reconstruction};
-    \node[stage, right=of b] (c) {3 Energy diagnosis};
-    \node[stage, below=of c] (d) {4 Scenario generation};
-    \node[stage, left=of d] (e) {5 Optimisation};
-    \node[stage, left=of e] (f) {6 Validation \& reporting};
-    \draw[arr] (a) -- (b);
-    \draw[arr] (b) -- (c);
-    \draw[arr] (c) -- (d);
-    \draw[arr] (d) -- (e);
-    \draw[arr] (e) -- (f);
+  \begin{tikzpicture}[node distance=0.9cm and 0.9cm,
+      stage/.style={box, minimum width=3.0cm, font=\small}]
+    \node<2->[stage] (a) {1 Ingestion \& data quality};
+    \node<3->[stage, right=of a] (b) {2 Building reconstruction};
+    \node<4->[stage, right=of b] (c) {3 Energy diagnosis};
+    \node<5->[stage, below=of c] (d) {4 Scenario generation};
+    \node<6->[stage, left=of d] (e) {5 Optimisation};
+    \node<7->[stage, left=of e] (f) {6 Validation \& reporting};
+    \draw<3->[arr] (a) -- (b);
+    \draw<4->[arr] (b) -- (c);
+    \draw<5->[arr] (c) -- (d);
+    \draw<6->[arr] (d) -- (e);
+    \draw<7->[arr] (e) -- (f);
   \end{tikzpicture}
   \end{center}
   \vspace{0.2em}
-  \small Deterministic engineering tools calculate. Language and vision models extract and explain.
+  \uncover<8->{\small Deterministic engineering tools calculate. Language and vision models extract and explain.}
   \note{Six agents pass structured data along one workflow. The important design choice: the
   calculations come from deterministic engineering tools, and the language and vision models only
   extract information and explain it. Planned stack: Python with FastAPI, PostgreSQL with PostGIS,
@@ -265,9 +306,9 @@
   \end{alertblock}
   \vspace{0.6em}
   \begin{itemize}
-    \item Ingestion flags missing or conflicting inputs instead of guessing them.
-    \item Validation lists the expert checks each roadmap requires.
-    \item The roadmap goes to a human for approval before anyone acts on it.
+    \item<2-> Ingestion flags missing or conflicting inputs instead of guessing them.
+    \item<3-> Validation lists the expert checks each roadmap requires.
+    \item<4-> The roadmap goes to a human for approval before anyone acts on it.
   \end{itemize}
   \note{This is the principle we will not compromise on. The software can be wrong about a wall. So
   it must always show what it assumed, and a professional makes the final call.}
@@ -276,30 +317,30 @@
 % ---------------------------------------------------------------------------
 \begin{frame}{Agents as employees}
   \begin{itemize}
-    \item \textbf{Coding agents} help build the FastAPI backend and write the tests.
-    \item \textbf{Research and QA agents} map data sources, check the pipeline and prepare interviews.
-    \item \textbf{GTM agents} maintain the pilot pipeline and the customer outreach.
+    \item<2-> \textbf{Coding agents} help build the FastAPI backend and write the tests.
+    \item<3-> \textbf{Research and QA agents} map data sources, check the pipeline and prepare interviews.
+    \item<4-> \textbf{GTM agents} maintain the pilot pipeline and the customer outreach.
   \end{itemize}
   \vspace{0.8em}
-  \begin{block}{What stays with the founders}
+  \only<5->{\begin{block}{What stays with the founders}
     Technical decisions, customer relationships, and every claim we make to users.
-  \end{block}
+  \end{block}}
   \note{We run the company with agents as employees, the way the course asks. The founders stay
   responsible for the decisions and for every claim we make to a customer.}
 \end{frame}
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Success metrics for this semester}
-  \begin{itemize}
-    \item \textbf{Completeness:} at least 10 residential buildings; at least 85\% of required
-      attributes extracted or flagged.
-    \item \textbf{Traceability:} 100\% of calculation inputs carry a source or assumption label.
-    \item \textbf{Model validity:} CV(RMSE) of at most 20\% on reference buildings where data allows.
-    \item \textbf{Feasibility:} 100\% of feasible-shown scenarios pass budget and technical checks.
-    \item \textbf{Decision usefulness:} at least 3 scenarios per building, each with investment range,
-      energy and carbon impact, and sequence.
-    \item \textbf{Speed:} at least 50\% less first-pass preparation time than the manual baseline.
-  \end{itemize}
+  \begin{center}
+  \begin{tikzpicture}
+    \node<2->[tile, minimum width=4.1cm, minimum height=1.9cm] at (0,1.4) {\Large\bfseries $\geq$10 buildings\\[2pt]{\scriptsize residential, end to end}};
+    \node<3->[tile, minimum width=4.1cm, minimum height=1.9cm] at (4.4,1.4) {\Large\bfseries 100\%\\[2pt]{\scriptsize calculation inputs labelled}};
+    \node<4->[tile, minimum width=4.1cm, minimum height=1.9cm] at (8.8,1.4) {\Large\bfseries $\leq$20\%\\[2pt]{\scriptsize CV(RMSE) on reference buildings}};
+    \node<5->[tile, minimum width=4.1cm, minimum height=1.9cm] at (0,-1.4) {\Large\bfseries 100\%\\[2pt]{\scriptsize feasible scenarios pass checks}};
+    \node<6->[tile, minimum width=4.1cm, minimum height=1.9cm] at (4.4,-1.4) {\Large\bfseries $\geq$3\\[2pt]{\scriptsize scenarios per building}};
+    \node<7->[tile, minimum width=4.1cm, minimum height=1.9cm] at (8.8,-1.4) {\Large\bfseries $\geq$50\%\\[2pt]{\scriptsize less preparation time}};
+  \end{tikzpicture}
+  \end{center}
   \note{These are our targets for the semester. They are development targets, not validated product
   claims. We will report against each of them at the end.}
 \end{frame}
@@ -307,21 +348,19 @@
 % ---------------------------------------------------------------------------
 \begin{frame}{Roadmap}
   \begin{center}
-  \begin{tikzpicture}[
-      ms/.style={circle, draw=kblue, very thick, fill=white, minimum size=5mm, inner sep=0pt},
-      lab/.style={align=center, font=\footnotesize, text width=3.9cm}]
+  \begin{tikzpicture}
     \draw[very thick, kblue] (0,0) -- (11,0);
-    \node[ms] at (0.5,0) {};
-    \node[ms] at (5.5,0) {};
-    \node[ms] at (10.5,0) {};
-    \node[above=3mm of {(0.5,0)}, font=\bfseries\small, kblue] {Weeks 3--6};
-    \node[above=3mm of {(5.5,0)}, font=\bfseries\small, kblue] {Weeks 7--10};
-    \node[above=3mm of {(10.5,0)}, font=\bfseries\small, kblue] {End of semester};
-    \node[below=3mm of {(0.5,0)}, lab] {\textbf{Goal 1: Data-to-building MVP}\\
+    \node[circle, draw=kblue, very thick, fill=white, minimum size=5mm, inner sep=0pt] (m1) at (0.5,0) {};
+    \node[circle, draw=kblue, very thick, fill=white, minimum size=5mm, inner sep=0pt] (m2) at (5.5,0) {};
+    \node[circle, draw=kblue, very thick, fill=kblue, minimum size=5mm, inner sep=0pt] (m3) at (10.5,0) {};
+    \node<2->[above=3mm of m1, font=\bfseries\small, kblue] {Weeks 3--6};
+    \node<3->[above=3mm of m2, font=\bfseries\small, kblue] {Weeks 7--10};
+    \node<4->[above=3mm of m3, font=\bfseries\small, kblue] {End of semester};
+    \node<2->[below=3mm of m1, align=center, font=\footnotesize, text width=3.9cm] {\textbf{Goal 1: Data-to-building MVP}\\
       Upload and extraction; a structured record with confidence labels; a simplified model on 3 sample buildings.};
-    \node[below=3mm of {(5.5,0)}, lab] {\textbf{Goal 2: Energy \& scenario engine}\\
+    \node<3->[below=3mm of m2, align=center, font=\footnotesize, text width=3.9cm] {\textbf{Goal 2: Energy \& scenario engine}\\
       Baseline simulation checked against reference data; 3 scenarios per building; a first budget ranking.};
-    \node[below=3mm of {(10.5,0)}, lab] {\textbf{End goal: pilot-ready demo}\\
+    \node<4->[below=3mm of m3, align=center, font=\footnotesize, text width=3.9cm] {\textbf{End goal: pilot-ready demo}\\
       Upload-to-report demo tested on 10 buildings, reviewed with 2 pilot partners.};
   \end{tikzpicture}
   \end{center}
@@ -333,18 +372,18 @@
 % ---------------------------------------------------------------------------
 \begin{frame}{Validation and next steps}
   \begin{enumerate}
-    \item \textbf{Interview first:} housing cooperatives, property managers and energy consultants,
+    \item<2-> \textbf{Interview first:} housing cooperatives, property managers and energy consultants,
       before we finalise the workflow.
-    \item \textbf{Validate with real documents:} permissioned data and expert reference models where
+    \item<3-> \textbf{Validate with real documents:} permissioned data and expert reference models where
       available.
-    \item \textbf{Check data licensing} before any commercial use.
+    \item<4-> \textbf{Check data licensing} before any commercial use.
   \end{enumerate}
   \vspace{0.6em}
-  \textit{Later:} BIM reconstruction, automated procurement, pan-European regulation.
+  \uncover<5->{\textit{Later:} BIM reconstruction, automated procurement, pan-European regulation.}
   \vspace{0.6em}
-  \begin{alertblock}{Careful with numbers}
+  \only<6->{\begin{alertblock}{Careful with numbers}
     Performance values are development targets, not validated product claims.
-  \end{alertblock}
+  \end{alertblock}}
   \note{Our next step is listening, not building. We interview the people who manage these
   buildings before we fix the workflow. The later items are real, but out of scope for this
   semester.}
@@ -352,13 +391,13 @@
 
 % ---------------------------------------------------------------------------
 \begin{frame}{Takeaway}
-  \begin{block}{One thing to remember}
+  \only<1->{\begin{block}{One thing to remember}
     \Large Kelpod recommends what can actually be built, and shows what it does not know.
-  \end{block}
+  \end{block}}
   \vspace{1em}
-  \begin{exampleblock}{Next}
+  \uncover<2->{\begin{exampleblock}{Next}
     Interviews with housing cooperatives, property managers and energy consultants.
-  \end{exampleblock}
+  \end{exampleblock}}
   \note{So, the one thing to remember: an energy renovation plan has to be implementable and honest
   about its uncertainty. That is what Kelpod does. Our next step is to talk to the people who would
   use it. Thank you, and we are happy to take questions.}
