@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Keeps a Claude Code lead agent working through docs/HANDOFF.md until everything is done:
 # resumes after usage limits (waits until the stated reset time), pushes the branch after every
-# run, and every 10 minutes pushes committed work plus a snapshot of uncommitted work to
+# run, and every hour pushes committed work plus a snapshot of uncommitted work to
 # "<branch>-autosave" (never touches main).
 #
 # Run on the cluster as a Slurm job (survives logouts): sbatch scripts/slurm/agent-loop.sbatch
@@ -27,7 +27,8 @@ beats the benchmark, revert what does not, log every experiment in docs/EXPERIME
   training runs, evaluation, research, docs), start one subagent per piece IN PARALLEL with the
   shared rules and a clear brief. You review, test, integrate.
 - Check whether something already exists (open source, papers) before building it.
-- Commit and push after EVERY meaningful change: small commits, pushed as often as possible.
+- Commit and push about once an hour (bundle the hour's work; also before a promotion and before
+  stopping for a usage limit). No need to commit after every small change.
 - Branches: main is the baseline. Each experiment runs on its own exp/<name> branch in its own git
   worktree (~/kelpod-wt/<name>). Merge into main ONLY by promotion: scripts/promotion_check.sh must
   pass under docs/EVAL_PROTOCOL.md; then merge --no-ff, tag baseline-vN, push; new experiments
@@ -51,7 +52,7 @@ snapshot() { # push uncommitted work to <branch>-autosave without touching the i
       git push -q -f origin "$c:refs/heads/$(git rev-parse --abbrev-ref HEAD)-autosave"
   fi
 }
-autosave() { while true; do sleep 600; git push -q origin HEAD 2>/dev/null; snapshot 2>/dev/null; done; }
+autosave() { while true; do sleep 3600; git push -q origin HEAD 2>/dev/null; snapshot 2>/dev/null; done; }
 autosave & AUTOSAVE_PID=$!
 trap 'kill $AUTOSAVE_PID 2>/dev/null' EXIT
 
