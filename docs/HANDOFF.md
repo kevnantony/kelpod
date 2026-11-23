@@ -12,8 +12,10 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
 
 - [x] Old LoRA-factory code deleted (it stays in git history).
 - [x] Package skeleton, contracts (`src/kelpod/contracts.py`), pipeline, CLI.
-- [ ] Research first (rule: check what exists before building anything):
-  docs/research/OPEN_SOURCE_SURVEY.md.
+- [x] Research first (rule: check what exists before building anything):
+  docs/research/OPEN_SOURCE_SURVEY.md (2026-11-23). Key points: no open tool does scan to closed IFC;
+  all published floor-plan weights are GPL or non-commercial; Hottgenroth has its own "Hott-KI" plan
+  recognition (check in pilot interviews); keep the classical pipeline, IfcOpenShell, RapidOCR.
 - [ ] Modules, one subagent each (briefs in docs/AGENT_BRIEFS.md): clean, segment, ocr, geometry,
   export, evaluation. A first attempt was stopped part-way on 2026-11-23 when work moved to the
   server, so module folders may hold partial, untested WIP: review it, keep what is good.
