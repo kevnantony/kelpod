@@ -43,7 +43,8 @@ def check(graph: PlanGraph) -> ConsistencyReport:
         issues.append("No walls were found.")
     if n_comp > 1:
         issues.append(
-            f"The walls form {n_comp} separate groups; a single storey should be one connected group."
+            f"The walls form {n_comp} separate groups; a single storey should be one "
+            "connected group."
         )
     if dangling:
         x, y = pos[dangling[0]]

@@ -33,7 +33,12 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
     tiles; German number/BRH/area/room-name parsers; dimension-line and tick association with a
     page-wide px/m check. Synth seeds 0-4: dimension recall 72 % (precision 78 %), linked spans 88 %
     within 4 px of the ticks, 24/25 room names; 11-17 s per A3 page. 106 tests. Synthetic only.
-  - [ ] segment, geometry (WIP committed in 5dc6a52, agents finishing).
+  - [x] geometry: scale from dimension spans (fallback plan scale), 0/90/45° snapping, parallel
+    clustering, gap bridging, extend/trim, T-splits, spur removal, least-squares fit to dimension
+    chains (faces vs centrelines), shapely rooms, NetworkX checks; never raises. Simulated synth
+    input: 100/100 closed at 1.5 px noise (room IoU 0.99), 75 % at 3 px; 3 % drawing error fixed to
+    0.18 % area error. 41 tests. Synth window head aligned to 2.285 m (0.90 + 1.385).
+  - [ ] segment (WIP committed in 5dc6a52, agents finishing).
 - [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
   When it works, also run `uv run python scripts/demo.py --seed N` (no `--ground-truth`) for the
   same 3 plans: it writes `out/demo/seed_N/viewer.html` (input plan next to the 3D IFC model; the

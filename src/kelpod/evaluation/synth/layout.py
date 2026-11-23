@@ -36,8 +36,8 @@ MIN_ROOM_W = 1.135
 WINDOW_WIDTHS = (1.01, 1.135, 1.26, 1.385, 1.51, 1.76, 2.01)
 SMALL_WINDOW_WIDTHS = (0.635, 0.76, 0.885)
 DOOR_HEIGHT = 2.01
-WINDOW_HEAD = 2.26
-"""Window head height above the floor; window height = head - sill."""
+WINDOW_HEAD = 2.285
+"""Window head above the floor (0.90 sill + 1.385 height, as in export/geometry defaults)."""
 EPS = 1e-6
 
 
