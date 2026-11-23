@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (embedded HTML/JS template and CLI help text)
 """Show a floor-plan PDF turning into a 3D IFC model.
 
     uv run python scripts/demo.py --seed 4                   # generate a synthetic plan, then convert

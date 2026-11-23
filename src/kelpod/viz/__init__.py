@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (embedded HTML/JS template and CLI help text)
 """Side-by-side demo page: the input plan next to an interactive 3D view of the IFC model.
 
 ``write_viewer(plan_image, ifc_path, out_html)`` tessellates every IFC product with
