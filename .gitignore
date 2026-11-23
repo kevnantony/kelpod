@@ -24,3 +24,4 @@ bench/corpora/data/
 *.ifc
 /logs/
 .agent-done
+/.claude/
