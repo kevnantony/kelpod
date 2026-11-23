@@ -1,7 +1,7 @@
 # Hand-over: MVP milestone 1 (plan to closed IFC on 3 sample plans)
 
 Read `KELPOD_CONTEXT.md`, `CLAUDE.md` and `docs/ARCHITECTURE.md` first. Work on branch
-`claude/kelpod-mvp-fa1abc`; commit and push about once an hour; never push `main`.
+`claude/kelpod-mvp-fa1abc`; commit and push about once an hour; `main` only by promotion (`docs/EVAL_PROTOCOL.md`).
 
 ## Definition of done
 

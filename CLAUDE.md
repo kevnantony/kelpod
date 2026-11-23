@@ -22,5 +22,6 @@ for HottCAD), the pipeline, the strategy, the pilot and the course requirements.
 - Keep the `## Status` block in `README.md` (between the `status:start` / `status:end` markers)
   current: **Done**, **Doing now**, **Next**, with a "Last updated" timestamp (date, time, CET).
   Update it about once an hour while working (also when pausing for a usage limit: say so and when
-  work resumes). Commit and push it together with the work.
-- Commit and push about once an hour, not after every small change. Short plain bullets; measured numbers only, marked synthetic or real.
+  work resumes). Commit and push it together with the work. Short plain bullets; measured numbers
+  only, marked synthetic or real.
+- Commit and push about once an hour, not after every small change.

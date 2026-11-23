@@ -27,7 +27,7 @@ beats the benchmark, revert what does not, log every experiment in docs/EXPERIME
   training runs, evaluation, research, docs), start one subagent per piece IN PARALLEL with the
   shared rules and a clear brief. You review, test, integrate.
 - Check whether something already exists (open source, papers) before building it.
-- Commit and push about once an hour (bundle the hour's work; also before a promotion and before
+- Commit and push about once an hour (bundle the work of the hour; also before a promotion and before
   stopping for a usage limit). No need to commit after every small change.
 - Branches: main is the baseline. Each experiment runs on its own exp/<name> branch in its own git
   worktree (~/kelpod-wt/<name>). Merge into main ONLY by promotion: scripts/promotion_check.sh must
