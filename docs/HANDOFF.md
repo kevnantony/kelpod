@@ -16,7 +16,7 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   docs/research/OPEN_SOURCE_SURVEY.md (2026-11-23). Key points: no open tool does scan to closed IFC;
   all published floor-plan weights are GPL or non-commercial; Hottgenroth has its own "Hott-KI" plan
   recognition (check in pilot interviews); keep the classical pipeline, IfcOpenShell, RapidOCR.
-- [ ] Modules, one subagent each (briefs in docs/AGENT_BRIEFS.md): clean, segment, ocr, geometry,
+- [x] Modules, one subagent each (briefs in docs/AGENT_BRIEFS.md): clean, segment, ocr, geometry,
   export, evaluation. A first attempt was stopped part-way on 2026-11-23 when work moved to the
   server, so module folders may hold partial, untested WIP: review it, keep what is good.
   - [x] export: IFC4 + IFC2X3 via `ifcopenshell.api`, closed L-corners, openings, spaces, optional
@@ -38,7 +38,12 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
     chains (faces vs centrelines), shapely rooms, NetworkX checks; never raises. Simulated synth
     input: 100/100 closed at 1.5 px noise (room IoU 0.99), 75 % at 3 px; 3 % drawing error fixed to
     0.18 % area error. 41 tests. Synth window head aligned to 2.285 m (0.90 + 1.385).
-  - [ ] segment (WIP committed in 5dc6a52, agents finishing).
+  - [x] segment: classical baseline (wall mask, centreline vectorisation, thickness classes, door
+    arcs / window lines in gaps, rooms as enclosed free space); `Segmenter` registry, stub learned
+    backend; 12 tests. `tests/segment/synth_eval.py`, synth seeds 0-4 (degrade 0 and 0.5): wall
+    recall 0.997, precision 1.00, doors/windows 1.00, rooms 1.00 recall, room IoU 0.97, ~0.3 s/page;
+    seeds 5-9 at degrade 1.0: wall recall 0.94, door recall 0.81, room recall 0.72, room IoU 0.93.
+    Synthetic only.
 - [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
   When it works, also run `uv run python scripts/demo.py --seed N` (no `--ground-truth`) for the
   same 3 plans: it writes `out/demo/seed_N/viewer.html` (input plan next to the 3D IFC model; the
