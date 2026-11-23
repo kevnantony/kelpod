@@ -22,3 +22,5 @@ bench/corpora/data/
 /out/
 /samples/
 *.ifc
+/logs/
+.agent-done
