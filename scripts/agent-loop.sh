@@ -9,7 +9,7 @@
 set -u
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.local/bin:$PATH"
-BRANCH=claude/kelpod-mvp-fa1abc
+BRANCH=$(git rev-parse --abbrev-ref HEAD)  # re-read every iteration below
 MODEL=${KELPOD_MODEL:-claude-opus-5-5}
 CONFIG_DIR=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
 mkdir -p logs
@@ -27,12 +27,16 @@ beats the benchmark, revert what does not, log every experiment in docs/EXPERIME
   training runs, evaluation, research, docs), start one subagent per piece IN PARALLEL with the
   shared rules and a clear brief. You review, test, integrate.
 - Check whether something already exists (open source, papers) before building it.
-- Commit and git push origin '"$BRANCH"' after EVERY meaningful change: small commits, pushed
-  as often as possible. Never push main.
+- Commit and push after EVERY meaningful change: small commits, pushed as often as possible.
+- Branches: main is the baseline. Each experiment runs on its own exp/<name> branch in its own git
+  worktree (~/kelpod-wt/<name>). Merge into main ONLY by promotion: scripts/promotion_check.sh must
+  pass under docs/EVAL_PROTOCOL.md; then merge --no-ff, tag baseline-vN, push; new experiments
+  branch from the new main. Never weaken or game the evaluation; eval changes go on eval/* branches.
 - Keep docs/HANDOFF.md current, and keep the Status block in README.md current (Done / Doing now /
   Next, timestamp; see CLAUDE.md), pushed after every step so the team can follow on GitHub.
 - GPUs: use Slurm (sbatch) as described in docs/HANDOFF.md; never run GPU work on the login node.
-  The cluster is shared: at most 4 GPUs at once, cancel jobs you no longer need.
+  You may use as much of the pascal cluster as is justified: write the justification and expected
+  GPU hours per job in docs/EXPERIMENTS.md, checkpoint long jobs, cancel idle ones.
 - Never present targets as results. If a usage limit stops you, the loop resumes you later: pick
   up from docs/HANDOFF.md, docs/EXPERIMENTS.md and git log. Never write .agent-done; only a person
   stops this loop (scripts/cockroach.sh stop).'
@@ -44,10 +48,10 @@ snapshot() { # push uncommitted work to <branch>-autosave without touching the i
   tree=$(GIT_INDEX_FILE=$idx git write-tree); rm -f "$idx"
   if [ -n "$tree" ] && [ "$tree" != "$(git rev-parse 'HEAD^{tree}')" ]; then
     c=$(git commit-tree "$tree" -p HEAD -m "autosave $(date -Is)") &&
-      git push -q -f origin "$c:refs/heads/$BRANCH-autosave"
+      git push -q -f origin "$c:refs/heads/$(git rev-parse --abbrev-ref HEAD)-autosave"
   fi
 }
-autosave() { while true; do sleep 600; git push -q origin "$BRANCH" 2>/dev/null; snapshot 2>/dev/null; done; }
+autosave() { while true; do sleep 600; git push -q origin HEAD 2>/dev/null; snapshot 2>/dev/null; done; }
 autosave & AUTOSAVE_PID=$!
 trap 'kill $AUTOSAVE_PID 2>/dev/null' EXIT
 
@@ -72,6 +76,7 @@ fi
 bash scripts/cockroach.sh check  # make sure the watchdog is up
 
 while [ ! -f .agent-stop ]; do
+  BRANCH=$(git rev-parse --abbrev-ref HEAD)
   git pull -q --rebase --autostash origin "$BRANCH" 2>>logs/agent-loop.log || true
   CONTINUE=""
   ls "$CONFIG_DIR"/projects/*kelpod*/*.jsonl >/dev/null 2>&1 && CONTINUE="--continue"

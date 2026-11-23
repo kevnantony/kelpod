@@ -12,7 +12,13 @@ for HottCAD), the pipeline, the strategy, the pilot and the course requirements.
   is built separately, so do not reject a tool here only because it is not commercially usable.
 - Keep the pilot customer's name out of this public repo.
 - Never present targets as results; mark unbuilt ideas as ideas.
-- Ask before pushing to `main` or publishing.
+- `main` is the current baseline. Merge into `main` only by promotion under `docs/EVAL_PROTOCOL.md`
+  (`scripts/promotion_check.sh` must pass), plus docs-only status commits. Experiments live on
+  `exp/<name>` branches in their own worktrees. Ask before publishing anything outside this repo.
+- Never weaken, bypass or game the evaluation (`docs/EVAL_PROTOCOL.md` §6). Report flaws, fix them on
+  an `eval/*` branch.
+- GPUs: the whole pascal cluster may be used when justified. Write the justification and expected
+  GPU hours for each job in `docs/EXPERIMENTS.md`, checkpoint long jobs, cancel idle ones.
 - Keep the `## Status` block in `README.md` (between the `status:start` / `status:end` markers)
   current: **Done**, **Doing now**, **Next**, with a "Last updated" timestamp (date, time, CET).
   Update it whenever a step lands, a new step starts, or the plan changes, and at least every few

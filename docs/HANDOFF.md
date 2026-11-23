@@ -73,8 +73,19 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
 ## Continuous improvement (after the MVP items)
 
 The user wants Kelpod to keep getting more accurate, with experiments running in a loop until they
-say stop. GPU compute on this cluster is available for it (shared: at most 4 GPUs at once), and any
-online data may be used (credit it in `CREDITS.md`; note what the paid version could not use).
+say stop. The whole pascal cluster may be used when justified (justification and GPU hours per job in
+`docs/EXPERIMENTS.md`), and any online data may be used (credit it in `CREDITS.md`; note what the
+paid version could not use). Research and ranked bets: `docs/research/V2_RESEARCH.md`.
+
+**Evaluation and promotion follow `docs/EVAL_PROTOCOL.md`.** Order of work:
+0. On an `eval/protocol-v1` branch: build the frozen splits and manifests (`eval/`), the held-out
+   test style in the generator, `scripts/locked_eval.py` (panel metrics, paired bootstrap, the
+   promotion rule, `--verify-manifests`, appends to `eval/TEST_LOG.md`, runs the pipeline on an
+   input-only temp dir), and its tests. Merge it into `main` together with the finished MVP: that is
+   `baseline-v0`. Start the real-scan benchmark (RealBench-DE) as soon as real plans are available.
+1. Then each experiment on its own `exp/<name>` branch and worktree, from `main`; promote with
+   `scripts/promotion_check.sh exp/<name>`, merge `--no-ff`, tag `baseline-vN`, push; the next
+   experiments start from the new `main`.
 
 1. **Fixed benchmark first.** Freeze test splits that are never trained or tuned on: hard synthetic
    (degrade 0.5 and 1.0, non-rectangular rooms once the generator has them), rendered Swiss Dwellings
