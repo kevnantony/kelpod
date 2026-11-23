@@ -19,3 +19,6 @@ bench/corpora/data/
 .DS_Store
 /egress-out/
 /dist/
+/out/
+/samples/
+*.ifc
