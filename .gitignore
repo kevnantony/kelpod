@@ -25,3 +25,4 @@ bench/corpora/data/
 /logs/
 .agent-done
 /samples/
+/.claude/

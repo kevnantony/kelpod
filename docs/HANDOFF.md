@@ -31,6 +31,13 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
     7/10 fully closed, room IoU 0.935, ~14 s/plan (OCR 80-90 %). Synthetic only.
   - [ ] segment, ocr, geometry (WIP committed in 5dc6a52, agents finishing).
 - [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
+  When it works, also run `uv run python scripts/demo.py --seed N` (no `--ground-truth`) for the
+  same 3 plans: it writes `out/demo/seed_N/viewer.html` (input plan next to the 3D IFC model; the
+  viewer is done, see `src/kelpod/viz`). The user wants to see these. Known generator bug for the
+  evaluation module: superscript millimetre digits (e.g. `36⁵`) render as empty boxes because the
+  font lacks the glyphs; draw them as small raised digits instead.
+- [ ] Fine-tune a state-of-the-art segmentation model (brief "finetune" in docs/AGENT_BRIEFS.md;
+  approved 2026-11-23). Starts after integration; GPUs via Slurm.
 - [ ] Minimal FastAPI endpoint (`kelpod.api`), if time allows.
 - [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
 
