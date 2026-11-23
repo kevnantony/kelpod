@@ -1,15 +1,13 @@
-# kelpod — Zero-Leak LoRA Factory (ZLLF)
+# Kelpod
 
-A fully offline appliance that turns a folder of sensitive documents into a tested, deployable, domain-specialised LoRA adapter, with no code and no network connection.
+Turns old German floor-plan scans (*Bestandspläne*: PDF, PNG, JPG, TIFF) into topologically closed
+IFC 2x3 / IFC4 models that energy software such as HottCAD can import.
 
-> Working title: Zero-Leak LoRA Factory (ZLLF). Final product name TBD.
-> Founders: Kevin Antony, Arsha Fahima Tajdeen. Frontier Systems 2026/2027.
+Status: MVP in progress, tested on synthetic plans only. See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md)
+for the product and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the pipeline.
 
-## Documents
-
-- [Product Requirements Document](docs/PRD.md)
-- [Technical Development Plan](docs/DEVELOPMENT_PLAN.md)
-
-## Status
-
-Planning. Implementation starts with Phase 0 of the development plan.
+```bash
+uv sync --all-extras
+uv run kelpod convert plan.pdf -o model.ifc
+uv run pytest
+```
