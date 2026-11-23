@@ -17,8 +17,9 @@ only until the pilot provides real *Bestandspläne*.
 `kelpod.pipeline.convert` chains the steps and times each one; `kelpod convert` is the CLI.
 
 Rules for every module: it owns only its folder in `src/kelpod/<module>/` and `tests/<module>/`,
-it talks to other modules only through `contracts.py`, and every dependency has a permissive licence
-(MIT/BSD/Apache, IfcOpenShell LGPL as a library). No GPL/AGPL code, no non-commercial datasets.
+and it talks to other modules only through `contracts.py`.
+
+Licences: This public repo is Kelpod's open-source, educational version. Any open-source code, model or dataset may be used here, including GPL/AGPL code and non-commercial datasets such as CubiCasa5k, as long as we follow its terms and credit it in `CREDITS.md`. The paid version is built separately; licence checks for it happen there, not in this repo.
 
 ## Drawing conventions of the synthetic plans
 

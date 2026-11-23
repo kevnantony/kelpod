@@ -7,7 +7,7 @@ already hold partial work: the subagent reads it first, keeps what is good, and 
 ## Shared rules (give these to every subagent)
 
 - **Check before building.** Before writing code, read `docs/research/OPEN_SOURCE_SURVEY.md` and
-  search (web, GitHub, PyPI) for an existing, maintained, permissively licensed solution to your
+  search (web, GitHub, PyPI) for an existing, maintained open-source solution to your
   step. Use it, wrap it or port the idea if it fits; write your own only when nothing fits, and
   say in your report what you checked and why you did or did not reuse it.
 - Read `CLAUDE.md`, `docs/ARCHITECTURE.md` and `src/kelpod/contracts.py` first.
@@ -17,7 +17,8 @@ already hold partial work: the subagent reads it first, keeps what is good, and 
 - `uv run python …`, `uv run pytest tests/<module>`. Installed: numpy, opencv-python-headless,
   scikit-image, pypdfium2, pillow, shapely, scipy, networkx, ifcopenshell, rapidocr-onnxruntime,
   pydantic.
-- Permissive licences only. No DeepFloorPlan (GPL), Ultralytics or PyMuPDF (AGPL), CubiCasa5k.
+- Any open-source licence is fine in this repo (GPL/AGPL code and non-commercial data such as
+  CubiCasa5k included): follow its terms and add it to `CREDITS.md` with licence and link.
 - No NVIDIA GPU is assumed. Keep each module's tests under ~20 s; mark slower ones
   `@pytest.mark.slow`.
 - Other modules are built at the same time: build your own fixtures (draw with cv2/Pillow or construct
@@ -109,7 +110,36 @@ tools, DeepFloorPlan and its forks, plan2scene, …), datasets (CubiCasa5k, R2V,
 MSD, ResPlan, any German/European plans), OCR for rotated dimension text, vectorisation and
 constraint-fitting tools, IFC writers and validators, and plan-to-BIM products or services.
 For each: what it does, input/output, licence of code **and** weights **and** training data (verify
-on the repo; flag GPL/AGPL/non-commercial), maturity (last commit, stars, maintained?), whether it
+on the repo, so we can credit it correctly), maturity (last commit, stars, maintained?), whether it
 runs without an NVIDIA GPU, and how Kelpod could use it (use as is, fine-tune on German plans,
 borrow ideas only, avoid). End with a ranked shortlist of what to adopt next and what to avoid,
 with reasons. Cite URLs. Mark anything not verified as unverified.
+
+## finetune (`training/`, `src/kelpod/segment/learned.py`, `tests/training/`; starts after integration)
+
+Goal: replace the classical segmentation baseline with a fine-tuned state-of-the-art model, plugged
+in through the `Segmenter` protocol as `backend="learned"`, and show with numbers whether it beats
+the baseline. Licences are no obstacle in this repo (see `CLAUDE.md`); credit everything in
+`CREDITS.md`.
+
+1. **Check first:** read `docs/research/OPEN_SOURCE_SURVEY.md` and confirm the current state of the
+   art for raster floor plan → walls / openings / room polygons (e.g. Raster2Seq, SIGGRAPH 2026, MIT
+   code, CubiCasa5k weights on Hugging Face; fpvec-lab's detection readout; Detectron2 Mask R-CNN or
+   RF-DETR as a detection baseline). Pick the candidate with released weights, working code and the
+   best reported wall/room scores; write the choice and reasons in `training/README.md`.
+2. **Zero-shot baseline:** run the pretrained weights on 50 synthetic plans from
+   `kelpod.evaluation.synth` and score them with `kelpod.evaluation.metrics` against the ground
+   truth and against the classical baseline.
+3. **Data:** (a) our generator (unlimited, exact labels, German conventions); (b) Modified Swiss
+   Dwellings / Swiss Dwellings (CC BY 4.0) re-rendered in our DIN 1356-1 style by the generator's
+   renderer; (c) CubiCasa5k (CC BY-NC-4.0, credit it); later (d) the pilot's real plans. Keep a
+   fixed held-out test split of synthetic and, if possible, SFS-A68 (German/Austrian/Swiss plans,
+   room-function labels only) for a reality check.
+4. **Fine-tune** on the cluster with Slurm (`sbatch`, scripts in `training/slurm/`; ampere A100 40 GB
+   / RTX A6000 48 GB, max 2 days; volta V100 32 GB, max 4 days; interactive sessions are limited to
+   2 h). Log metrics per epoch; keep checkpoints out of git (`/models/`, or a path under `~/`).
+5. **Integrate:** `LearnedSegmenter` loads the checkpoint (path from an env var or argument), runs on
+   CPU too (slowly), and returns a `Segmentation`. The geometry step stays deterministic.
+6. **Report** in `training/README.md`: zero-shot vs fine-tuned vs classical on the same test split
+   (wall F1, room IoU, opening recall, closure after geometry, runtime), GPU hours used, and what
+   real German plans would add. Never present targets as results.

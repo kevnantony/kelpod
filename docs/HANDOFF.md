@@ -27,6 +27,8 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
     faint-line rescue; ~0.7 s per A3 page at 200 dpi; 24 tests (own fixtures, not yet real scans).
   - [ ] segment, ocr, geometry, evaluation (WIP committed in 5dc6a52, agents finishing).
 - [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
+- [ ] Fine-tune a state-of-the-art segmentation model (brief "finetune" in docs/AGENT_BRIEFS.md;
+  approved 2026-11-23). Starts after integration; GPUs via Slurm.
 - [ ] Minimal FastAPI endpoint (`kelpod.api`), if time allows.
 - [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
 

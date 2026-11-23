@@ -4,9 +4,8 @@ version = "0.1.0"
 description = "Old German floor-plan scans to closed IFC models for energy software"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-license = { text = "Proprietary" }
 authors = [{ name = "Arsha Fahima Tajdeen" }, { name = "Kevin Antony" }]
-# Licences of every runtime dependency must be permissive (MIT/BSD/Apache) or LGPL used as a library.
+# Open-source, educational repo: any open-source licence is fine; credit everything in CREDITS.md.
 dependencies = [
     "numpy>=1.26",               # BSD
     "pydantic>=2.7",             # MIT

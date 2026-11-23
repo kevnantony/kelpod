@@ -58,7 +58,9 @@ the customer's NVIDIA GPUs. Zero retention on SaaS unless the customer opts in t
 **Privacy:** German GDPR (DSGVO). AI output is not a certified measurement; a qualified expert approves
 every result.
 
-## Open-source building blocks (prefer permissive licences)
+## Open-source building blocks
+
+This public repo is Kelpod's open-source, educational version. Any open-source code, model or dataset may be used here, including GPL/AGPL code and non-commercial datasets such as CubiCasa5k, as long as we follow its terms and credit it in `CREDITS.md`. The paid version is built separately; licence checks for it happen there, not in this repo.
 
 | Step | Tools |
 |---|---|
@@ -70,8 +72,9 @@ every result.
 | Export | IfcOpenShell (LGPL-3.0), ezdxf (MIT) |
 | App | FastAPI (Python) backend, Next.js + Tailwind frontend |
 
-Avoid for the commercial product unless the licence is resolved: DeepFloorPlan (GPL-3.0), Ultralytics
-YOLO and PyMuPDF (AGPL-3.0), the CubiCasa5k dataset (non-commercial as far as known).
+Usable in this open-source repo with credit, but not in the separate paid version without their own
+licence: DeepFloorPlan (GPL-3.0), Ultralytics YOLO and PyMuPDF (AGPL-3.0), the CubiCasa5k dataset
+(CC BY-NC-4.0) and models trained on it.
 
 ## Users, market, business
 
