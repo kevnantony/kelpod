@@ -15,6 +15,7 @@
 #   scripts/cockroach.sh check    one pass (used by cron, the watchdog and the agent job)
 #   scripts/cockroach.sh watch    the watchdog loop (run inside the kelpod-cockroach job)
 set -u
+USER=${USER:-$(id -un)}; export USER
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 STOP="$REPO/.agent-stop"
 LOG="$REPO/logs/cockroach.log"

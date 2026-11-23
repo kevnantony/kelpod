@@ -83,6 +83,14 @@ paid version could not use). Research and ranked bets: `docs/research/V2_RESEARC
    promotion rule, `--verify-manifests`, appends to `eval/TEST_LOG.md`, runs the pipeline on an
    input-only temp dir), and its tests. Merge it into `main` together with the finished MVP: that is
    `baseline-v0`. Start the real-scan benchmark (RealBench-DE) as soon as real plans are available.
+   **Real scans:** `~/kelpod-data/real/dev/` (pages + `sources.csv` with licences; outside the repo,
+   never commit them) is the real dev set; `~/kelpod-data/sealed/real-test/` is held out (EVAL_PROTOCOL
+   test-real candidates: never open per item). If `~/kelpod-data/real/sources.csv` does not exist,
+   collect 40-80 real floor-plan pages first (German/DACH Bestandspläne preferred; licence per file).
+   A proxy-metric runner (closure, scale from dimensions, OCR stamp area vs. computed room area,
+   overlays) is in `~/kelpod-jobs/run_real.py`; first results of the MVP snapshot will be in
+   `~/kelpod-runs/real-dev-bcd01f1/`. Baseline synthetic numbers (200 plans each at degrade 0,
+   0.5, 1.0): `~/kelpod-runs/baseline-bcd01f1/`.
 1. Then each experiment on its own `exp/<name>` branch and worktree, from `main`; promote with
    `scripts/promotion_check.sh exp/<name>`, merge `--no-ff`, tag `baseline-vN`, push; the next
    experiments start from the new `main`.
