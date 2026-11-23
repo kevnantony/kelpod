@@ -12,7 +12,11 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
 
 - [x] Old LoRA-factory code deleted (it stays in git history).
 - [x] Package skeleton, contracts (`src/kelpod/contracts.py`), pipeline, CLI.
-- [ ] Modules, one owner each: clean, segment, ocr, geometry, export, evaluation.
+- [ ] Research first (rule: check what exists before building anything):
+  docs/research/OPEN_SOURCE_SURVEY.md.
+- [ ] Modules, one subagent each (briefs in docs/AGENT_BRIEFS.md): clean, segment, ocr, geometry,
+  export, evaluation. A first attempt was stopped part-way on 2026-11-23 when work moved to the
+  server, so module folders may hold partial, untested WIP: review it, keep what is good.
 - [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
 - [ ] Minimal FastAPI endpoint (`kelpod.api`), if time allows.
 - [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
