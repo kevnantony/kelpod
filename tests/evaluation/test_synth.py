@@ -180,6 +180,22 @@ def test_save_and_load(tmp_path, plans):
     pdf.close()
 
 
+@pytest.fixture(params=["truetype", "hershey"])
+def font_mode(request, monkeypatch):
+    from kelpod.evaluation.synth import text
+
+    if request.param == "hershey":
+        monkeypatch.setenv("KELPOD_SYNTH_FONT", "hershey")
+    else:
+        monkeypatch.delenv("KELPOD_SYNTH_FONT", raising=False)
+        if text.font_path.__wrapped__() is None:
+            pytest.skip("no TrueType font installed")
+    text.font_path.cache_clear()
+    yield request.param
+    monkeypatch.undo()
+    text.font_path.cache_clear()
+
+
 def test_hershey_fallback(monkeypatch):
     from kelpod.evaluation.synth import text
 
@@ -188,11 +204,60 @@ def test_hershey_fallback(monkeypatch):
     try:
         p = generate(2, degrade=0.0)
         texts = [a.text for a in p.annotations]
-        assert all("²" not in t and "ü" not in t for t in texts)
-        assert any(t.endswith(" m2") for t in texts)
+        assert all("ü" not in t for t in texts)  # umlauts are spelled out
+        assert any(t.endswith(" m²") for t in texts)  # superscripts stay semantic
     finally:
         monkeypatch.delenv("KELPOD_SYNTH_FONT")
         text.font_path.cache_clear()
+
+
+def _ink_box(mask: np.ndarray, thresh: float = 0.3) -> np.ndarray:
+    ys, xs = np.nonzero(mask > thresh)
+    return mask[ys.min() : ys.max() + 1, xs.min() : xs.max() + 1]
+
+
+def _similarity(a: np.ndarray, b: np.ndarray) -> float:
+    """Normalised correlation of two ink crops after resizing ``a`` to ``b``'s shape."""
+    import cv2
+
+    a = cv2.resize(a, (b.shape[1], b.shape[0]), interpolation=cv2.INTER_AREA)
+    a, b = a - a.mean(), b - b.mean()
+    return float((a * b).sum() / np.sqrt((a * a).sum() * (b * b).sum()))
+
+
+@pytest.mark.parametrize(
+    "text_in, base, sup", [("36⁵", "36", "5"), ("1,01⁵", "1,01", "5"), ("14,52 m²", "14,52 m", "2")]
+)
+def test_superscript_digits_are_drawn_as_raised_digits(font_mode, text_in, base, sup):
+    from kelpod.evaluation.synth.text import SUP_SCALE, render_text
+
+    digit_h = 30.0
+    full, drawn = render_text(text_in, digit_h)
+    assert drawn == text_in  # recorded text keeps the superscript
+    plain, _ = render_text(base, digit_h)
+    # the superscript is whatever ink lies right of the normal part
+    region = full[:, plain.shape[1] :]
+    assert (region > 0.3).sum() > 10, "superscript not drawn"
+    glyph = _ink_box(region)
+    ref = _ink_box(render_text(sup, digit_h * SUP_SCALE)[0])
+    tofu = np.zeros_like(ref)
+    tofu[[0, -1], :] = tofu[:, [0, -1]] = 1.0  # an empty box
+    sim = _similarity(glyph, ref)
+    assert sim > 0.7, sim
+    assert sim > _similarity(glyph, tofu) + 0.2
+    # smaller than a normal digit and raised: its ink ends well above the baseline
+    assert glyph.shape[0] < 0.8 * _ink_box(plain).shape[0]
+    rows = np.nonzero((region > 0.3).any(axis=1))[0]
+    base_rows = np.nonzero((full[:, : plain.shape[1]] > 0.3).any(axis=1))[0]
+    assert rows.max() < base_rows.max() - 0.25 * digit_h
+
+
+def test_superscript_rendering_is_deterministic():
+    from kelpod.evaluation.synth.text import render_text
+
+    a, _ = render_text("1,01⁵", 30.0)
+    b, _ = render_text("1,01⁵", 30.0)
+    assert np.array_equal(a, b)
 
 
 @pytest.mark.slow
