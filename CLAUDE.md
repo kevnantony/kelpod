@@ -13,3 +13,8 @@ for HottCAD), the pipeline, the strategy, the pilot and the course requirements.
 - Keep the pilot customer's name out of this public repo.
 - Never present targets as results; mark unbuilt ideas as ideas.
 - Ask before pushing to `main` or publishing.
+- Keep the `## Status` block in `README.md` (between the `status:start` / `status:end` markers)
+  current: **Done**, **Doing now**, **Next**, with a "Last updated" timestamp (date, time, CET).
+  Update it whenever a step lands, a new step starts, or the plan changes, and at least every few
+  hours while working (also when pausing for a usage limit: say so and when work resumes). Commit and
+  push it together with the work. Short plain bullets; measured numbers only, marked synthetic or real.

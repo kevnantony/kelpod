@@ -25,6 +25,8 @@ not stop until all are checked.
   landing, a passing integration step, a doc update): small commits, pushed as often as possible.
   Never push main.
 - Keep the status in docs/HANDOFF.md current (newest facts, numbers measured, what is not done).
+- Keep the Status block in README.md current (Done / Doing now / Next, timestamp; see CLAUDE.md)
+  and push it after every step, so the team can follow progress on GitHub.
 - GPUs: use Slurm (sbatch) as described in docs/HANDOFF.md; never run GPU work on the login node.
 - Never present targets as results. If a usage limit stops you, the loop resumes you later: pick
   up from docs/HANDOFF.md and git log.
