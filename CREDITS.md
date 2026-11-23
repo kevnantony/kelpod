@@ -21,6 +21,8 @@ each licence's terms. Add an entry whenever you add something.
 | RapidOCR (ONNX Runtime, PaddleOCR models) | Apache-2.0 | https://github.com/RapidAI/RapidOCR |
 | Typer | MIT | https://github.com/fastapi/typer |
 | FastAPI / Uvicorn | MIT / BSD-3-Clause | https://fastapi.tiangolo.com |
+| Starlette | BSD-3-Clause | https://github.com/encode/starlette |
+| python-multipart | Apache-2.0 | https://github.com/Kludex/python-multipart |
 
 ## Models and datasets
 

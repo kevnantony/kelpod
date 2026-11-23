@@ -61,7 +61,11 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   Synthetic only.
 - [ ] Fine-tune a state-of-the-art segmentation model (brief "finetune" in docs/AGENT_BRIEFS.md;
   approved 2026-11-23). Starts after integration; GPUs via Slurm.
-- [ ] Minimal FastAPI endpoint (`kelpod.api`), if time allows.
+- [x] Minimal FastAPI endpoint (`kelpod.api`): `GET /health`, `POST /convert` (multipart upload,
+  extension + magic-byte check, 415/413/422, pipeline in a worker thread), `GET /jobs/{id}` and
+  `GET /jobs/{id}/model.ifc`; jobs keep-last-N + TTL, temp dir removed on shutdown. Run with
+  `uv run --extra api kelpod serve` or `python -m kelpod.api`. 12 tests (1 slow). No auth yet;
+  the size limit is checked while reading, so a reverse proxy should also cap request size.
 - [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
 
 ## Compute

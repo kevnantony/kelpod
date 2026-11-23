@@ -74,3 +74,18 @@ def convert(
                 indent=2,
             )
         )
+
+
+@app.command()
+def serve(
+    host: Annotated[str, typer.Option(help="Bind address (0.0.0.0 for all)")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="Port")] = 8000,
+    jobs_dir: Annotated[Path | None, typer.Option(help="Keep jobs here")] = None,
+) -> None:
+    """Run the HTTP API (needs the `api` extra: uv sync --extra api)."""
+    from kelpod.api.__main__ import main as api_main
+
+    argv = ["--host", host, "--port", str(port)]
+    if jobs_dir is not None:
+        argv += ["--jobs-dir", str(jobs_dir)]
+    api_main(argv)
