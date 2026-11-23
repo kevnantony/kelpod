@@ -33,7 +33,9 @@ class Gap:
         return (a, n) if self.orient == H else (n, a)
 
 
-def find_gaps(walls: list[Run], *, min_w_px: float, max_w_px: float, blockers: list[Run]) -> list[Gap]:
+def find_gaps(
+    walls: list[Run], *, min_w_px: float, max_w_px: float, blockers: list[Run]
+) -> list[Gap]:
     """Gaps between a free wall end and the next collinear wall, or the face of a perpendicular
     wall, along the wall axis. ``blockers`` (e.g. window runs) end a search without a gap."""
     gaps: list[Gap] = []

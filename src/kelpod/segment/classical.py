@@ -76,7 +76,7 @@ def segment_classical(page: RasterPage, p: ClassicalParams | None = None) -> Seg
         min_extent_px=px(p.min_component_m),
     )
     max_th = min(wl.estimate_max_thickness(body), px(p.max_wall_m))
-    klen = int(np.ceil(1.25 * max(max_th, px(p.min_wall_m)))) + 2
+    klen = int(np.ceil(1.1 * max(max_th, px(p.min_wall_m)))) + 3
 
     # 2. runs per orientation, windows, merged walls, junctions
     runs: list[wl.Run] = []
@@ -101,10 +101,12 @@ def segment_classical(page: RasterPage, p: ClassicalParams | None = None) -> Seg
     wl.snap_junctions(walls, tol_px=max(2.0, px(0.03)))
     # outlines are drawn centred on the wall faces: remove the pen width from thickness and
     # from free wall ends (jambs) so walls describe the faces, not the ink extent
-    lws = [r.meta.get("face_lw", 0.0) for r in runs if not r.is_window]
-    lws = [v for v in lws if v > 0]
+    lws = [r.meta.get("face_lw", 0.0) for r in runs if r.label == "H" and not r.is_window]
+    lws = [v for v in lws if v > 0] or [
+        r.meta.get("face_lw", 0.0) for r in runs if r.meta.get("face_lw", 0.0) > 0
+    ]
     face_lw = float(np.median(lws)) if lws else 0.0
-    face_lw = min(face_lw, 0.25 * min((w.th for w in walls), default=0.0))
+    face_lw = min(face_lw, 0.25 * px(p.min_wall_m) * 1.5)
     if face_lw > 0:
         for w in walls + window_runs:
             w.th = max(w.th - face_lw, 0.5 * w.th)
@@ -117,10 +119,29 @@ def segment_classical(page: RasterPage, p: ClassicalParams | None = None) -> Seg
 
     # 3. openings in gaps
     ink_d = cv2.dilate(ink.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
-    gaps = op.find_gaps(
-        walls, min_w_px=px(p.min_opening_m), max_w_px=px(p.max_opening_m), blockers=window_runs
+
+    def openings_in_gaps():
+        gs = op.find_gaps(
+            walls, min_w_px=px(p.min_opening_m), max_w_px=px(p.max_opening_m), blockers=window_runs
+        )
+        return op.classify_gaps(gs, ink, ink_d, door_thr=p.door_score)
+
+    gaps = openings_in_gaps()
+    # walls and windows outside the building footprint are dimension-chain artefacts
+    fp = _footprint(
+        walls, window_runs, gaps, ink.shape, face_lw, px(1.0) ** 2 * p.min_room_m2, m_per_px
     )
-    gaps = op.classify_gaps(gaps, ink, ink_d, door_thr=p.door_score)
+    if fp is not None:
+        n_w, n_r = len(walls), len(window_runs)
+        walls = [w for w in walls if _inside(fp, w)]
+        window_runs = [r for r in window_runs if _inside(fp, r)]
+        if len(walls) != n_w or len(window_runs) != n_r:
+            notes.append(
+                f"dropped {n_w - len(walls)} walls and {n_r - len(window_runs)} "
+                "windows outside the masonry footprint"
+            )
+            gaps = openings_in_gaps()
+            gaps = [g for g in gaps if _inside(fp, g)]
 
     # 4. wall mask = wall bodies under the vectorised walls; barrier adds openings
     rect = np.zeros_like(body)
@@ -249,3 +270,43 @@ def _snap_window_ends(r: wl.Run, walls: list[wl.Run], tol: float) -> None:
             r.a0 = w.a1
         if abs(w.a0 - r.a1) <= tol:
             r.a1 = w.a0
+
+
+def _footprint(walls, window_runs, gaps, shape, face_lw, min_hole_px, mpp) -> np.ndarray | None:
+    """Room-sized free space enclosed by all walls, windows and openings (the building interior);
+    ``None`` if nothing is enclosed (open outline), in which case nothing is filtered."""
+    if len(walls) < 3:
+        return None
+    m = np.zeros(shape, bool)
+    for w in walls:
+        rm.draw_rect(m, w.orient, w.c, w.a0 - 2, w.a1 + 2, w.th + face_lw + 2)
+    for r in window_runs:
+        rm.draw_rect(m, r.orient, r.c, r.a0 - 2, r.a1 + 2, r.th + face_lw + 2)
+
+    def anchored(w) -> bool:  # part of the wall network, not an isolated blob
+        return w.meta.get("snap0") or w.meta.get("snap1") or w.length * mpp >= 1.0
+
+    for g in gaps:
+        if g.right is not None or anchored(g.left):
+            rm.draw_rect(m, g.orient, g.c, g.a0 - 2, g.a1 + 2, g.th + face_lw + 2)
+    n, lab, outside = rm.free_space(m)
+    areas = np.bincount(lab.ravel(), minlength=n)
+    keep = (~outside) & (areas >= min_hole_px)
+    keep[0] = False
+    if not keep.any():
+        return None
+    return keep[lab]
+
+
+def _inside(interior: np.ndarray, r) -> bool:
+    """True if one side of the run borders the enclosed building interior."""
+    h, w = interior.shape
+    for t in (0.3, 0.5, 0.7):
+        a = r.a0 + t * (r.a1 - r.a0)
+        for side in (-1, 1):
+            n = r.c + side * (r.th / 2 + 6)
+            x, y = (a, n) if r.orient == wl.H else (n, a)
+            xi, yi = int(round(x)), int(round(y))
+            if 0 <= yi < h and 0 <= xi < w and interior[yi, xi]:
+                return True
+    return False

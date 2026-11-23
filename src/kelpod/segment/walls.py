@@ -88,10 +88,14 @@ def wall_body_mask(
 
 
 def estimate_max_thickness(body: np.ndarray) -> float:
+    """Thickness of the thickest common wall: 95th percentile of twice the distance transform on
+    its ridge (medial axis) pixels, so junction squares and odd blobs do not dominate."""
     if not body.any():
         return 0.0
     dt = cv2.distanceTransform(body.astype(np.uint8), cv2.DIST_L2, 3)
-    return float(2.0 * np.percentile(dt[dt > 0], 99.5))
+    ridge = (dt > 0) & (dt >= cv2.dilate(dt, np.ones((3, 3), np.uint8)) - 1e-3)
+    vals = dt[ridge] if ridge.any() else dt[dt > 0]
+    return float(2.0 * np.percentile(vals, 95))
 
 
 # ----------------------------------------------------------------------------------------------
@@ -180,12 +184,37 @@ def _column_labels(band: np.ndarray, th: float) -> tuple[list[str], float]:
         else:
             labels.append("E")
     labels = _smooth_labels(labels, max(4, int(0.6 * th)))
-    return labels, face_lw
+    return _snap_to_jambs(labels, band, th), face_lw
 
 
-def _absorb_protrusions(
-    geo: list[list[float]], tol: float = 1.5
-) -> list[list[float]]:
+def _snap_to_jambs(labels: list[str], band: np.ndarray, th: float) -> list[str]:
+    """Move each label boundary onto a nearby jamb line (a column inked across the band)."""
+    colfrac = band.mean(axis=0)
+    jamb = colfrac >= 0.8
+    out = list(labels)
+    r = max(3, int(th / 2))
+    for j in range(1, len(labels)):
+        if labels[j] == labels[j - 1]:
+            continue
+        lo, hi = max(0, j - r), min(len(labels), j + r)
+        idx = np.nonzero(jamb[lo:hi])[0] + lo
+        if idx.size == 0:
+            continue
+        k = int(idx[np.argmin(np.abs(idx - j))])
+        # centre of that jamb line
+        k0 = k1 = k
+        while k0 > 0 and jamb[k0 - 1]:
+            k0 -= 1
+        while k1 + 1 < len(jamb) and jamb[k1 + 1]:
+            k1 += 1
+        b = (k0 + k1 + 1) // 2
+        left, right = labels[j - 1], labels[j]
+        for t in range(min(b, j), max(b, j)):
+            out[t] = left if t < b else right
+    return out
+
+
+def _absorb_protrusions(geo: list[list[float]], tol: float = 1.5) -> list[list[float]]:
     """``geo`` = ordered ``[s, e, th, c, top, bot]`` runs of one component. A short run whose
     band contains its neighbour's band (the neighbour plus something touching one face: a door
     leaf or arc foot, a T-junction bump) is absorbed into that neighbour."""
@@ -322,9 +351,7 @@ def merge_walls(runs: list[Run], *, max_gap_px: float) -> list[Run]:
     """Merge consecutive collinear non-window runs (same orientation, centre and thickness)."""
     out: list[Run] = []
     for orient in (H, V):
-        rs = sorted(
-            (r for r in runs if r.orient == orient and not r.is_window), key=lambda r: (r.a0)
-        )
+        rs = sorted((r for r in runs if r.orient == orient and not r.is_window), key=lambda r: r.a0)
         merged: list[Run] = []
         for r in rs:
             tol = max(2.0, 0.2 * r.th)
@@ -334,9 +361,7 @@ def merge_walls(runs: list[Run], *, max_gap_px: float) -> list[Run]:
                     target = m
                     break
             if target is None:
-                merged.append(
-                    Run(r.orient, r.c, r.a0, r.a1, r.th, r.label, r.hatched_frac, r.comp)
-                )
+                merged.append(Run(r.orient, r.c, r.a0, r.a1, r.th, r.label, r.hatched_frac, r.comp))
                 continue
             la, lb = target.length, r.length
             tot = la + lb
