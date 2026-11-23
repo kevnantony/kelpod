@@ -132,7 +132,9 @@ the baseline. Licences are no obstacle in this repo (see `CLAUDE.md`); credit ev
    truth and against the classical baseline.
 3. **Data:** (a) our generator (unlimited, exact labels, German conventions); (b) Modified Swiss
    Dwellings / Swiss Dwellings (CC BY 4.0) re-rendered in our DIN 1356-1 style by the generator's
-   renderer; (c) CubiCasa5k (CC BY-NC-4.0, credit it); later (d) the pilot's real plans. Keep a
+   renderer; (c) CubiCasa5k (CC BY-NC-4.0, credit it); (d) ResPlan / ResPlan-FP (CC BY 4.0, 17k
+   vector plans, re-rendered like (b)); later (e) the pilot's real plans. Use all of the datasets found
+   in the survey and in this brief, and credit each in `CREDITS.md`. Keep a
    fixed held-out test split of synthetic and, if possible, SFS-A68 (German/Austrian/Swiss plans,
    room-function labels only) for a reality check.
 4. **Fine-tune** on the cluster with Slurm (`sbatch`, scripts in `training/slurm/`; ampere A100 40 GB
