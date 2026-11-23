@@ -67,6 +67,31 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   `uv run --extra api kelpod serve` or `python -m kelpod.api`. 12 tests (1 slow). No auth yet;
   the size limit is checked while reading, so a reverse proxy should also cap request size.
 - [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
+- [ ] Continuous improvement (approved 2026-11-23; never checked, runs until a person stops the loop):
+  see "Continuous improvement" below.
+
+## Continuous improvement (after the MVP items)
+
+The user wants Kelpod to keep getting more accurate, with experiments running in a loop until they
+say stop. GPU compute on this cluster is available for it (shared: at most 4 GPUs at once), and any
+online data may be used (credit it in `CREDITS.md`; note what the paid version could not use).
+
+1. **Fixed benchmark first.** Freeze test splits that are never trained or tuned on: hard synthetic
+   (degrade 0.5 and 1.0, non-rectangular rooms once the generator has them), rendered Swiss Dwellings
+   / ResPlan, CubiCasa5k test, and real German plans as soon as any exist. Report every experiment on
+   the same splits with `scripts/benchmark.py`. The headline metric is the share of plans that come
+   out fully closed with correct rooms (closure, room IoU, wall F1, opening recall, area error).
+2. **Pick the next bet** from `docs/research/V2_RESEARCH.md` (if present) and from what the last
+   experiments showed: biggest expected gain per effort first. Ideas: learned segmentation
+   (fine-tuned), junction detection plus optimisation, better OCR for Maßketten, larger and more
+   realistic synthetic data (DIN-style renders of vector datasets, realistic scan damage),
+   multi-hypothesis search scored by the graph check, multi-storey and heights from sections.
+3. **Run experiments in parallel** (one subagent per experiment, GPU work via `sbatch`).
+4. **Keep or revert:** merge a change only if it beats the current best on the benchmark without
+   breaking tests; otherwise revert it and record why.
+5. **Log** each experiment in `docs/EXPERIMENTS.md` (newest first): date, hypothesis, change, data,
+   GPU hours, results vs. current best, kept or reverted. Update the README status block. Push.
+6. Repeat. Every few cycles, re-check the state of the art online.
 
 ## Compute
 

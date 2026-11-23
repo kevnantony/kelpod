@@ -14,23 +14,25 @@ MODEL=${KELPOD_MODEL:-claude-opus-5-5}
 CONFIG_DIR=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
 mkdir -p logs
 
-PROMPT='You are the lead engineer of the Kelpod MVP. Read CLAUDE.md, docs/HANDOFF.md and
-docs/AGENT_BRIEFS.md, then work through every unchecked item in docs/HANDOFF.md, in order, and do
-not stop until all are checked.
-- Work multi-agent: whenever two or more pieces of work are independent (modules, the benchmark,
-  the demo, training experiments, the API, the report), start one subagent per piece IN PARALLEL
-  with the shared rules and its brief from docs/AGENT_BRIEFS.md. You review, test, integrate.
-- Check whether something already exists (open source) before building it.
-- Commit and git push origin '"$BRANCH"' after EVERY meaningful change (a module or fix
-  landing, a passing integration step, a doc update): small commits, pushed as often as possible.
-  Never push main.
-- Keep the status in docs/HANDOFF.md current (newest facts, numbers measured, what is not done).
-- Keep the Status block in README.md current (Done / Doing now / Next, timestamp; see CLAUDE.md)
-  and push it after every step, so the team can follow progress on GitHub.
+PROMPT='You are the lead engineer of Kelpod, running continuously on the cluster until a person
+stops you. Read CLAUDE.md, docs/HANDOFF.md and docs/AGENT_BRIEFS.md.
+Phase 1: work through every unchecked MVP item in docs/HANDOFF.md, in order.
+Phase 2 (once the MVP items are done; never ends): keep improving accuracy on real German
+Bestandspläne, following "Continuous improvement" in docs/HANDOFF.md. Run experiments, keep what
+beats the benchmark, revert what does not, log every experiment in docs/EXPERIMENTS.md, repeat.
+- Work multi-agent: whenever two or more pieces of work are independent (modules, experiments,
+  training runs, evaluation, research, docs), start one subagent per piece IN PARALLEL with the
+  shared rules and a clear brief. You review, test, integrate.
+- Check whether something already exists (open source, papers) before building it.
+- Commit and git push origin '"$BRANCH"' after EVERY meaningful change: small commits, pushed
+  as often as possible. Never push main.
+- Keep docs/HANDOFF.md current, and keep the Status block in README.md current (Done / Doing now /
+  Next, timestamp; see CLAUDE.md), pushed after every step so the team can follow on GitHub.
 - GPUs: use Slurm (sbatch) as described in docs/HANDOFF.md; never run GPU work on the login node.
+  The cluster is shared: at most 4 GPUs at once, cancel jobs you no longer need.
 - Never present targets as results. If a usage limit stops you, the loop resumes you later: pick
-  up from docs/HANDOFF.md and git log.
-When every item is checked, write DONE as the only line of .agent-done and stop.'
+  up from docs/HANDOFF.md, docs/EXPERIMENTS.md and git log. Never write .agent-done; only a person
+  stops this loop (scripts/cockroach.sh stop).'
 
 snapshot() { # push uncommitted work to <branch>-autosave without touching the index or tree
   local idx tree c
@@ -46,9 +48,10 @@ autosave() { while true; do sleep 600; git push -q origin "$BRANCH" 2>/dev/null;
 autosave & AUTOSAVE_PID=$!
 trap 'kill $AUTOSAVE_PID 2>/dev/null' EXIT
 
-wait_for_reset() { # sleep until "resets 8:50pm" from the last run's output, else 15 minutes
+wait_for_reset() { # sleep until the reset time in the last run's output ("resets 8:50pm",
+  # "resets Nov 30, 8pm"), else retry in 15 minutes
   local reset t now
-  reset=$(tail -n 20 logs/last-run.log 2>/dev/null | grep -oE 'resets [0-9]{1,2}(:[0-9]{2})?[ap]m' | tail -1 | cut -d' ' -f2)
+  reset=$(tail -n 20 logs/last-run.log 2>/dev/null | grep -oE 'resets [^(·]*[0-9]{1,2}(:[0-9]{2})?[ap]m' | tail -1 | sed 's/^resets //; s/,//')
   if [ -n "$reset" ] && t=$(date -d "$reset" +%s 2>/dev/null); then
     now=$(date +%s); [ "$t" -le "$now" ] && t=$((t + 86400))
     echo "[$(date -Is)] usage limit, sleeping until $reset" | tee -a logs/agent-loop.log
@@ -58,7 +61,14 @@ wait_for_reset() { # sleep until "resets 8:50pm" from the last run's output, els
   fi
 }
 
-while [ ! -f .agent-done ]; do
+# Only one agent loop at a time: if an older kelpod-agent job is already running, leave.
+if [ -n "${SLURM_JOB_ID:-}" ]; then
+  older=$(squeue -u "$USER" -h -n kelpod-agent -t RUNNING -o %i | awk -v me="$SLURM_JOB_ID" '$1 < me' | head -1)
+  [ -n "$older" ] && { echo "[$(date -Is)] job $older already runs the loop; exiting" | tee -a logs/agent-loop.log; exit 0; }
+fi
+bash scripts/cockroach.sh check  # make sure the watchdog is up
+
+while [ ! -f .agent-stop ]; do
   git pull -q --rebase --autostash origin "$BRANCH" 2>>logs/agent-loop.log || true
   CONTINUE=""
   ls "$CONFIG_DIR"/projects/*kelpod*/*.jsonl >/dev/null 2>&1 && CONTINUE="--continue"
@@ -72,4 +82,4 @@ while [ ! -f .agent-done ]; do
   snapshot 2>/dev/null || true
   if [ $status -ne 0 ] || grep -q "hit your .*limit" logs/last-run.log; then wait_for_reset; else sleep 30; fi
 done
-echo "[$(date -Is)] done" | tee -a logs/agent-loop.log
+echo "[$(date -Is)] stop flag found, loop ends" | tee -a logs/agent-loop.log

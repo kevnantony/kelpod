@@ -26,3 +26,4 @@ bench/corpora/data/
 .agent-done
 /samples/
 /.claude/
+.agent-stop
