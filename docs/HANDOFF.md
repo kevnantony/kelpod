@@ -20,3 +20,11 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
 - [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
 - [ ] Minimal FastAPI endpoint (`kelpod.api`), if time allows.
 - [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
+
+## Compute
+
+The MVP runs on CPU. If a step needs a GPU (e.g. fine-tuning or running a learned segmenter, a
+heavier OCR model), use the cluster's GPUs through Slurm from the login host; never run GPU jobs on
+the login node itself. Partitions seen on 2026-11-23: `pascal` (GTX 1080 Ti), `volta` (V100),
+`ampere` (RTX A6000, A100). Example: `srun -p ampere --gres=gpu:1 --time=02:00:00 uv run python …`
+or an `sbatch` script under `scripts/slurm/`. Keep jobs small and release GPUs when done.
