@@ -13,6 +13,9 @@ BRANCH=claude/kelpod-mvp-fa1abc
 MODEL=${KELPOD_MODEL:-claude-opus-5-5}
 CONFIG_DIR=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
 mkdir -p logs
+# In -p mode Claude Code stops background subagents 10 min after the lead's last turn; that killed
+# training and fix subagents mid-work. Wait for them instead.
+export CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0
 
 PROMPT='You are the lead engineer of Kelpod, running continuously on the cluster until a person
 stops you. Read CLAUDE.md, docs/HANDOFF.md and docs/AGENT_BRIEFS.md.
