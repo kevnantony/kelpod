@@ -55,7 +55,10 @@ def test_image_without_dpi_defaults_to_300(tmp_path):
     p = tmp_path / "plan.jpg"
     cv2.imwrite(str(p), img)  # OpenCV writes no usable DPI
     (page,) = load(p, dpi=150)
-    assert page.shape == (round(600 * 150 / DEFAULT_IMAGE_DPI), round(900 * 150 / DEFAULT_IMAGE_DPI))
+    assert page.shape == (
+        round(600 * 150 / DEFAULT_IMAGE_DPI),
+        round(900 * 150 / DEFAULT_IMAGE_DPI),
+    )
 
 
 def test_rgba_and_colour_become_gray_on_white(tmp_path):
@@ -106,9 +109,9 @@ def test_run_returns_raster_pages(tmp_path, a4_plan):
     assert pg.deskew_deg == 0.0
 
 
-def test_missing_file():
+def test_missing_file(tmp_path):
     with pytest.raises(FileNotFoundError):
-        load("/nonexistent/plan.pdf")
+        load(tmp_path / "missing.pdf")
 
 
 # ------------------------------------------------------------------------------------------------

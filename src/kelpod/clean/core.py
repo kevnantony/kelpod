@@ -72,7 +72,9 @@ def flatten_background(gray: np.ndarray, dpi: float) -> np.ndarray:
     """
     h, w = gray.shape
     f = min(1.0, BACKGROUND_WORK_DPI / dpi)
-    small = cv2.resize(gray, (max(1, round(w * f)), max(1, round(h * f))), interpolation=cv2.INTER_AREA)
+    small = cv2.resize(
+        gray, (max(1, round(w * f)), max(1, round(h * f))), interpolation=cv2.INTER_AREA
+    )
     k = max(3, int(round(_px(BACKGROUND_KERNEL_MM, dpi * f))) | 1)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
     bg = cv2.morphologyEx(small, cv2.MORPH_CLOSE, kernel, borderType=cv2.BORDER_REPLICATE)
@@ -137,7 +139,9 @@ def ink_threshold(flat: np.ndarray) -> int:
 # ------------------------------------------------------------------------------------------------
 
 
-def _profile_score(xs: np.ndarray, ys: np.ndarray, angles_deg: np.ndarray, bin_px: float) -> np.ndarray:
+def _profile_score(
+    xs: np.ndarray, ys: np.ndarray, angles_deg: np.ndarray, bin_px: float
+) -> np.ndarray:
     """Sharpness (sum of squared bin counts) of the x and y projection profiles after rotating the
     points by each angle (image coordinates, cv2 convention: positive = counter-clockwise on
     screen)."""
@@ -152,12 +156,15 @@ def _profile_score(xs: np.ndarray, ys: np.ndarray, angles_deg: np.ndarray, bin_p
     return scores
 
 
-def deskew_angle(ink: np.ndarray, *, max_deg: float = MAX_SKEW_DEG, max_points: int = 400_000) -> float:
+def deskew_angle(
+    ink: np.ndarray, *, max_deg: float = MAX_SKEW_DEG, max_points: int = 400_000
+) -> float:
     """Skew of the drawing in degrees (counter-clockwise positive, as seen on screen).
 
     Maximises the sharpness of the horizontal and vertical projection profiles of the ink pixels,
     which floor plans (long axis-parallel walls and dimension lines) make very peaked at the right
-    angle. Coarse-to-fine search (0.5 / 0.1 / 0.02 / 0.005 deg steps with shrinking bins). Returns 0.0 for nearly empty pages.
+    angle. Coarse-to-fine search (0.5 / 0.1 / 0.02 / 0.005 deg steps with shrinking bins).
+    Returns 0.0 for nearly empty pages.
     """
     ys, xs = np.nonzero(ink)
     if len(xs) < 200:
@@ -181,7 +188,7 @@ def deskew_angle(ink: np.ndarray, *, max_deg: float = MAX_SKEW_DEG, max_points: 
 
 
 def rotate(gray: np.ndarray, angle_deg: float, *, border: int = 255) -> np.ndarray:
-    """Rotate ``gray`` about its centre by ``angle_deg`` (counter-clockwise on screen), same size."""
+    """Rotate ``gray`` about its centre by ``angle_deg`` (CCW on screen), keeping the size."""
     h, w = gray.shape
     m = cv2.getRotationMatrix2D(((w - 1) / 2.0, (h - 1) / 2.0), angle_deg, 1.0)
     return cv2.warpAffine(

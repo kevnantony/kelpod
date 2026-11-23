@@ -65,27 +65,61 @@ def draw_plan(dpi: float = 200.0, size_mm: tuple[float, float] = (420.0, 297.0))
     for yy in (y0, ym, y1):
         cv2.line(img, (xd - tick, yy + tick), (xd + tick, yy - tick), 0, 2)
     font_scale = dpi / 200.0 * 0.9
-    cv2.putText(img, "15,01", ((x0 + xm) // 2 - mm(5, dpi), yd - mm(1.5, dpi)),
-                cv2.FONT_HERSHEY_SIMPLEX, font_scale, 0, 2, cv2.LINE_AA)
-    cv2.putText(img, "Wohnen", (x0 + mm(30, dpi), ym + mm(30, dpi)),
-                cv2.FONT_HERSHEY_SIMPLEX, font_scale, 0, 2, cv2.LINE_AA)
-    cv2.putText(img, "14,52 m2", (x0 + mm(30, dpi), ym + mm(36, dpi)),
-                cv2.FONT_HERSHEY_SIMPLEX, font_scale, 0, 2, cv2.LINE_AA)
+    cv2.putText(
+        img,
+        "15,01",
+        ((x0 + xm) // 2 - mm(5, dpi), yd - mm(1.5, dpi)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale,
+        0,
+        2,
+        cv2.LINE_AA,
+    )
+    cv2.putText(
+        img,
+        "Wohnen",
+        (x0 + mm(30, dpi), ym + mm(30, dpi)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale,
+        0,
+        2,
+        cv2.LINE_AA,
+    )
+    cv2.putText(
+        img,
+        "14,52 m2",
+        (x0 + mm(30, dpi), ym + mm(36, dpi)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale,
+        0,
+        2,
+        cv2.LINE_AA,
+    )
     img[thin > 0] = 0
     return {"image": img, "thin": thin > 0}
 
 
 def rotate_ccw(gray: np.ndarray, angle_deg: float) -> np.ndarray:
-    """Rotate counter-clockwise on screen by ``angle_deg`` about the centre, same size, white fill."""
+    """Rotate CCW on screen by ``angle_deg`` about the centre, same size, white fill."""
     h, w = gray.shape
     m = cv2.getRotationMatrix2D(((w - 1) / 2.0, (h - 1) / 2.0), angle_deg, 1.0)
     return cv2.warpAffine(gray, m, (w, h), flags=cv2.INTER_LINEAR, borderValue=255)
 
 
-def degrade(gray: np.ndarray, dpi: float, seed: int = 0, *, angle_deg: float = 0.0,
-            noise: float = 12.0, blur: float = 0.6, stains: int = 3, fold: bool = True,
-            uneven: float = 0.25, jpeg: int | None = 70) -> np.ndarray:
-    """Scan-like degradation: rotation, uneven background, stains, a faint fold, blur, noise, JPEG."""
+def degrade(
+    gray: np.ndarray,
+    dpi: float,
+    seed: int = 0,
+    *,
+    angle_deg: float = 0.0,
+    noise: float = 12.0,
+    blur: float = 0.6,
+    stains: int = 3,
+    fold: bool = True,
+    uneven: float = 0.25,
+    jpeg: int | None = 70,
+) -> np.ndarray:
+    """Scan-like degradation: rotation, uneven background, stains, fold, blur, noise, JPEG."""
     rng = np.random.default_rng(seed)
     out = gray.astype(np.float32)
     if angle_deg:
