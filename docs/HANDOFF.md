@@ -44,13 +44,21 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
     recall 0.997, precision 1.00, doors/windows 1.00, rooms 1.00 recall, room IoU 0.97, ~0.3 s/page;
     seeds 5-9 at degrade 1.0: wall recall 0.94, door recall 0.81, room recall 0.72, room IoU 0.93.
     Synthetic only.
-- [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
+- [x] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
   When it works, also run `uv run python scripts/demo.py --seed N` (no `--ground-truth`) for the
   same 3 plans: it writes `out/demo/seed_N/viewer.html` (input plan next to the 3D IFC model; the
   viewer is done, see `src/kelpod/viz`). The user wants to see these. Known generator bug for the
   evaluation module: superscript millimetre digits (e.g. `36⁵`) render as empty boxes because the
   font lacks the glyphs; draw them as small raised digits instead. (Fixed: drawn as raised digits
   with both fonts, tested against an empty-box render.)
+  Result (2026-11-23, pascal-node02 CPU): `kelpod convert` on synth seeds 0-2 writes IFC4 that
+  re-opens; seeds 0 and 1 closed, seed 2 not (Küche not enclosed, 2 dangling wall ends).
+  `scripts/benchmark.py --n 10 --degrade 0.5` (docs/results/benchmark_synth10_degrade05.md):
+  10/10 ran, 8/10 fully closed (seeds 2 and 9 not), room IoU 0.923, room recall 0.938, wall F1
+  0.997, doors 0.986, windows 0.958, 4.7 s/plan mean (OCR ~75 %). Demo viewers written to
+  `out/demo/seed_{0000,0001,0002}/viewer.html` (git-ignored; regenerate with scripts/demo.py).
+  Fixed: ONNX Runtime affinity-error spam under Slurm (rapidocr ignores per-module thread keys).
+  Synthetic only.
 - [ ] Fine-tune a state-of-the-art segmentation model (brief "finetune" in docs/AGENT_BRIEFS.md;
   approved 2026-11-23). Starts after integration; GPUs via Slurm.
 - [ ] Minimal FastAPI endpoint (`kelpod.api`), if time allows.

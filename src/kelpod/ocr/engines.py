@@ -52,10 +52,14 @@ class RapidOcrEngine:
         from rapidocr_onnxruntime import RapidOCR
 
         # Explicit thread counts: with the default (-1) ONNX Runtime pins threads to cores and
-        # logs affinity errors inside containers / Slurm jobs.
-        n = max(1, min(8, os.cpu_count() or 1))
-        threads = {f"{p}_{k}": v for p in ("det", "cls", "rec")
-                   for k, v in (("intra_op_num_threads", n), ("inter_op_num_threads", 1))}
+        # logs affinity errors inside containers / Slurm jobs. rapidocr copies the *global*
+        # values into det/cls/rec (overwriting per-module ones), so set the global keys.
+        try:
+            avail = len(os.sched_getaffinity(0))
+        except AttributeError:  # macOS
+            avail = os.cpu_count() or 1
+        n = max(1, min(8, avail))
+        threads = {"intra_op_num_threads": n, "inter_op_num_threads": 1}
         # No 0/180° classifier: plans have no upside-down text, and next to tick marks it flips
         # labels the wrong way. Vertical text is handled by the 90° pass in read_page.
         self._ocr = RapidOCR(max_side_len=max(4000, tile + 1), text_score=text_score,

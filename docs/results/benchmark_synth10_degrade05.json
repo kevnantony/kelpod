@@ -1,0 +1,757 @@
+{
+ "meta": {
+  "date": "2026-11-23 20:30 UTC",
+  "n": 10,
+  "degrade": 0.5,
+  "ocr_backend": "rapidocr",
+  "machine": "Linux x86_64, Python 3.12.16",
+  "summary": {
+   "plans": 10,
+   "pipeline_ok": 10,
+   "failures_by_step": "none",
+   "closed_share": 0.8,
+   "node_closure_mean": 0.96013,
+   "room_closure_mean": 1.0,
+   "room_iou_mean": 0.9233664937875732,
+   "room_recall_mean": 0.9380952380952381,
+   "wall_f1_mean": 0.9973260271702495,
+   "door_recall_mean": 0.9857142857142858,
+   "window_recall_mean": 0.9583333333333334,
+   "room_area_error_mean": 0.020319936058181394,
+   "total_s_mean": 4.703,
+   "total_s_max": 6.536
+  }
+ },
+ "plans": [
+  {
+   "seed": 0,
+   "n_rooms_gt": 3,
+   "rotation_deg": 1.096,
+   "synth_s": 1.122,
+   "ok": true,
+   "timings": {
+    "clean": 0.278,
+    "segment": 0.241,
+    "ocr": 3.49,
+    "geometry": 0.007,
+    "model": 0.0,
+    "export": 0.566
+   },
+   "total_s": 4.584,
+   "closure": {
+    "is_closed": true,
+    "node_closure": 1.0,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 0,
+    "dimension_residual_m": 3.856223339034316e-07,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 3,
+    "n_rooms_gt": 3,
+    "room_iou_mean": 0.9964076606883988,
+    "room_precision": 1.0,
+    "room_recall": 1.0,
+    "room_area_error": 2.567613957404817e-07,
+    "total_area_error": 1.3416576648530624e-07,
+    "room_name_accuracy": 1.0,
+    "wall_precision": 1.0,
+    "wall_recall": 1.0,
+    "wall_f1": 1.0,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 1.0,
+     "any": 1.0
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.015999999999999983
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 10,
+     "IfcOpeningElement": 11,
+     "IfcDoor": 4,
+     "IfcWindow": 7,
+     "IfcSpace": 3,
+     "IfcRelVoidsElement": 11,
+     "IfcRelFillsElement": 11,
+     "IfcRelConnectsPathElements": 16,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 10,
+     "IfcPropertySet": 21,
+     "IfcElementQuantity": 13
+    }
+   }
+  },
+  {
+   "seed": 1,
+   "n_rooms_gt": 4,
+   "rotation_deg": -1.466,
+   "synth_s": 1.211,
+   "ok": true,
+   "timings": {
+    "clean": 0.304,
+    "segment": 0.287,
+    "ocr": 3.382,
+    "geometry": 0.008,
+    "model": 0.0,
+    "export": 0.476
+   },
+   "total_s": 4.457,
+   "closure": {
+    "is_closed": true,
+    "node_closure": 1.0,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 0,
+    "dimension_residual_m": 3.6242147877198503e-07,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 4,
+    "n_rooms_gt": 4,
+    "room_iou_mean": 0.9940691125716821,
+    "room_precision": 1.0,
+    "room_recall": 1.0,
+    "room_area_error": 0.0008065222275720568,
+    "total_area_error": 0.0007731005283646866,
+    "room_name_accuracy": 1.0,
+    "wall_precision": 1.0,
+    "wall_recall": 1.0,
+    "wall_f1": 1.0,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 1.0,
+     "any": 1.0
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.01704999999999999
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 13,
+     "IfcOpeningElement": 10,
+     "IfcDoor": 4,
+     "IfcWindow": 6,
+     "IfcSpace": 4,
+     "IfcRelVoidsElement": 10,
+     "IfcRelFillsElement": 10,
+     "IfcRelConnectsPathElements": 22,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 13,
+     "IfcPropertySet": 23,
+     "IfcElementQuantity": 17
+    }
+   }
+  },
+  {
+   "seed": 2,
+   "n_rooms_gt": 3,
+   "rotation_deg": -1.454,
+   "synth_s": 0.994,
+   "ok": true,
+   "timings": {
+    "clean": 0.273,
+    "segment": 0.262,
+    "ocr": 2.745,
+    "geometry": 0.005,
+    "model": 0.0,
+    "export": 0.398
+   },
+   "total_s": 3.684,
+   "closure": {
+    "is_closed": false,
+    "node_closure": 0.7778,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 2,
+    "dimension_residual_m": 2.6936450387815024e-07,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 2,
+    "n_rooms_gt": 3,
+    "room_iou_mean": 0.6623430400731839,
+    "room_precision": 1.0,
+    "room_recall": 0.6666666666666666,
+    "room_area_error": 1.0490750619516499e-16,
+    "total_area_error": 0.3393178292021448,
+    "room_name_accuracy": 1.0,
+    "wall_precision": 1.0,
+    "wall_recall": 0.9765400990529152,
+    "wall_f1": 0.9881308246878847,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 1.0,
+     "any": 1.0
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.024588888888888896
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 10,
+     "IfcOpeningElement": 9,
+     "IfcDoor": 3,
+     "IfcWindow": 6,
+     "IfcSpace": 2,
+     "IfcRelVoidsElement": 9,
+     "IfcRelFillsElement": 9,
+     "IfcRelConnectsPathElements": 15,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 10,
+     "IfcPropertySet": 19,
+     "IfcElementQuantity": 12
+    }
+   }
+  },
+  {
+   "seed": 3,
+   "n_rooms_gt": 7,
+   "rotation_deg": -1.445,
+   "synth_s": 1.525,
+   "ok": true,
+   "timings": {
+    "clean": 0.362,
+    "segment": 0.36,
+    "ocr": 3.745,
+    "geometry": 0.013,
+    "model": 0.001,
+    "export": 0.774
+   },
+   "total_s": 5.254,
+   "closure": {
+    "is_closed": true,
+    "node_closure": 1.0,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 0,
+    "dimension_residual_m": 0.00434828282535036,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 7,
+    "n_rooms_gt": 7,
+    "room_iou_mean": 0.9923191961643045,
+    "room_precision": 1.0,
+    "room_recall": 1.0,
+    "room_area_error": 0.0016056074493985874,
+    "total_area_error": 0.0011684564468374575,
+    "room_name_accuracy": 1.0,
+    "wall_precision": 1.0,
+    "wall_recall": 1.0,
+    "wall_f1": 1.0,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 1.0,
+     "any": 1.0
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.021712500000000003
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 22,
+     "IfcOpeningElement": 16,
+     "IfcDoor": 8,
+     "IfcWindow": 8,
+     "IfcSpace": 7,
+     "IfcRelVoidsElement": 16,
+     "IfcRelFillsElement": 16,
+     "IfcRelConnectsPathElements": 40,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 22,
+     "IfcPropertySet": 38,
+     "IfcElementQuantity": 29
+    }
+   }
+  },
+  {
+   "seed": 4,
+   "n_rooms_gt": 8,
+   "rotation_deg": 0.899,
+   "synth_s": 1.985,
+   "ok": true,
+   "timings": {
+    "clean": 0.433,
+    "segment": 0.416,
+    "ocr": 4.921,
+    "geometry": 0.011,
+    "model": 0.001,
+    "export": 0.755
+   },
+   "total_s": 6.536,
+   "closure": {
+    "is_closed": true,
+    "node_closure": 1.0,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 0,
+    "dimension_residual_m": 0.0028263345986384897,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 8,
+    "n_rooms_gt": 8,
+    "room_iou_mean": 0.9837074430381204,
+    "room_precision": 1.0,
+    "room_recall": 1.0,
+    "room_area_error": 0.0011244508671108427,
+    "total_area_error": 0.0008466057484674759,
+    "room_name_accuracy": 0.875,
+    "wall_precision": 1.0,
+    "wall_recall": 1.0,
+    "wall_f1": 1.0,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 1.0,
+     "any": 1.0
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.019992857142857146
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 25,
+     "IfcOpeningElement": 14,
+     "IfcDoor": 8,
+     "IfcWindow": 6,
+     "IfcSpace": 8,
+     "IfcRelVoidsElement": 14,
+     "IfcRelFillsElement": 14,
+     "IfcRelConnectsPathElements": 46,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 25,
+     "IfcPropertySet": 39,
+     "IfcElementQuantity": 33
+    }
+   }
+  },
+  {
+   "seed": 5,
+   "n_rooms_gt": 6,
+   "rotation_deg": -1.441,
+   "synth_s": 1.565,
+   "ok": true,
+   "timings": {
+    "clean": 0.372,
+    "segment": 0.358,
+    "ocr": 3.611,
+    "geometry": 0.01,
+    "model": 0.0,
+    "export": 0.551
+   },
+   "total_s": 4.903,
+   "closure": {
+    "is_closed": true,
+    "node_closure": 1.0,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 0,
+    "dimension_residual_m": 4.819279987540353e-07,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 6,
+    "n_rooms_gt": 6,
+    "room_iou_mean": 0.995105651494407,
+    "room_precision": 1.0,
+    "room_recall": 1.0,
+    "room_area_error": 7.170317777682192e-05,
+    "total_area_error": 1.55572452377144e-07,
+    "room_name_accuracy": 1.0,
+    "wall_precision": 1.0,
+    "wall_recall": 1.0,
+    "wall_f1": 1.0,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 1.0,
+     "any": 1.0
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.04210000000000004
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 19,
+     "IfcOpeningElement": 10,
+     "IfcDoor": 6,
+     "IfcWindow": 4,
+     "IfcSpace": 6,
+     "IfcRelVoidsElement": 10,
+     "IfcRelFillsElement": 10,
+     "IfcRelConnectsPathElements": 34,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 19,
+     "IfcPropertySet": 29,
+     "IfcElementQuantity": 25
+    }
+   }
+  },
+  {
+   "seed": 6,
+   "n_rooms_gt": 6,
+   "rotation_deg": -1.447,
+   "synth_s": 1.814,
+   "ok": true,
+   "timings": {
+    "clean": 0.374,
+    "segment": 0.373,
+    "ocr": 3.568,
+    "geometry": 0.009,
+    "model": 0.0,
+    "export": 0.6
+   },
+   "total_s": 4.924,
+   "closure": {
+    "is_closed": true,
+    "node_closure": 1.0,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 0,
+    "dimension_residual_m": 4.781624948854036e-07,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 6,
+    "n_rooms_gt": 6,
+    "room_iou_mean": 0.9935565646407136,
+    "room_precision": 1.0,
+    "room_recall": 1.0,
+    "room_area_error": 0.00024688588413064827,
+    "total_area_error": 6.476810960051072e-10,
+    "room_name_accuracy": 0.8333333333333334,
+    "wall_precision": 1.0,
+    "wall_recall": 1.0,
+    "wall_f1": 1.0,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 1.0,
+     "any": 1.0
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.020058333333333317
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 19,
+     "IfcOpeningElement": 12,
+     "IfcDoor": 6,
+     "IfcWindow": 6,
+     "IfcSpace": 6,
+     "IfcRelVoidsElement": 12,
+     "IfcRelFillsElement": 12,
+     "IfcRelConnectsPathElements": 34,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 19,
+     "IfcPropertySet": 31,
+     "IfcElementQuantity": 25
+    }
+   }
+  },
+  {
+   "seed": 7,
+   "n_rooms_gt": 5,
+   "rotation_deg": 1.204,
+   "synth_s": 1.452,
+   "ok": true,
+   "timings": {
+    "clean": 0.328,
+    "segment": 0.314,
+    "ocr": 2.969,
+    "geometry": 0.009,
+    "model": 0.0,
+    "export": 0.6
+   },
+   "total_s": 4.22,
+   "closure": {
+    "is_closed": true,
+    "node_closure": 1.0,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 0,
+    "dimension_residual_m": 0.0028347335848258022,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 5,
+    "n_rooms_gt": 5,
+    "room_iou_mean": 0.98484239423527,
+    "room_precision": 1.0,
+    "room_recall": 1.0,
+    "room_area_error": 0.008640508509116525,
+    "total_area_error": 0.0079231732544206,
+    "room_name_accuracy": 1.0,
+    "wall_precision": 1.0,
+    "wall_recall": 1.0,
+    "wall_f1": 1.0,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 0.75,
+     "any": 0.8461538461538461
+    },
+    "opening_precision": 0.9166666666666666,
+    "opening_width_error_m": 0.02150909090909091
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 18,
+     "IfcOpeningElement": 12,
+     "IfcDoor": 5,
+     "IfcWindow": 7,
+     "IfcSpace": 5,
+     "IfcRelVoidsElement": 12,
+     "IfcRelFillsElement": 12,
+     "IfcRelConnectsPathElements": 30,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 18,
+     "IfcPropertySet": 30,
+     "IfcElementQuantity": 23
+    }
+   }
+  },
+  {
+   "seed": 8,
+   "n_rooms_gt": 5,
+   "rotation_deg": 1.153,
+   "synth_s": 1.162,
+   "ok": true,
+   "timings": {
+    "clean": 0.315,
+    "segment": 0.292,
+    "ocr": 2.682,
+    "geometry": 0.009,
+    "model": 0.0,
+    "export": 0.504
+   },
+   "total_s": 3.801,
+   "closure": {
+    "is_closed": true,
+    "node_closure": 1.0,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 0,
+    "dimension_residual_m": 0.002669587527576309,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 5,
+    "n_rooms_gt": 5,
+    "room_iou_mean": 0.9929086790992423,
+    "room_precision": 1.0,
+    "room_recall": 1.0,
+    "room_area_error": 0.0010247605068080489,
+    "total_area_error": 0.0011204694037019623,
+    "room_name_accuracy": 1.0,
+    "wall_precision": 1.0,
+    "wall_recall": 1.0,
+    "wall_f1": 1.0,
+    "opening_recall": {
+     "door": 1.0,
+     "window": 1.0,
+     "any": 1.0
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.03212000000000002
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 16,
+     "IfcOpeningElement": 10,
+     "IfcDoor": 4,
+     "IfcWindow": 6,
+     "IfcSpace": 5,
+     "IfcRelVoidsElement": 10,
+     "IfcRelFillsElement": 10,
+     "IfcRelConnectsPathElements": 28,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 16,
+     "IfcPropertySet": 26,
+     "IfcElementQuantity": 21
+    }
+   }
+  },
+  {
+   "seed": 9,
+   "n_rooms_gt": 7,
+   "rotation_deg": 1.044,
+   "synth_s": 1.95,
+   "ok": true,
+   "timings": {
+    "clean": 0.415,
+    "segment": 0.416,
+    "ocr": 3.234,
+    "geometry": 0.011,
+    "model": 0.0,
+    "export": 0.59
+   },
+   "total_s": 4.667,
+   "closure": {
+    "is_closed": false,
+    "node_closure": 0.8235,
+    "room_closure": 1.0,
+    "n_components": 1,
+    "n_dangling": 3,
+    "dimension_residual_m": 0.0029417423542273335,
+    "scale_source": "dimensions"
+   },
+   "compare": {
+    "offset_m": [
+     0.0,
+     0.0
+    ],
+    "alignment": "none",
+    "n_rooms_pred": 5,
+    "n_rooms_gt": 7,
+    "room_iou_mean": 0.6384051958704094,
+    "room_precision": 1.0,
+    "room_recall": 0.7142857142857143,
+    "room_area_error": 0.18967866519850454,
+    "total_area_error": 0.035497101846317713,
+    "room_name_accuracy": 1.0,
+    "wall_precision": 1.0,
+    "wall_recall": 0.9706946803380093,
+    "wall_f1": 0.9851294470146109,
+    "opening_recall": {
+     "door": 0.8571428571428571,
+     "window": 0.8333333333333334,
+     "any": 0.8461538461538461
+    },
+    "opening_precision": 1.0,
+    "opening_width_error_m": 0.031000000000000007
+   },
+   "export": {
+    "reopened_ok": true,
+    "n_warnings": 0,
+    "entities": {
+     "IfcProject": 1,
+     "IfcSite": 1,
+     "IfcBuilding": 1,
+     "IfcBuildingStorey": 1,
+     "IfcWall": 21,
+     "IfcOpeningElement": 11,
+     "IfcDoor": 6,
+     "IfcWindow": 5,
+     "IfcSpace": 5,
+     "IfcRelVoidsElement": 11,
+     "IfcRelFillsElement": 11,
+     "IfcRelConnectsPathElements": 37,
+     "IfcRelAggregates": 4,
+     "IfcRelContainedInSpatialStructure": 1,
+     "IfcRelAssociatesMaterial": 21,
+     "IfcPropertySet": 32,
+     "IfcElementQuantity": 26
+    }
+   }
+  }
+ ]
+}
