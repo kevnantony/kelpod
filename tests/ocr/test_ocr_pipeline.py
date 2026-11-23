@@ -8,7 +8,7 @@ from ocr_render import make_fixture
 
 import kelpod.ocr as ocr
 from kelpod.contracts import OcrAnnotations, RasterPage, TextItem
-from kelpod.ocr.dimlines import DimensionLineFinder, find_dimension_span
+from kelpod.ocr.dimlines import DimensionLineFinder, LineTicks, find_dimension_span, pick_span
 from kelpod.ocr.engines import (
     cw_to_original,
     dedupe,
@@ -19,7 +19,7 @@ from kelpod.ocr.engines import (
     register_engine,
     rotate_cw,
 )
-from kelpod.ocr.interpret import interpret
+from kelpod.ocr.interpret import interpret, split_merged_items
 
 
 @pytest.fixture(scope="module")
@@ -205,3 +205,31 @@ def test_run_with_injected_engine(fx):
     assert len(ann.dimensions) == len(fx.chains)
     assert all(d.line is not None for d in ann.dimensions)
     assert {d.angle_deg for d in ann.dimensions} == {0.0, 90.0}
+
+
+def test_pick_span_nearest_and_expected():
+    lt = LineTicks(ticks=[0.0, 100.0, 130.0, 300.0], y=0.0, cx=115.0, text_h=20.0)
+    # nearest ticks around the centre: 100..130
+    assert pick_span(lt)[:2] == (100.0, 130.0)
+    # a label wider than its span, centred on 100..130, but value says 200 px: 100..300
+    assert pick_span(lt, expected_len=200.0)[:2] == (100.0, 300.0)
+    assert pick_span(lt, expected_len=30.0)[:2] == (100.0, 130.0)
+    assert pick_span(lt, expected_len=55.0) is None
+
+
+def test_inconsistent_span_is_repicked_or_dropped(fx):
+    """A label whose value does not fit its drawn span loses its line; the others keep theirs."""
+    items = [_item(ch.text, ch.quad) for ch in fx.chains]
+    items[0] = _item("9,99", fx.chains[0].quad)  # wrong value on the 3,51 span
+    dims, *_ = interpret(items, fx.image < 128)
+    by = {d.text: d for d in dims}
+    assert by["9,99"].line is None
+    assert sum(d.line is not None for d in dims) == len(fx.chains) - 1
+
+
+def test_split_merged_items_quads():
+    it = _item("0,6351,15", _hquad(100, 50, 90, 20))
+    a, b = split_merged_items([it])
+    assert (a.text, b.text) == ("0,635", "1,15")
+    assert a.center[0] < 100 < b.center[0]
+    assert a.confidence < it.confidence

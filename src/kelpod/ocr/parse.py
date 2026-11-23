@@ -22,11 +22,12 @@ _SUPERSCRIPT = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 
 # Characters OCR engines often return instead of digits inside a number.
 _DIGIT_FIXES = str.maketrans(
-    {"O": "0", "o": "0", "D": "0", "Q": "0", "l": "1", "I": "1", "|": "1", "i": "1", "!": "1",
+    {"O": "0", "o": "0", "D": "0", "Q": "0", "C": "0",
+     "l": "1", "I": "1", "|": "1", "i": "1", "!": "1",
      "S": "5", "s": "5", "B": "8", "Z": "2", "z": "2"}
 )
 
-_NUMBER_CHARS = r"0-9OoDQlI|i!SsBZz⁰¹²³⁴⁵⁶⁷⁸⁹"
+_NUMBER_CHARS = r"0-9OoDQClI|i!SsBZz⁰¹²³⁴⁵⁶⁷⁸⁹"
 _NUMBER_RE = re.compile(rf"^[{_NUMBER_CHARS}]+(?:\s?[,.]\s?[{_NUMBER_CHARS}]+)?$")
 
 MIN_LENGTH_M = 0.02
@@ -82,6 +83,8 @@ def parse_number(text: str) -> ParsedNumber | None:
         int_part, dec_part = re.split(r"[,.]", s)
     else:
         int_part, dec_part = s, ""
+        if len(int_part) >= 3 and int_part[0] == "0":  # "0365": comma lost -> 0,365
+            int_part, dec_part, has_comma, fixed = "0", int_part[1:], True, True
     value = float(f"{int_part}.{dec_part}{sup_digits}" if (dec_part or sup_digits) else int_part)
     return ParsedNumber(
         value=value,
@@ -250,3 +253,49 @@ _DOOR_LABEL_RE = re.compile(r"^\s*[0-9OolI,.⁰-⁹¹²³]+\s*/\s*[0-9OolI,.⁰-
 def is_opening_label(text: str) -> bool:
     """``88,5/2,01``-style width/height labels of doors and windows (not dimensions)."""
     return bool(_DOOR_LABEL_RE.match(text))
+
+
+def split_merged_numbers(text: str) -> list[str] | None:
+    """Split two dimension values that OCR read as one string, e.g. ``0,6351,15`` ->
+    ``["0,635", "1,15"]`` (neighbouring labels on a crowded chain). The second value is assumed to
+    have a one-digit integer part (lengths under 10 m), else two digits. ``None`` if no split
+    gives two plausible lengths."""
+    s = re.sub(r"\s+", "", text)
+    seps = [i for i, c in enumerate(s) if c in ",."]
+    if len(seps) != 2:
+        return None
+    j = seps[1]
+    for k in (1, 2):
+        a, b = s[: j - k], s[j - k :]
+        if "," in a or "." in a:
+            if parse_length_m(a) is not None and parse_length_m(b) is not None:
+                if len(a) - seps[0] - 1 >= 2:  # first value keeps 2-3 decimals
+                    return [a, b]
+    return None
+
+
+_TOKEN_RE = re.compile(rf"[{_NUMBER_CHARS},.]+")
+
+
+def number_tokens(text: str) -> list[tuple[int, int, str]]:
+    """Plausible lengths inside a string with junk around them, as ``(start, end, token)``
+    character spans: ``L 88,5 L`` -> ``[(2, 6, "88,5")]``, ``1,26」76」`` -> two tokens.
+    Remnants of tick marks and extension lines next to a label are read as ``L``, ``[``, ``」``.
+    Merged pairs such as ``0,6351,15`` are split with :func:`split_merged_numbers`."""
+    out: list[tuple[int, int, str]] = []
+    # Words or a scale ("Grundriss EG M 1:100") are not junk around a label.
+    if len(re.findall(r"[A-Za-zÄÖÜäöüß]", text)) > 3 or re.search(r"\d\s*:\s*\d", text):
+        return out
+    for m in _TOKEN_RE.finditer(text):
+        tok = m.group(0).strip(",.")
+        start = m.start() + m.group(0).index(tok) if tok else m.start()
+        if parse_length_m(tok) is not None and re.search(r"[0-9]", tok):
+            out.append((start, start + len(tok), tok))
+            continue
+        parts = split_merged_numbers(tok)
+        if parts:
+            k = start
+            for p in parts:
+                out.append((k, k + len(p), p))
+                k += len(p)
+    return out

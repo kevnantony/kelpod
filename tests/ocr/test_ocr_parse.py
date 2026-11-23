@@ -4,10 +4,12 @@ from kelpod.ocr.parse import (
     is_brh_keyword,
     is_opening_label,
     match_room_name,
+    number_tokens,
     parse_area,
     parse_length_m,
     parse_number,
     parse_sill_height,
+    split_merged_numbers,
 )
 
 
@@ -38,7 +40,9 @@ def test_parse_length(text, metres):
     assert parse_length_m(text) == pytest.approx(metres)
 
 
-@pytest.mark.parametrize("text", ["", "Bad", "IS", "1:100", "BRH 0,90", "a,b", "14,52 m²", "M", "0"])
+@pytest.mark.parametrize(
+    "text", ["", "Bad", "IS", "1:100", "BRH 0,90", "a,b", "14,52 m²", "M", "0"]
+)
 def test_parse_length_rejects(text):
     assert parse_length_m(text) is None
 
@@ -135,3 +139,35 @@ def test_opening_label():
     assert is_opening_label("88,5/2,01")
     assert is_opening_label("1,01 / 1,385")
     assert not is_opening_label("3,51")
+
+
+@pytest.mark.parametrize(
+    ("text", "parts"),
+    [
+        ("0,6351,15", ["0,635", "1,15"]),
+        ("C,6651,385", ["C,665", "1,385"]),
+        ("3,51", None),
+        ("Wohnen", None),
+    ],
+)
+def test_split_merged_numbers(text, parts):
+    assert split_merged_numbers(text) == parts
+
+
+@pytest.mark.parametrize(("text", "metres"), [("0365", 0.365), ("Q.365", 0.365), ("C,665", 0.665)])
+def test_lost_comma_and_letter_fixes(text, metres):
+    assert parse_length_m(text) == pytest.approx(metres)
+
+
+@pytest.mark.parametrize(
+    ("text", "tokens"),
+    [
+        ("L 88,5 L", ["88,5"]),
+        ("L0,885[", ["0,885"]),
+        ("1,26」76」", ["1,26", "76"]),
+        ("Grundriss Erdgeschoss M 1:100", []),
+        ("M 1:50", []),
+    ],
+)
+def test_number_tokens(text, tokens):
+    assert [t for _, _, t in number_tokens(text)] == tokens

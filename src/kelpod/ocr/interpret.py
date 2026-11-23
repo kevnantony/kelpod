@@ -7,18 +7,49 @@ import math
 import numpy as np
 
 from kelpod.contracts import DimensionLabel, OcrAnnotations, RoomStamp, SillHeight, TextItem
-from kelpod.ocr.dimlines import DimensionLineFinder
+from kelpod.ocr.dimlines import DimensionLineFinder, pick_span
 from kelpod.ocr.engines import quad_size
 from kelpod.ocr.parse import (
     is_brh_keyword,
     is_opening_label,
     match_room_name,
+    number_tokens,
     parse_area,
     parse_length_m,
     parse_number,
     parse_sill_height,
     parse_sill_value,
 )
+
+
+def split_merged_items(items: list[TextItem]) -> list[TextItem]:
+    """Clean up number items that do not parse as a whole: ``0,6351,15`` (two labels read as
+    one) or ``L 88,5 L`` (tick remnants read as letters). Each plausible number token becomes its
+    own item, its quad cut from the original in proportion to its character span. Confidence is
+    lowered because the split is a guess."""
+    out: list[TextItem] = []
+    for it in items:
+        toks = None
+        t = it.text
+        if (parse_length_m(t) is None and parse_area(t) is None and parse_sill_height(t) is None
+                and not is_brh_keyword(t) and not is_opening_label(t)
+                and match_room_name(t) is None):
+            toks = number_tokens(t)
+        if not toks:
+            out.append(it)
+            continue
+        q = np.asarray(it.quad, float)
+        n = max(1, len(t))
+        for start, end, tok in toks:
+            t0, t1 = start / n, end / n
+            tl = q[0] + (q[1] - q[0]) * t0
+            tr = q[0] + (q[1] - q[0]) * t1
+            bl = q[3] + (q[2] - q[3]) * t0
+            br = q[3] + (q[2] - q[3]) * t1
+            quad = [tuple(map(float, c)) for c in (tl, tr, br, bl)]
+            out.append(it.model_copy(update={"text": tok, "quad": quad,
+                                             "confidence": it.confidence * 0.7}))
+    return out
 
 
 def _snap_angle(a: float) -> float:
@@ -42,6 +73,7 @@ def interpret(
     items: list[TextItem], ink: np.ndarray | None = None
 ) -> tuple[list[DimensionLabel], list[SillHeight], list[RoomStamp], list[str]]:
     """Classify items. ``ink`` (bool mask) enables the dimension-line / tick search."""
+    items = split_merged_items(items)
     notes: list[str] = []
     used: set[int] = set()
     sills: list[SillHeight] = []
@@ -131,8 +163,7 @@ def interpret(
         notes.append(f"{len(lone)} area(s) without a room name: {lone}")
 
     # 3. Everything else that parses as a length is a dimension.
-    finder = DimensionLineFinder(ink) if ink is not None else None
-    n_line = 0
+    cands: list[tuple[TextItem, float, float, float]] = []  # item, value, angle, confidence
     skipped: list[str] = []
     for i, it in enumerate(items):
         if i in used:
@@ -144,25 +175,70 @@ def interpret(
         if v is None:
             skipped.append(it.text)
             continue
-        angle = _snap_angle(it.angle_deg)
         n = parse_number(it.text)
         conf = it.confidence * (0.8 if n is not None and n.fixed else 1.0)
-        line = None
-        if finder is not None:
-            found = finder.find(it.quad, angle)
-            if found is not None:
-                line, _ = found
-                n_line += 1
+        cands.append((it, v, _snap_angle(it.angle_deg), conf))
+    lines = _link_lines(cands, ink, notes) if ink is not None else [None] * len(cands)
+    for (it, v, angle, conf), line in zip(cands, lines, strict=True):
         dims.append(DimensionLabel(value_m=v, text=it.text, anchor=it.center, angle_deg=angle,
                                    line=line, confidence=conf))
-    if dims:
-        notes.append(f"{n_line}/{len(dims)} dimensions linked to a dimension line with ticks")
     if skipped:
         notes.append(f"{len(skipped)} text item(s) not interpreted: {skipped[:20]}")
     return dims, sills, stamps, notes
 
 
+def _link_lines(cands, ink: np.ndarray, notes: list[str]):
+    """Find the measured span of every dimension text.
+
+    Pass 1 takes the nearest tick on each side of the text. The page-wide pixels per metre is
+    the median of span length / value over those spans (no plan scale assumed). Pass 2 checks
+    every span against it and, where it disagrees or is missing, picks the tick pair whose
+    length fits (short spans whose label overhangs the ticks, missed or extra ticks); spans that
+    still do not fit within 8 % are dropped rather than passed on wrong.
+    """
+    finder = DimensionLineFinder(ink)
+    found = [finder.ticks(it.quad, angle) for it, _, angle, _ in cands]
+    first = []
+    ratios = []
+    for (_, v, _, _), f in zip(cands, found, strict=True):
+        sp = pick_span(f[0]) if f is not None else None
+        first.append(sp)
+        if sp is not None:
+            ratios.append((sp[1] - sp[0]) / v)
+    if len(ratios) < 3:
+        out = []
+        for f, sp in zip(found, first, strict=True):
+            out.append(None if sp is None else finder.to_image(sp[0], sp[1], f[0].y, f[1]))
+        if ratios:
+            notes.append("too few dimension lines to check spans against each other")
+        return out
+    r = float(np.median(ratios))
+    out = []
+    n_ok = n_refit = n_drop = 0
+    for (_, v, _, _), f, sp in zip(cands, found, first, strict=True):
+        if f is None:
+            out.append(None)
+            continue
+        exp = v * r
+        if sp is not None and abs((sp[1] - sp[0]) - exp) <= 0.08 * exp:
+            n_ok += 1
+        else:
+            sp2 = pick_span(f[0], exp)
+            if sp is not None or sp2 is not None:
+                n_refit += sp2 is not None
+                n_drop += sp2 is None
+            sp = sp2
+        out.append(None if sp is None else finder.to_image(sp[0], sp[1], f[0].y, f[1]))
+    notes.append(
+        f"{sum(o is not None for o in out)}/{len(cands)} dimensions linked to a dimension line "
+        f"with ticks ({n_refit} re-picked, {n_drop} dropped as inconsistent; "
+        f"{r:.1f} px/m from the spans)"
+    )
+    return out
+
+
 def annotate(items: list[TextItem], ink: np.ndarray | None, backend: str) -> OcrAnnotations:
+    items = split_merged_items(items)
     dims, sills, stamps, notes = interpret(items, ink)
     return OcrAnnotations(items=items, dimensions=dims, sill_heights=sills, room_stamps=stamps,
                           backend=backend, notes=notes)
