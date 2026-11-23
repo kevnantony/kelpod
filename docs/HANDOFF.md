@@ -19,6 +19,10 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
 - [ ] Modules, one subagent each (briefs in docs/AGENT_BRIEFS.md): clean, segment, ocr, geometry,
   export, evaluation. A first attempt was stopped part-way on 2026-11-23 when work moved to the
   server, so module folders may hold partial, untested WIP: review it, keep what is good.
+  - [x] export: IFC4 + IFC2X3 via `ifcopenshell.api`, closed L-corners, openings, spaces, optional
+    slab; re-open/validate/geometry checks; 21 tests (hand-built plans only). Open HottCAD questions
+    (space boundaries, schema/view, wall height convention) go to the pilot.
+  - [ ] clean, segment, ocr, geometry, evaluation (WIP committed in 5dc6a52, agents finishing).
 - [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
 - [ ] Minimal FastAPI endpoint (`kelpod.api`), if time allows.
 - [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
