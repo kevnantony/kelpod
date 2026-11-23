@@ -2,20 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from kelpod.export.ifc import corner_extensions, path_connections, write_ifc
+from kelpod.export.model import build_model
 
-from kelpod.contracts import BuildingModel, ExportResult, IfcSchema, PlanGraph
-
-
-def build_model(
-    graph: PlanGraph, *, storey_height_m: float = 2.60, name: str = "Kelpod building"
-) -> BuildingModel:
-    """Extrude the plan graph to a one-storey 3D model with default opening heights."""
-    raise NotImplementedError
-
-
-def write_ifc(
-    model: BuildingModel, path: str | Path, *, schema: IfcSchema = "IFC4"
-) -> ExportResult:
-    """Write the model with IfcOpenShell, then re-open the file to validate it."""
-    raise NotImplementedError
+__all__ = ["build_model", "corner_extensions", "path_connections", "write_ifc"]
