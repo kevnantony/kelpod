@@ -88,8 +88,15 @@ class _Canvas:
 
     def line(self, a: Point, b: Point, width_mm: float) -> None:
         """Line between two plan-space points."""
-        cv2.line(self.img, self._fix(self.px(a)), self._fix(self.px(b)), 0, self.lw(width_mm),
-                 cv2.LINE_AA, self.SHIFT)
+        cv2.line(
+            self.img,
+            self._fix(self.px(a)),
+            self._fix(self.px(b)),
+            0,
+            self.lw(width_mm),
+            cv2.LINE_AA,
+            self.SHIFT,
+        )
 
     def polyline(self, pts: list[Point], width_mm: float, closed: bool = False) -> None:
         arr = np.array([self._fix(self.px(p)) for p in pts], np.int32).reshape(-1, 1, 2)
@@ -225,12 +232,23 @@ def _wall_regions(layout: Layout):
         b = (x1 + dx * e1, y1 + dy * e1)
         t = w.thickness_m / 2
         nx, ny = -dy, dx
-        rect = Polygon([(a[0] + nx * t, a[1] + ny * t), (b[0] + nx * t, b[1] + ny * t),
-                        (b[0] - nx * t, b[1] - ny * t), (a[0] - nx * t, a[1] - ny * t)])
+        rect = Polygon(
+            [
+                (a[0] + nx * t, a[1] + ny * t),
+                (b[0] + nx * t, b[1] + ny * t),
+                (b[0] - nx * t, b[1] - ny * t),
+                (a[0] - nx * t, a[1] - ny * t),
+            ]
+        )
         (plain if w.kind == WallKind.DRYWALL else hatched).append(rect)
 
-    cuts = unary_union([_opening_box(layout, op, layout.lines[op.line_id], 0.01)
-                        for op in layout.openings]) if layout.openings else Polygon()
+    cuts = (
+        unary_union(
+            [_opening_box(layout, op, layout.lines[op.line_id], 0.01) for op in layout.openings]
+        )
+        if layout.openings
+        else Polygon()
+    )
     hatched_u = unary_union(hatched) if hatched else Polygon()
     plain_u = unary_union(plain).difference(hatched_u) if plain else Polygon()
     hatched_u = shapely.set_precision(hatched_u.difference(cuts), 1e-5)
@@ -266,8 +284,9 @@ def _draw_openings(cv: _Canvas, layout: Layout) -> None:
         if op.kind == OpeningKind.WINDOW:
             offs = (-0.38 * t, 0.0, 0.38 * t) if op.window_lines == 3 else (-0.12 * t, 0.12 * t)
             for o in offs:
-                cv.line(_to_plan(layout, line, op.s0, o), _to_plan(layout, line, op.s1, o),
-                        THIN_LINE_MM)
+                cv.line(
+                    _to_plan(layout, line, op.s0, o), _to_plan(layout, line, op.s1, o), THIN_LINE_MM
+                )
             continue
         side = _room_side(layout, line, op.room)
         face = side * t / 2
@@ -282,8 +301,13 @@ def _draw_openings(cv: _Canvas, layout: Layout) -> None:
         a1 = math.atan2(far[1] - hinge[1], far[0] - hinge[0])
         da = (a1 - a0 + math.pi) % (2 * math.pi) - math.pi
         n = 24
-        arc = [(hinge[0] + width * math.cos(a0 + da * k / n),
-                hinge[1] + width * math.sin(a0 + da * k / n)) for k in range(n + 1)]
+        arc = [
+            (
+                hinge[0] + width * math.cos(a0 + da * k / n),
+                hinge[1] + width * math.sin(a0 + da * k / n),
+            )
+            for k in range(n + 1)
+        ]
         cv.polyline(arc, THIN_LINE_MM)
 
 
@@ -303,8 +327,10 @@ def _chains(layout: Layout) -> dict[str, list[list[float]]]:
         faces = {lo, 0.0, length, hi}
         for ln in layout.lines[4:]:
             perp = ("v" if side in "sn" else "h") == ln.axis
-            touches = abs(ln.lo - layout.lines[lid].coord) < 1e-6 or abs(
-                ln.hi - layout.lines[lid].coord) < 1e-6
+            touches = (
+                abs(ln.lo - layout.lines[lid].coord) < 1e-6
+                or abs(ln.hi - layout.lines[lid].coord) < 1e-6
+            )
             if perp and touches:
                 faces |= {ln.coord - ln.thickness / 2, ln.coord + ln.thickness / 2}
         chain2 = sorted(faces)
@@ -327,7 +353,7 @@ def _draw_dimensions(cv: _Canvas, layout: Layout, style: Style, texts: list[Draw
                 continue
             c = face + outward * CHAIN_OFFSETS_M[level]
 
-            def P(s: float, across: float, horizontal=horizontal) -> Point:
+            def P(s: float, across: float, horizontal=horizontal, base=base) -> Point:
                 return (base + s, across) if horizontal else (across, base + s)
 
             # dimension line, slightly past the end ticks
@@ -347,14 +373,17 @@ def _draw_dimensions(cv: _Canvas, layout: Layout, style: Style, texts: list[Draw
                 seg_px = abs(pb[0] - pa[0]) + abs(pb[1] - pa[1])
                 along = tw if horizontal else th
                 # "above" the line as read: up for horizontal text, left for rotated text
+                # candidates: centred above the line, then beside the span (either side, one
+                # and two text widths away), then one text height further from the line
+                side = seg_px / 2 + along / 2 + gap
+                along_shifts = [0.0, side, -side, side + along + gap, -(side + along + gap)]
+                up = (th if horizontal else tw) + gap
                 if horizontal:
                     centre = (mid[0], mid[1] - gap - th / 2)
-                    shifts = [(0.0, 0.0), (seg_px / 2 + along / 2 + gap, 0.0),
-                              (-(seg_px / 2 + along / 2 + gap), 0.0)]
+                    shifts = [(d, 0.0) for d in along_shifts] + [(0.0, -up)]
                 else:
                     centre = (mid[0] - gap - tw / 2, mid[1])
-                    shifts = [(0.0, 0.0), (0.0, -(seg_px / 2 + along / 2 + gap)),
-                              (0.0, seg_px / 2 + along / 2 + gap)]
+                    shifts = [(0.0, -d) for d in along_shifts] + [(-up, 0.0)]
                 chosen = centre
                 for dx, dy in shifts:
                     cand = (centre[0] + dx, centre[1] + dy)
@@ -366,19 +395,47 @@ def _draw_dimensions(cv: _Canvas, layout: Layout, style: Style, texts: list[Draw
                 texts.append(DrawnText(drawn, "dimension", quad, angle, value, (pa, pb)))
 
 
+def _stamp_fits(
+    cv: _Canvas, name: str, area: str, room_w: float, room_h: float, k: float, rotated: bool
+) -> bool:
+    nw, nh = cv.text_size(name, NAME_TEXT_MM * k)
+    aw, ah = cv.text_size(area, AREA_TEXT_MM * k)
+    text_w, text_h = max(nw, aw), nh + ah + cv.mm(1.2 * k)
+    if rotated:
+        text_w, text_h = text_h, text_w
+    return text_w <= room_w and text_h <= room_h
+
+
 def _draw_stamps(cv: _Canvas, layout: Layout, texts: list[DrawnText]) -> None:
     for i, cell in enumerate(layout.cells):
         cx, cy = cv.px(layout.to_plan((cell.x0 + cell.x1) / 2, (cell.y0 + cell.y1) / 2))
         name = layout.names[i]
         area = format_area(layout.stamp_areas[i])
-        _, nh = cv.text_size(name, NAME_TEXT_MM)
-        _, ah = cv.text_size(area, AREA_TEXT_MM)
-        g = cv.mm(1.2)
-        total = nh + g + ah
-        q, drawn, _ = cv.text(name, (cx, cy - total / 2 + nh / 2), NAME_TEXT_MM)
-        texts.append(DrawnText(drawn, "room_name", q, 0.0, None, room_id=i))
-        q, drawn, _ = cv.text(area, (cx, cy + total / 2 - ah / 2), AREA_TEXT_MM)
-        texts.append(DrawnText(drawn, "room_area", q, 0.0, layout.stamp_areas[i], room_id=i))
+        room_w = cell.w / cv.m_per_px - cv.mm(1.5)
+        room_h = cell.h / cv.m_per_px - cv.mm(1.5)
+
+        # largest stamp that fits: horizontal first, then rotated (narrow rooms); if nothing
+        # fits, draw it small along the longer room side
+        options = [(k, rot) for rot in (False, True) for k in (1.0, 0.85, 0.7)]
+        k, rotated = next(
+            (o for o in options if _stamp_fits(cv, name, area, room_w, room_h, *o)),
+            (0.7, cell.h > cell.w),
+        )
+        angle, scale = (90.0 if rotated else 0.0), k
+        n_mm, a_mm = NAME_TEXT_MM * scale, AREA_TEXT_MM * scale
+        nw, nh = cv.text_size(name, n_mm)
+        aw, ah = cv.text_size(area, a_mm)
+        total = nh + cv.mm(1.2 * scale) + ah
+        if angle == 0.0:
+            c_name = (cx, cy - total / 2 + nh / 2)
+            c_area = (cx, cy + total / 2 - ah / 2)
+        else:  # rotated: the name line sits left of the area line
+            c_name = (cx - total / 2 + nh / 2, cy)
+            c_area = (cx + total / 2 - ah / 2, cy)
+        q, drawn, _ = cv.text(name, c_name, n_mm, angle)
+        texts.append(DrawnText(drawn, "room_name", q, angle, None, room_id=i))
+        q, drawn, _ = cv.text(area, c_area, a_mm, angle)
+        texts.append(DrawnText(drawn, "room_area", q, angle, layout.stamp_areas[i], room_id=i))
 
 
 def _draw_sills(cv: _Canvas, layout: Layout, style: Style, texts: list[DrawnText]) -> None:

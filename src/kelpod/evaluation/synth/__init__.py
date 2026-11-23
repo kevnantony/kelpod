@@ -29,7 +29,8 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
 
 from kelpod.contracts import PlanGraph, Point
-from kelpod.evaluation.synth.degrade import Degradation, degrade as _degrade
+from kelpod.evaluation.synth.degrade import Degradation
+from kelpod.evaluation.synth.degrade import degrade as _degrade
 from kelpod.evaluation.synth.layout import make_layout
 from kelpod.evaluation.synth.render import Style, render
 from kelpod.evaluation.synth.text import format_area, format_length, format_sill, render_text
@@ -107,7 +108,8 @@ class SyntheticPlan(BaseModel):
     def to_degraded_px(self, p: Point) -> Point:
         """Map an undegraded image point into the degraded image."""
         m = self.degradation.affine_px
-        return (m[0][0] * p[0] + m[0][1] * p[1] + m[0][2], m[1][0] * p[0] + m[1][1] * p[1] + m[1][2])
+        x, y = p
+        return (m[0][0] * x + m[0][1] * y + m[0][2], m[1][0] * x + m[1][1] * y + m[1][2])
 
 
 def generate(
@@ -132,8 +134,14 @@ def generate(
     image, info = _degrade(clean, float(degrade), np.random.default_rng([int(seed), 0x64656772]))
     annotations = [
         TextAnnotation(
-            text=d.text, kind=d.kind, quad=d.quad, angle_deg=d.angle_deg, value=d.value,
-            line=d.line, room_id=d.room_id, opening_id=d.opening_id,
+            text=d.text,
+            kind=d.kind,
+            quad=d.quad,
+            angle_deg=d.angle_deg,
+            value=d.value,
+            line=d.line,
+            room_id=d.room_id,
+            opening_id=d.opening_id,
         )
         for d in drawn
     ]
@@ -142,9 +150,17 @@ def generate(
     graph = layout.graph
     graph.report = closure_metrics(graph)
     return SyntheticPlan(
-        seed=int(seed), image=image, clean_image=clean, wall_mask=wall_mask, dpi=dpi,
-        plan_scale=plan_scale, graph=graph, annotations=annotations, degradation=info,
-        length_style=style.length, sill_style=style.sill,
+        seed=int(seed),
+        image=image,
+        clean_image=clean,
+        wall_mask=wall_mask,
+        dpi=dpi,
+        plan_scale=plan_scale,
+        graph=graph,
+        annotations=annotations,
+        degradation=info,
+        length_style=style.length,
+        sill_style=style.sill,
     )
 
 
@@ -166,9 +182,7 @@ def save(plan: SyntheticPlan, directory: str | Path, *, clean: bool = False) -> 
         Image.fromarray((plan.wall_mask * 255).astype(np.uint8), mode="L").save(
             out / "wall_mask.png"
         )
-    (out / "ground_truth.json").write_text(
-        plan.model_dump_json(indent=1), encoding="utf-8"
-    )
+    (out / "ground_truth.json").write_text(plan.model_dump_json(indent=1), encoding="utf-8")
     return out
 
 
@@ -191,7 +205,9 @@ def load(directory: str | Path, *, image: bool = False) -> GroundTruth:
     d = Path(directory)
     data = json.loads((d / "ground_truth.json").read_text(encoding="utf-8"))
     gt = GroundTruth(
-        seed=data["seed"], dpi=data["dpi"], plan_scale=data["plan_scale"],
+        seed=data["seed"],
+        dpi=data["dpi"],
+        plan_scale=data["plan_scale"],
         graph=PlanGraph.model_validate(data["graph"]),
         annotations=[TextAnnotation.model_validate(a) for a in data["annotations"]],
         degradation=Degradation.model_validate(data["degradation"]),
@@ -201,4 +217,3 @@ def load(directory: str | Path, *, image: bool = False) -> GroundTruth:
 
         gt.image = np.asarray(Image.open(d / "plan.png").convert("L"))
     return gt
-

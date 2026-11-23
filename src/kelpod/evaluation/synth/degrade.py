@@ -44,17 +44,16 @@ def degrade(
     # 1. the sheet lies slightly crooked on the scanner
     angle = float(rng.choice([-1.0, 1.0])) * 3.0 * amount()
     m = cv2.getRotationMatrix2D((w / 2, h / 2), angle, 1.0)
-    out = cv2.warpAffine(img, m, (w, h), flags=cv2.INTER_LINEAR, borderValue=255).astype(
-        np.float32
-    )
+    out = cv2.warpAffine(img, m, (w, h), flags=cv2.INTER_LINEAR, borderValue=255).astype(np.float32)
     info.rotation_deg = angle
     info.affine_px = m.tolist()
 
     # 2. paper: uneven background (low-frequency illumination), stains, a fold line
     paper = np.ones((h, w), np.float32)
     amp = 0.25 * amount()
-    gx, gy = np.meshgrid(np.linspace(-1, 1, w, dtype=np.float32),
-                         np.linspace(-1, 1, h, dtype=np.float32))
+    gx, gy = np.meshgrid(
+        np.linspace(-1, 1, w, dtype=np.float32), np.linspace(-1, 1, h, dtype=np.float32)
+    )
     a, b, c = rng.uniform(-1, 1, 3)
     field = a * gx + b * gy + c * (gx * gx + gy * gy) / 2
     field = (field - field.min()) / max(float(field.max() - field.min()), 1e-6)

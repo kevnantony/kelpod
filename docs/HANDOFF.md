@@ -25,7 +25,11 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   - [x] clean: pypdfium2/Pillow loaders (multi-page PDF/TIFF, DPI fallback 300), background
     flattening, profile deskew (max error 0.015° over ±10°), fold/stain suppression, Otsu plus
     faint-line rescue; ~0.7 s per A3 page at 200 dpi; 24 tests (own fixtures, not yet real scans).
-  - [ ] segment, ocr, geometry, evaluation (WIP committed in 5dc6a52, agents finishing).
+  - [x] evaluation: seeded German-style synth generator (synth plans only, rectangular rooms),
+    metrics (closure, Hungarian room IoU, wall F1 @10 cm, opening recall; best-of shift alignment),
+    `scripts/benchmark.py`; 16 tests. First 10-plan run (modules still in flux): 10/10 ran,
+    7/10 fully closed, room IoU 0.935, ~14 s/plan (OCR 80-90 %). Synthetic only.
+  - [ ] segment, ocr, geometry (WIP committed in 5dc6a52, agents finishing).
 - [ ] Integration: `kelpod convert` on 3 synthetic plans, `scripts/benchmark.py` report.
 - [ ] Minimal FastAPI endpoint (`kelpod.api`), if time allows.
 - [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
