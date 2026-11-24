@@ -5,7 +5,7 @@ Every dimension label with a measured span (two tick positions) becomes one equa
 the feature the tick sits on (a wall face ``±t/2`` or the centreline ``0``). The ticks are matched
 in the drawing's own geometry, so a plan that was drawn a few percent off still matches; the written
 values then pull the walls to the right lengths. Weak priors keep unconstrained lines where they
-were drawn. A robust loss plus one rejection round removes misread labels.
+were drawn. Contradicting (misread) labels are removed greedily, leave-one-out.
 
 Both conventions (ticks on faces, ticks on centrelines) are tried; the one that explains more
 labels (then: lower residual against the drawing as drawn) wins.
@@ -17,7 +17,6 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.optimize import least_squares
 
 from .lines import Line, Piece
 from .params import GeometryParams
@@ -94,13 +93,45 @@ def _residuals(x: np.ndarray, eqs: list[_Eq]) -> np.ndarray:
 
 
 def _solve(x0: np.ndarray, eqs: list[_Eq], prm: GeometryParams) -> np.ndarray:
+    """Linear least squares: label equations (weight 1) plus weak priors towards the drawing."""
+    n = len(x0)
+    a = np.zeros((len(eqs) + n, n))
+    b = np.zeros(len(eqs) + n)
+    for k, e in enumerate(eqs):
+        a[k, e.j] += 1.0
+        a[k, e.i] -= 1.0
+        b[k] = e.value - e.oj + e.oi
     w = prm.prior_weight
+    a[len(eqs) :, :] = np.eye(n) * w
+    b[len(eqs) :] = x0 * w
+    return np.linalg.lstsq(a, b, rcond=None)[0]
 
-    def fun(x):
-        return np.concatenate([_residuals(x, eqs), w * (x - x0)])
 
-    sol = least_squares(fun, x0, loss="soft_l1", f_scale=0.01, method="trf")
-    return sol.x
+def _fit_robust(x0: np.ndarray, eqs: list[_Eq], prm: GeometryParams):
+    """Fit, then greedily drop the label whose removal best restores consistency (ties: the
+    solution that stays closest to the drawing). Returns (x, kept equations)."""
+    active = list(eqs)
+    max_drop = int(prm.dim_max_reject_share * len(eqs))
+    x = _solve(x0, active, prm)
+    while len(eqs) - len(active) < max_drop and len(active) > 1:
+        worst = float(np.max(np.abs(_residuals(x, active))))
+        if worst <= prm.dim_consistent_m:
+            break
+        best = None
+        for k in range(len(active)):
+            rest = active[:k] + active[k + 1 :]
+            xk = _solve(x0, rest, prm)
+            score = (
+                round(float(np.max(np.abs(_residuals(xk, rest)))), 4),
+                float(np.linalg.norm(xk - x0)),
+            )
+            if best is None or score < best[0]:
+                best = (score, k, xk)
+        if best is None or best[0][0] >= worst - 1e-4:
+            break
+        active.pop(best[1])
+        x = best[2]
+    return x, active
 
 
 def _rms(r: np.ndarray) -> float:
@@ -116,14 +147,8 @@ def fit_dimensions(
         eqs = _build(lines, pieces, dims, mode, prm)
         if not eqs:
             continue
-        x = _solve(x0, eqs, prm)
-        r = _residuals(x, eqs)
-        keep = [e for e, ri in zip(eqs, r, strict=True) if abs(ri) <= prm.dim_outlier_m]
+        x, keep = _fit_robust(x0, eqs, prm)
         n_out = len(eqs) - len(keep)
-        if n_out and keep:
-            x = _solve(x0, keep, prm)
-        elif not keep:
-            continue
         res = FitResult(
             coords=[float(v) for v in x],
             mode=mode,

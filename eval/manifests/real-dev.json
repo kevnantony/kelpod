@@ -1,0 +1,11 @@
+{
+ "manifest_version": 1,
+ "split": "real-dev",
+ "status": "pending",
+ "kind": "proxy",
+ "family": "val",
+ "created_utc": "2026-11-24 01:34",
+ "note": "~/kelpod-data/real/dev does not exist yet",
+ "n_items": 0,
+ "items": []
+}

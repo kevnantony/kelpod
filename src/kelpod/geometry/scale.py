@@ -116,7 +116,10 @@ def estimate_scale(
 
 
 def estimate_skew_deg(walls_px: list[tuple[Point, Point]], max_deg: float) -> float:
-    """Length-weighted median deviation of near-axis walls from 0/90 degrees (image space)."""
+    """Weighted median deviation of near-axis walls from 0/90 degrees (image space).
+
+    The angle error of a piece falls with 1/length, so weights are length squared
+    (inverse variance); short pieces would otherwise invent a skew on straight plans."""
     devs, wts = [], []
     for p0, p1 in walls_px:
         dx, dy = p1[0] - p0[0], p1[1] - p0[1]
@@ -127,10 +130,12 @@ def estimate_skew_deg(walls_px: list[tuple[Point, Point]], max_deg: float) -> fl
         r = ((a + 45.0) % 90.0) - 45.0
         if abs(r) <= max_deg:
             devs.append(r)
-            wts.append(length)
+            wts.append(length * length)
     if not devs:
         return 0.0
     order = np.argsort(devs)
     d = np.asarray(devs)[order]
-    w = np.cumsum(np.asarray(wts)[order])
-    return float(d[np.searchsorted(w, w[-1] / 2.0)])
+    wt = np.asarray(wts)[order]
+    med = float(d[np.searchsorted(np.cumsum(wt), wt.sum() / 2.0)])
+    keep = np.abs(d - med) <= 2.0  # weighted mean of the inliers: uses every piece's evidence
+    return float(np.sum(d[keep] * wt[keep]) / np.sum(wt[keep]))

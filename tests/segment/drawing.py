@@ -28,13 +28,15 @@ class W:
     def rect(self):
         h = self.th / 2
         return box(
-            min(self.x0, self.x1) - h, min(self.y0, self.y1) - h,
-            max(self.x0, self.x1) + h, max(self.y0, self.y1) + h,
+            min(self.x0, self.x1) - h,
+            min(self.y0, self.y1) - h,
+            max(self.x0, self.x1) + h,
+            max(self.y0, self.y1) + h,
         )
 
 
 @dataclass
-class O:
+class Op:
     wall: int
     t0: float  # offset of the near edge along the wall from (x0, y0)
     width: float
@@ -46,7 +48,7 @@ class O:
 @dataclass
 class Plan:
     walls: list[W]
-    openings: list[O] = field(default_factory=list)
+    openings: list[Op] = field(default_factory=list)
     rooms: list[tuple[float, float, str]] = field(default_factory=list)  # label positions
     dims: bool = True
 
@@ -128,8 +130,10 @@ def render(plan: Plan, *, dpi: float = 200, size_m=(12.0, 10.0), margin_m: float
             a1 = np.arctan2(v1[1], v1[0])
             da = (a1 - a0 + np.pi) % (2 * np.pi) - np.pi
             pts = np.array(
-                [P(*(hinge + r * np.array([np.cos(a0 + da * t), np.sin(a0 + da * t)])))
-                 for t in angs],
+                [
+                    P(*(hinge + r * np.array([np.cos(a0 + da * t), np.sin(a0 + da * t)])))
+                    for t in angs
+                ],
                 np.int32,
             )
             cv2.polylines(img, [pts], False, 0, lw_thin)
@@ -147,16 +151,19 @@ def render(plan: Plan, *, dpi: float = 200, size_m=(12.0, 10.0), margin_m: float
             cv2.line(img, P(x - 0.08, yd + 0.08), P(x + 0.08, yd - 0.08), 0, lw_thin + 1)
             cv2.line(img, P(x, ymax + 0.3), P(x, yd + 0.15), 0, lw_thin)
         for xa, xb in zip(xs[:-1], xs[1:], strict=False):
-            cv2.putText(img, f"{xb - xa:.2f}".replace(".", ","), P((xa + xb) / 2 - 0.3, yd - 0.1),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, 0, 2)
+            cv2.putText(
+                img,
+                f"{xb - xa:.2f}".replace(".", ","),
+                P((xa + xb) / 2 - 0.3, yd - 0.1),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                0,
+                2,
+            )
 
     gt = {
-        "walls": [
-            (P(w.x0, w.y0), P(w.x1, w.y1), w.th / mpp, w.hatched) for w in plan.walls
-        ],
-        "openings": [
-            (o.kind, P(*a), P(*b), o.wall) for o, a, b in gt_openings
-        ],
+        "walls": [(P(w.x0, w.y0), P(w.x1, w.y1), w.th / mpp, w.hatched) for w in plan.walls],
+        "openings": [(o.kind, P(*a), P(*b), o.wall) for o, a, b in gt_openings],
         "m_per_px": mpp,
     }
     return img, gt
@@ -179,12 +186,12 @@ def house() -> Plan:
         W(4.5, 3.0, 8, 3.0, 0.115, hatched=False),  # 5 partition
     ]
     openings = [
-        O(0, 1.2, 1.51, "window3"),
-        O(1, 0.9, 1.26, "window2"),
-        O(2, 5.5, 1.01, "door", hinge_end=0, side=1),  # entrance, bottom wall, swings in
-        O(4, 1.0, 0.885, "door", hinge_end=1, side=1),
-        O(5, 1.2, 0.76, "door", hinge_end=0, side=-1),
-        O(3, 2.0, 1.26, "window3"),
+        Op(0, 1.2, 1.51, "window3"),
+        Op(1, 0.9, 1.26, "window2"),
+        Op(2, 5.5, 1.01, "door", hinge_end=0, side=1),  # entrance, bottom wall, swings in
+        Op(4, 1.0, 0.885, "door", hinge_end=1, side=1),
+        Op(5, 1.2, 0.76, "door", hinge_end=0, side=-1),
+        Op(3, 2.0, 1.26, "window3"),
     ]
     rooms = [(2.2, 3.0, "Wohnen"), (6.2, 1.5, "Kind"), (6.2, 4.5, "Bad")]
     return Plan(walls, openings, rooms)

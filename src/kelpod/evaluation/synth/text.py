@@ -86,36 +86,115 @@ def _pil_font(path: str, size: int):
     return ImageFont.truetype(path, size)
 
 
+@lru_cache(maxsize=8)
+def _hershey_digit_px(face: int) -> float:
+    return float(cv2.getTextSize("0", face, 1.0, 1)[0][1])
+
+
 _HERSHEY_MAP = str.maketrans(
-    {"ä": "ae", "ö": "oe", "ü": "ue", "Ä": "Ae", "Ö": "Oe", "Ü": "Ue", "ß": "ss", "²": "2"}
-    | {s: d for d, s in zip("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹", strict=True)}
+    {"ä": "ae", "ö": "oe", "ü": "ue", "Ä": "Ae", "Ö": "Oe", "Ü": "Ue", "ß": "ss"}
 )
+_FROM_SUP = {s: d for d, s in zip("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹", strict=True)}
+SUP_SCALE = 0.62
+"""Superscript digits are drawn as normal digits at this fraction of the size ..."""
+SUP_RAISE = 1.0 - SUP_SCALE
+"""... with their baseline raised by this fraction of the digit height (tops aligned)."""
 
 
-def render_text(text: str, digit_height_px: float) -> tuple[np.ndarray, str]:
-    """Render ``text`` into an alpha mask (float32, 1 = ink), tight box plus 1 px padding.
+def _runs(text: str) -> list[tuple[str, bool]]:
+    """Split into (normal text, False) and (superscript digits as normal digits, True) runs.
 
-    Returns the mask and the text actually drawn (Hershey cannot draw umlauts or superscripts).
+    Many fonts lack the superscript glyphs (they show as empty boxes), so they are never drawn
+    as such.
     """
-    path = font_path()
+    runs: list[tuple[str, bool]] = []
+    for ch in text:
+        sup = ch in _FROM_SUP
+        ch = _FROM_SUP.get(ch, ch)
+        if runs and runs[-1][1] == sup:
+            runs[-1] = (runs[-1][0] + ch, sup)
+        else:
+            runs.append((ch, sup))
+    return runs
+
+
+def _crop(img: np.ndarray, pad: int = 1) -> np.ndarray:
+    ys, xs = np.nonzero(img)
+    if not len(xs):
+        return img[:1, :1] * 0
+    return img[
+        max(ys.min() - pad, 0) : ys.max() + 1 + pad, max(xs.min() - pad, 0) : xs.max() + 1 + pad
+    ]
+
+
+@lru_cache(maxsize=32)
+def _digit_em(path: str) -> float:
+    """Digit height of a font as a fraction of its size (0.73 for DejaVu Sans)."""
+    f = _pil_font(path, 200)
+    _, top, _, bottom = f.getbbox("0123456789", anchor="ls")
+    return (bottom - top) / 200
+
+
+def _resolve_font(font: str | None) -> tuple[str | None, int]:
+    """(TrueType path or None for Hershey, Hershey face) for a style font spec."""
+    if font is None:
+        return font_path(), cv2.FONT_HERSHEY_SIMPLEX
+    if font.startswith("hershey:"):
+        return None, int(font.split(":", 1)[1])
+    if not Path(font).is_file():
+        raise FileNotFoundError(f"style font {font} is not installed")
+    return font, cv2.FONT_HERSHEY_SIMPLEX
+
+
+def render_text(
+    text: str, digit_height_px: float, font: str | None = None
+) -> tuple[np.ndarray, str]:
+    """Render ``text`` into an alpha mask (float32, 1 = ink), cropped to the ink plus 1 px.
+
+    Superscript digits (``36⁵``, ``m²``) are drawn as smaller, raised normal digits. Returns the
+    mask and the text as drawn: the input text, except that Hershey spells out umlauts.
+    ``font`` is a style font spec (see :mod:`kelpod.evaluation.synth.styles`); ``None`` = default.
+    """
+    runs = _runs(text)
+    path, face = _resolve_font(font)
     if path is not None:
         from PIL import Image, ImageDraw
 
-        size = max(6, int(round(digit_height_px / _DIGIT_EM)))
-        font = _pil_font(path, size)
-        left, top, right, bottom = font.getbbox(text)
-        pad = 1
-        img = Image.new("L", (right - left + 2 * pad, bottom - top + 2 * pad), 0)
-        ImageDraw.Draw(img).text((pad - left, pad - top), text, font=font, fill=255)
-        return np.asarray(img, np.float32) / 255.0, text
+        em = _DIGIT_EM if font is None else _digit_em(path)
+        size = max(6, int(round(digit_height_px / em)))
+        sup_size = max(5, int(round(size * SUP_SCALE)))
+        fonts = {False: _pil_font(path, size), True: _pil_font(path, sup_size)}
+        width = sum(int(np.ceil(fonts[sup].getlength(r))) + 2 for r, sup in runs) + 8
+        height = 2 * size + 8
+        base = size + 4  # baseline
+        img = Image.new("L", (width, height), 0)
+        draw = ImageDraw.Draw(img)
+        x = 4.0
+        for r, sup in runs:
+            y = base - (SUP_RAISE * digit_height_px if sup else 0.0)
+            draw.text((x, y), r, font=fonts[sup], fill=255, anchor="ls")
+            x += fonts[sup].getlength(r)
+        return _crop(np.asarray(img, np.float32) / 255.0), text
     drawn = text.translate(_HERSHEY_MAP)
-    face = cv2.FONT_HERSHEY_SIMPLEX
-    scale = digit_height_px / 22.0  # simplex digits are ~22 px high at scale 1
+    # simplex digits are ~22 px high at scale 1; other faces are measured
+    ref = 22.0 if face == cv2.FONT_HERSHEY_SIMPLEX else _hershey_digit_px(face)
+    scale = digit_height_px / ref
     thick = max(1, int(round(scale * 2)))
-    (w, h), base = cv2.getTextSize(drawn, face, scale, thick)
-    img = np.zeros((h + base + 4, w + 4), np.uint8)
-    cv2.putText(img, drawn, (2, h + 2), face, scale, 255, thick, cv2.LINE_AA)
-    ys, xs = np.nonzero(img)
-    if len(xs):
-        img = img[max(ys.min() - 1, 0) : ys.max() + 2, max(xs.min() - 1, 0) : xs.max() + 2]
-    return img.astype(np.float32) / 255.0, drawn
+    sup_scale = scale * SUP_SCALE
+    sup_thick = max(1, int(round(sup_scale * 2)))
+    plain = [(r.translate(_HERSHEY_MAP), sup) for r, sup in runs]
+    sizes = [
+        cv2.getTextSize(r, face, sup_scale if sup else scale, sup_thick if sup else thick)[0]
+        for r, sup in plain
+    ]
+    width = sum(w for w, _ in sizes) + 8
+    height = int(2 * digit_height_px) + 12
+    base = int(round(1.3 * digit_height_px)) + 4
+    img = np.zeros((height, width), np.uint8)
+    x = 4
+    for (r, sup), (w, _) in zip(plain, sizes, strict=True):
+        y = base - int(round(SUP_RAISE * digit_height_px)) if sup else base
+        sc, th = (sup_scale, sup_thick) if sup else (scale, thick)
+        cv2.putText(img, r, (x, y), face, sc, 255, th, cv2.LINE_AA)
+        x += w
+    return _crop(img.astype(np.float32) / 255.0), drawn

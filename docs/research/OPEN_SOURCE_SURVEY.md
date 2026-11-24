@@ -5,6 +5,11 @@ date. Licences were checked against each repo's `LICENSE` file or README unless 
 **unverified**. This note is not legal advice: before shipping, have a person re-check any licence the
 product depends on.
 
+**Note (2026-11-23):** the verdicts below were written for a *commercial* product. This repo is the
+open-source, educational version, so items marked **avoid** for licence reasons (GPL, AGPL,
+non-commercial data such as CubiCasa5k) may be used here with credit in `CREDITS.md`. The paid
+version is built separately.
+
 Legend for "Use": **use** = adopt as a dependency as is · **fine-tune** = use the code, retrain on
 our own (German) data · **ideas** = read the paper or code, write our own · **avoid** = licence or fit
 rules it out for the product.

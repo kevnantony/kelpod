@@ -88,10 +88,14 @@ def wall_body_mask(
 
 
 def estimate_max_thickness(body: np.ndarray) -> float:
+    """Thickness of the thickest common wall: 95th percentile of twice the distance transform on
+    its ridge (medial axis) pixels, so junction squares and odd blobs do not dominate."""
     if not body.any():
         return 0.0
     dt = cv2.distanceTransform(body.astype(np.uint8), cv2.DIST_L2, 3)
-    return float(2.0 * np.percentile(dt[dt > 0], 99.5))
+    ridge = (dt > 0) & (dt >= cv2.dilate(dt, np.ones((3, 3), np.uint8)) - 1e-3)
+    vals = dt[ridge] if ridge.any() else dt[dt > 0]
+    return float(2.0 * np.percentile(vals, 95))
 
 
 # ----------------------------------------------------------------------------------------------
@@ -145,6 +149,22 @@ def _smooth_labels(labels: list[str], min_len: int) -> list[str]:
     return labels
 
 
+def _peel_outline(frac: np.ndarray, *, thr: float = 0.6, max_skip: int = 2) -> tuple[int, int]:
+    """Rows of the face outline at the start of ``frac`` (per-row ink share across a band).
+
+    Up to ``max_skip`` weak rows at the very edge are skipped when a strong row follows, then
+    the contiguous strong rows are the outline. Returns (first row after the outline, outline
+    width in rows); (0, 0) if there is no outline."""
+    n = len(frac)
+    first = next((i for i in range(min(max_skip + 1, n)) if frac[i] >= thr), None)
+    if first is None:
+        return 0, 0
+    i = first
+    while i < n and frac[i] >= thr:
+        i += 1
+    return i, i - first
+
+
 def _column_labels(band: np.ndarray, th: float) -> tuple[list[str], float]:
     """Label every column of a wall band (rows across the wall, columns along it).
 
@@ -156,12 +176,13 @@ def _column_labels(band: np.ndarray, th: float) -> tuple[list[str], float]:
     frac = band.mean(axis=1)
     if (frac >= 0.75).all():  # solid poché
         return ["H"] * cols, 0.0
-    top, bot = 0, rows
-    while top < rows and frac[top] >= 0.6:
-        top += 1
-    while bot > top and frac[bot - 1] >= 0.6:
-        bot -= 1
-    face_lw = (top + (rows - bot)) / 2.0
+    # the face outlines are the inked rows near each edge of the band; the outermost row may be
+    # only partly inked (the band is a pixel too wide, or the face steps where a thinner window
+    # or wall joins), so skip up to two weak edge rows instead of stopping at the first one
+    top, lw_top = _peel_outline(frac)
+    end, lw_bot = _peel_outline(frac[::-1])
+    bot = max(top, rows - end)
+    face_lw = (lw_top + lw_bot) / 2.0
     top, bot = top + 1, bot - 1
     if bot - top < 2:
         return ["E"] * cols, face_lw
@@ -180,12 +201,37 @@ def _column_labels(band: np.ndarray, th: float) -> tuple[list[str], float]:
         else:
             labels.append("E")
     labels = _smooth_labels(labels, max(4, int(0.6 * th)))
-    return labels, face_lw
+    return _snap_to_jambs(labels, band, th), face_lw
 
 
-def _absorb_protrusions(
-    geo: list[list[float]], tol: float = 1.5
-) -> list[list[float]]:
+def _snap_to_jambs(labels: list[str], band: np.ndarray, th: float) -> list[str]:
+    """Move each label boundary onto a nearby jamb line (a column inked across the band)."""
+    colfrac = band.mean(axis=0)
+    jamb = colfrac >= 0.8
+    out = list(labels)
+    r = max(3, int(th / 2))
+    for j in range(1, len(labels)):
+        if labels[j] == labels[j - 1]:
+            continue
+        lo, hi = max(0, j - r), min(len(labels), j + r)
+        idx = np.nonzero(jamb[lo:hi])[0] + lo
+        if idx.size == 0:
+            continue
+        k = int(idx[np.argmin(np.abs(idx - j))])
+        # centre of that jamb line
+        k0 = k1 = k
+        while k0 > 0 and jamb[k0 - 1]:
+            k0 -= 1
+        while k1 + 1 < len(jamb) and jamb[k1 + 1]:
+            k1 += 1
+        b = (k0 + k1 + 1) // 2
+        left, right = labels[j - 1], labels[j]
+        for t in range(min(b, j), max(b, j)):
+            out[t] = left if t < b else right
+    return out
+
+
+def _absorb_protrusions(geo: list[list[float]], tol: float = 1.5) -> list[list[float]]:
     """``geo`` = ordered ``[s, e, th, c, top, bot]`` runs of one component. A short run whose
     band contains its neighbour's band (the neighbour plus something touching one face: a door
     leaf or arc foot, a T-junction bump) is absorbed into that neighbour."""
@@ -322,9 +368,7 @@ def merge_walls(runs: list[Run], *, max_gap_px: float) -> list[Run]:
     """Merge consecutive collinear non-window runs (same orientation, centre and thickness)."""
     out: list[Run] = []
     for orient in (H, V):
-        rs = sorted(
-            (r for r in runs if r.orient == orient and not r.is_window), key=lambda r: (r.a0)
-        )
+        rs = sorted((r for r in runs if r.orient == orient and not r.is_window), key=lambda r: r.a0)
         merged: list[Run] = []
         for r in rs:
             tol = max(2.0, 0.2 * r.th)
@@ -334,9 +378,7 @@ def merge_walls(runs: list[Run], *, max_gap_px: float) -> list[Run]:
                     target = m
                     break
             if target is None:
-                merged.append(
-                    Run(r.orient, r.c, r.a0, r.a1, r.th, r.label, r.hatched_frac, r.comp)
-                )
+                merged.append(Run(r.orient, r.c, r.a0, r.a1, r.th, r.label, r.hatched_frac, r.comp))
                 continue
             la, lb = target.length, r.length
             tot = la + lb
@@ -378,8 +420,25 @@ def snap_junctions(walls: list[Run], tol_px: float) -> None:
                 else:
                     w.a1 = p.c
                 w.meta[f"snap{end}"] = True
+                w.meta[f"snap_to{end}"] = p
                 # extend the perpendicular wall if it stops short of this centreline
                 if w.c < p.a0 and p.a0 - w.c <= w.th / 2 + tol_px:
                     p.a0 = w.c
                 elif w.c > p.a1 and w.c - p.a1 <= w.th / 2 + tol_px:
                     p.a1 = w.c
+
+
+def drop_face_bumps(walls: list[Run], min_len_px: float) -> list[Run]:
+    """Drop walls with one end on a perpendicular wall that stick out of that wall's face by less
+    than ``min_len_px``: a bump on the face (text or a symbol touching the outline) that only
+    survived the line opening together with the wall body it sits on."""
+    out = []
+    for w in walls:
+        s0, s1 = w.meta.get("snap_to0"), w.meta.get("snap_to1")
+        if (s0 is None) != (s1 is None):
+            p = s0 if s0 is not None else s1
+            free = w.a1 - (p.c + p.th / 2) if s0 is not None else (p.c - p.th / 2) - w.a0
+            if free < min_len_px:
+                continue
+        out.append(w)
+    return out

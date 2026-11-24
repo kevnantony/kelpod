@@ -22,8 +22,12 @@ IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
 def load(path: str | Path, dpi: float = 200.0) -> list[np.ndarray]:
     """Load every page of ``path`` as grayscale uint8 (white paper = 255) resampled to ``dpi``."""
     path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(path)
+    try:
+        is_file = path.is_file()
+    except OSError:  # e.g. PermissionError on an unreadable parent directory
+        is_file = False
+    if not is_file:
+        raise FileNotFoundError(f"input file not found or not readable: {path}")
     suffix = path.suffix.lower()
     if suffix in PDF_SUFFIXES:
         return _load_pdf(path, dpi)
@@ -46,7 +50,9 @@ def _load_pdf(path: Path, dpi: float) -> list[np.ndarray]:
         for i in range(len(pdf)):
             page = pdf[i]
             try:
-                bitmap = page.render(scale=dpi / 72.0, grayscale=True, fill_color=(255, 255, 255, 255))
+                bitmap = page.render(
+                    scale=dpi / 72.0, grayscale=True, fill_color=(255, 255, 255, 255)
+                )
                 arr = bitmap.to_numpy()
                 bitmap.close()
             finally:

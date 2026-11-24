@@ -9,6 +9,7 @@ docTR or PaddleOCR can be added with :func:`register_engine` without touching th
 from __future__ import annotations
 
 import math
+import os
 from collections.abc import Callable
 from functools import lru_cache
 from typing import Protocol, runtime_checkable
@@ -50,7 +51,19 @@ class RapidOcrEngine:
     def __init__(self, *, tile: int = 1600, overlap: int = 200, text_score: float = 0.5) -> None:
         from rapidocr_onnxruntime import RapidOCR
 
-        self._ocr = RapidOCR(max_side_len=max(4000, tile + 1), text_score=text_score)
+        # Explicit thread counts: with the default (-1) ONNX Runtime pins threads to cores and
+        # logs affinity errors inside containers / Slurm jobs. rapidocr copies the *global*
+        # values into det/cls/rec (overwriting per-module ones), so set the global keys.
+        try:
+            avail = len(os.sched_getaffinity(0))
+        except AttributeError:  # macOS
+            avail = os.cpu_count() or 1
+        n = max(1, min(8, avail))
+        threads = {"intra_op_num_threads": n, "inter_op_num_threads": 1}
+        # No 0/180° classifier: plans have no upside-down text, and next to tick marks it flips
+        # labels the wrong way. Vertical text is handled by the 90° pass in read_page.
+        self._ocr = RapidOCR(max_side_len=max(4000, tile + 1), text_score=text_score,
+                             use_cls=False, **threads)
         self.tile = tile
         self.overlap = overlap
 
@@ -113,7 +126,8 @@ def get_engine(name: str) -> OcrEngine:
     try:
         factory = _REGISTRY[name]
     except KeyError:
-        raise ValueError(f"unknown OCR backend {name!r}; available: {available_engines()}") from None
+        msg = f"unknown OCR backend {name!r}; available: {available_engines()}"
+        raise ValueError(msg) from None
     return factory()
 
 
@@ -156,8 +170,18 @@ def _overlap_small(a: list[Point], b: list[Point]) -> float:
 
 
 def dedupe(items: list[TextItem], *, thresh: float = 0.6) -> list[TextItem]:
-    """Greedy non-maximum suppression: keep the more confident (then longer) of overlapping items."""
-    order = sorted(items, key=lambda it: (-it.confidence, -len(it.text)))
+    """Greedy non-maximum suppression over overlapping items.
+
+    Ranks by confidence weighted with text length, so a whole word read in the right orientation
+    beats single characters picked out of it in the wrong one (a sideways ``5`` from ``1,255``
+    often gets confidence 1.0).
+    """
+
+    def rank(it: TextItem) -> float:
+        n = len(it.text.replace(" ", ""))
+        return it.confidence * (1.0 + 0.15 * min(n, 6))
+
+    order = sorted(items, key=lambda it: (-rank(it), -it.confidence))
     kept: list[TextItem] = []
     for it in order:
         if all(_overlap_small(it.quad, k.quad) < thresh for k in kept):
@@ -200,3 +224,40 @@ def read_page(gray: np.ndarray, engine: OcrEngine, *, rotated: bool = True) -> l
             q = [cw_to_original(p, h) for p in it.quad]
             out.append(it.model_copy(update={"quad": q, "angle_deg": round(quad_angle_deg(q), 2)}))
     return dedupe(out)
+
+
+def remove_long_lines(gray: np.ndarray, ink: np.ndarray, min_len_px: int) -> np.ndarray:
+    """Blank out long horizontal and vertical strokes (dimension and extension lines, wall
+    outlines) before OCR, plus the short straight stubs left where they met (45° ticks, ends of
+    extension lines). Text strokes are much shorter than ``min_len_px``; lines that run through
+    or touch a label otherwise make the detector split, merge or miss it."""
+    import cv2
+
+    m = np.asarray(ink, np.uint8)
+    L = max(15, int(min_len_px))
+    h = cv2.morphologyEx(m, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (L, 1)))
+    v = cv2.morphologyEx(m, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (1, L)))
+    # Grow each line by one pixel across itself to remove anti-aliased edges too.
+    h = cv2.dilate(h, np.ones((3, 1), np.uint8))
+    v = cv2.dilate(v, np.ones((1, 3), np.uint8))
+    lines = (h | v).astype(bool)
+    rest = (m.astype(bool) & ~lines).astype(np.uint8)
+    touch = cv2.dilate(lines.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(rest, connectivity=8)
+    stubs = np.zeros(n, bool)
+    max_area = L * 4
+    for k in np.unique(lab[touch & rest.astype(bool)]):
+        if k == 0 or stats[k, cv2.CC_STAT_AREA] > max_area:
+            continue
+        x, y, w, hh = stats[k, :4]
+        ys, xs = np.nonzero(lab[y : y + hh, x : x + w] == k)
+        if xs.size < 4:
+            stubs[k] = True
+            continue
+        cov = np.cov(np.vstack([xs, ys]).astype(float))
+        ev = np.linalg.eigvalsh(cov)
+        if ev[0] <= 1.0 and ev[1] >= 4.0:  # thin and straight: a stroke, not a glyph
+            stubs[k] = True
+    out = gray.copy()
+    out[lines | stubs[lab]] = 255
+    return out

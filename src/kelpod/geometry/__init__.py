@@ -99,7 +99,7 @@ def _run(
     ]
     skew = estimate_skew_deg([(w.p0, w.p1) for w in raw], prm.max_skew_deg)
     frame = Frame(m_per_px, page.height, page.width / 2, page.height / 2)
-    if abs(skew) > 0.02:
+    if abs(skew) >= prm.min_skew_deg:
         frame.rot_rad = math.radians(-skew)
         if abs(skew) > 0.5:
             issues.append(f"The walls were rotated by {skew:.1f}° and straightened.")
@@ -113,7 +113,9 @@ def _run(
             continue
         walls_m.append(WallM(frame.to_m_raw(w.p0), frame.to_m_raw(w.p1), t, w.kind))
     if n_thin:
-        issues.append(f"Ignored {n_thin} wall piece(s) thinner than {prm.min_thickness_m * 100:.0f} cm.")
+        issues.append(
+            f"Ignored {n_thin} wall piece(s) thinner than {prm.min_thickness_m * 100:.0f} cm."
+        )
     openings_m = [
         OpeningM(o.kind, frame.to_m_raw(o.p0), frame.to_m_raw(o.p1))
         for o in (seg.openings if seg is not None else [])
@@ -138,8 +140,12 @@ def _run(
             fit = None
         if fit is not None and fit.mode is not None:
             residual = fit.residual_m
-            fx = [(ln.coord, c) for ln, c in zip(lines, fit.coords, strict=True) if ln.orient == "v"]
-            fy = [(ln.coord, c) for ln, c in zip(lines, fit.coords, strict=True) if ln.orient == "h"]
+            fx = [
+                (ln.coord, c) for ln, c in zip(lines, fit.coords, strict=True) if ln.orient == "v"
+            ]
+            fy = [
+                (ln.coord, c) for ln, c in zip(lines, fit.coords, strict=True) if ln.orient == "h"
+            ]
             frame.fx, frame.fy = make_correction(fx), make_correction(fy)
             for ln, c in zip(lines, fit.coords, strict=True):
                 ln.coord = c
@@ -265,6 +271,6 @@ def _room_closure_vs_segmentation(
     report.room_closure = hits / len(regions)
     if hits < len(regions):
         report.issues.append(
-            f"{len(regions) - hits} of {len(regions)} room regions seen by the segmentation did not "
-            "become closed rooms."
+            f"{len(regions) - hits} of {len(regions)} room regions seen by the segmentation "
+            "did not become closed rooms."
         )

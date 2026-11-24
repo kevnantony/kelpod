@@ -28,6 +28,10 @@ def convert(
     storey_height: Annotated[float, typer.Option(help="Clear room height in metres")] = 2.60,
     page: Annotated[int, typer.Option(help="Page of a multi-page PDF (0-based)")] = 0,
     report: Annotated[Path | None, typer.Option(help="Write a JSON report here")] = None,
+    segment_backend: Annotated[
+        str, typer.Option(help="classical, or learned (needs KELPOD_SEG_CHECKPOINT)")
+    ] = "classical",
+    ocr_backend: Annotated[str, typer.Option(help="rapidocr or none")] = "rapidocr",
 ) -> None:
     """Convert a floor-plan scan to a closed IFC model."""
     from kelpod.pipeline import convert as run
@@ -43,6 +47,8 @@ def convert(
         plan_scale=scale,
         storey_height_m=storey_height,
         page_index=page,
+        segment_backend=segment_backend,
+        ocr_backend=ocr_backend,
     )
     rep = res.graph.report
     typer.echo(
@@ -74,3 +80,18 @@ def convert(
                 indent=2,
             )
         )
+
+
+@app.command()
+def serve(
+    host: Annotated[str, typer.Option(help="Bind address (0.0.0.0 for all)")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="Port")] = 8000,
+    jobs_dir: Annotated[Path | None, typer.Option(help="Keep jobs here")] = None,
+) -> None:
+    """Run the HTTP API (needs the `api` extra: uv sync --extra api)."""
+    from kelpod.api.__main__ import main as api_main
+
+    argv = ["--host", host, "--port", str(port)]
+    if jobs_dir is not None:
+        argv += ["--jobs-dir", str(jobs_dir)]
+    api_main(argv)

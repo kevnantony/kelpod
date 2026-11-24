@@ -16,6 +16,7 @@ from kelpod.ocr.engines import (
     get_engine,
     read_page,
     register_engine,
+    remove_long_lines,
 )
 from kelpod.ocr.interpret import annotate
 
@@ -31,5 +32,8 @@ def run(page: RasterPage, *, backend: str = "rapidocr") -> OcrAnnotations:
         return OcrAnnotations(backend="none", notes=[f"OCR backend {backend!r} unavailable: {exc}"])
     if backend == "none":
         return OcrAnnotations(backend="none", notes=["OCR disabled (backend 'none')"])
-    items = read_page(page.image, engine)
+    # Lines longer than ~12 mm on paper are not text (labels are 2.5-5 mm high).
+    min_len = round(12.0 / 25.4 * page.dpi)
+    gray = remove_long_lines(page.image, page.ink, min_len)
+    items = read_page(gray, engine)
     return annotate(items, page.ink, engine.name)

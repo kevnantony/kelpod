@@ -2,8 +2,8 @@
 
 The layout is a guillotine partition of a rectangular footprint. All sizes follow the German
 octametric system (*oktametrische Maßordnung*, DIN 4172): clear room widths and opening widths are
-``n * 12.5 cm + 1 cm``, outer dimensions ``n * 12.5 cm - 1 cm``. Every wall line has one thickness, so
-every room is a rectangle bounded by inner wall faces.
+``n * 12.5 cm + 1 cm``, outer dimensions ``n * 12.5 cm - 1 cm``. Every wall line has one thickness,
+so every room is a rectangle bounded by inner wall faces.
 
 Internal coordinates: the inner faces of the exterior walls span ``[0, inner_w] x [0, inner_h]``;
 :func:`make_layout` shifts everything by ``origin`` so the result is in plan space (y up, origin at
@@ -36,8 +36,8 @@ MIN_ROOM_W = 1.135
 WINDOW_WIDTHS = (1.01, 1.135, 1.26, 1.385, 1.51, 1.76, 2.01)
 SMALL_WINDOW_WIDTHS = (0.635, 0.76, 0.885)
 DOOR_HEIGHT = 2.01
-WINDOW_HEAD = 2.26
-"""Window head height above the floor; window height = head - sill."""
+WINDOW_HEAD = 2.285
+"""Window head above the floor (0.90 sill + 1.385 height, as in export/geometry defaults)."""
 EPS = 1e-6
 
 
@@ -122,16 +122,27 @@ def okta_clear(n: int) -> float:
     return round(n * OKTA + 0.01, 4)
 
 
+def _plausible(w: float, h: float) -> bool:
+    """Narrow rooms (WC, hall, store) must stay short: no 1.2 m x 10 m strips."""
+    short, long_ = min(w, h), max(w, h)
+    return short >= 1.8 or long_ <= 3.5 * short
+
+
 def _split(cell: Cell, axis: str, rng: np.random.Generator, t: float) -> float | None:
-    """Pick a clear width for the first part of a split, or None if the cell is too small."""
+    """Pick a clear width for the first part of a split, or None if no split gives two plausible
+    rooms."""
     length = cell.w if axis == "v" else cell.h
+    across = cell.h if axis == "v" else cell.w
     lo_n = math.ceil((MIN_ROOM_W - 0.01) / OKTA - EPS)
     hi_n = math.floor((length - t - MIN_ROOM_W - 0.01) / OKTA + EPS)
-    if hi_n < lo_n:
+    ok = [
+        n
+        for n in range(lo_n, hi_n + 1)
+        if _plausible(okta_clear(n), across) and _plausible(length - t - okta_clear(n), across)
+    ]
+    if not ok:
         return None
-    # prefer splits away from the very edges, but allow narrow rooms (WC, Flur)
-    n = int(rng.integers(lo_n, hi_n + 1))
-    return okta_clear(n)
+    return okta_clear(int(rng.choice(ok)))
 
 
 def _partition(
@@ -315,31 +326,54 @@ def _openings(
             into, other = other, into
         out.append(
             OpeningSpec(
-                OpeningKind.DOOR, lid, s0, s0 + width, 0.0, DOOR_HEIGHT, into, other,
+                OpeningKind.DOOR,
+                lid,
+                s0,
+                s0 + width,
+                0.0,
+                DOOR_HEIGHT,
+                into,
+                other,
                 hinge_at_s0=bool(rng.random() < 0.5),
             )
         )
 
     # windows (and the entrance door) on exterior sides
     exterior = {ln.id for ln in lines if ln.kind == WallKind.EXTERIOR}
-    entrance_room = names.index("Flur") if "Flur" in names else int(
-        np.argmax([c.area for c in cells])
+
+    # entrance: the hall if it has an outside wall, else the room with the longest outside side
+    def ext_len(ci: int) -> float:
+        c = cells[ci]
+        sides = [c.side_interval(s) for s in "snwe" if c.sides[s] in exterior]
+        return max((b - a for a, b in sides), default=0.0)
+
+    candidates = sorted(
+        range(len(cells)), key=lambda ci: (names[ci] != "Flur" or ext_len(ci) < 1.6, -ext_len(ci))
     )
+    entrance_room = candidates[0]
     entrance_done = False
     window_lines = int(rng.choice([2, 3]))
     for ci, cell in enumerate(cells):
         ext_sides = [s for s in "snwe" if cell.sides[s] in exterior]
         rng.shuffle(ext_sides)
-        if ci == entrance_room and ext_sides:
-            side = ext_sides[0]
+        if ci == entrance_room:
+            # the longest outside side, so the door always fits
+            side = max(ext_sides, key=lambda s: cell.side_interval(s)[1] - cell.side_interval(s)[0])
             lo, hi = cell.side_interval(side)
             s0 = _place(lo, hi, 1.01, rng, inset=0.25, centred=False)
             if s0 is not None:
                 occ.add(cell.sides[side], s0, s0 + 1.01)
                 out.append(
                     OpeningSpec(
-                        OpeningKind.DOOR, cell.sides[side], s0, s0 + 1.01, 0.0, DOOR_HEIGHT, ci,
-                        None, hinge_at_s0=bool(rng.random() < 0.5),
+                        OpeningKind.DOOR,
+                        cell.sides[side],
+                        s0,
+                        s0 + 1.01,
+                        0.0,
+                        DOOR_HEIGHT,
+                        ci,
+                        None,
+                        hinge_at_s0=bool(rng.random() < 0.5),
                     )
                 )
                 entrance_done = True
@@ -363,18 +397,31 @@ def _openings(
             sill = _sill_for(name, rng)
             out.append(
                 OpeningSpec(
-                    OpeningKind.WINDOW, lid, s0, s0 + width, sill, round(WINDOW_HEAD - sill, 4),
-                    ci, None, window_lines=window_lines,
+                    OpeningKind.WINDOW,
+                    lid,
+                    s0,
+                    s0 + width,
+                    sill,
+                    round(WINDOW_HEAD - sill, 4),
+                    ci,
+                    None,
+                    window_lines=window_lines,
                 )
             )
-    if not entrance_done:  # pragma: no cover - every footprint has an exterior side
+    if not entrance_done:
         raise RuntimeError("no entrance door placed")
     return out
 
 
 def _graph(
-    lines: list[Line], cells: list[Cell], names: list[str], stamp_areas: list[float],
-    openings: list[OpeningSpec], origin: tuple[float, float], m_per_px: float, image_h: int,
+    lines: list[Line],
+    cells: list[Cell],
+    names: list[str],
+    stamp_areas: list[float],
+    openings: list[OpeningSpec],
+    origin: tuple[float, float],
+    m_per_px: float,
+    image_h: int,
 ) -> PlanGraph:
     ox, oy = origin
     node_ids: dict[tuple[float, float], int] = {}
@@ -417,8 +464,13 @@ def _graph(
             if lid == op.line_id and a - EPS <= op.s0 and op.s1 <= b + EPS:
                 ops.append(
                     Opening(
-                        id=len(ops), kind=op.kind, wall_id=wid, offset_m=round(op.s0 - a, 6),
-                        width_m=round(op.s1 - op.s0, 6), sill_m=op.sill, height_m=op.height,
+                        id=len(ops),
+                        kind=op.kind,
+                        wall_id=wid,
+                        offset_m=round(op.s0 - a, 6),
+                        width_m=round(op.s1 - op.s0, 6),
+                        sill_m=op.sill,
+                        height_m=op.height,
                     )
                 )
                 break
@@ -427,16 +479,30 @@ def _graph(
 
     rooms = []
     for i, c in enumerate(cells):
-        poly = [(c.x0 + ox, c.y0 + oy), (c.x1 + ox, c.y0 + oy), (c.x1 + ox, c.y1 + oy),
-                (c.x0 + ox, c.y1 + oy)]
+        poly = [
+            (c.x0 + ox, c.y0 + oy),
+            (c.x1 + ox, c.y0 + oy),
+            (c.x1 + ox, c.y1 + oy),
+            (c.x0 + ox, c.y1 + oy),
+        ]
         poly = [(round(x, 6), round(y, 6)) for x, y in poly]
         rooms.append(
-            Room(id=i, polygon=poly, name=names[i], area_m2=round(c.area, 6),
-                 stamp_area_m2=stamp_areas[i])
+            Room(
+                id=i,
+                polygon=poly,
+                name=names[i],
+                area_m2=round(c.area, 6),
+                stamp_area_m2=stamp_areas[i],
+            )
         )
     return PlanGraph(
-        nodes=nodes, walls=walls, openings=ops, rooms=rooms, m_per_px=m_per_px,
-        scale_source="ground_truth", image_height_px=image_h,
+        nodes=nodes,
+        walls=walls,
+        openings=ops,
+        rooms=rooms,
+        m_per_px=m_per_px,
+        scale_source="ground_truth",
+        image_height_px=image_h,
     )
 
 

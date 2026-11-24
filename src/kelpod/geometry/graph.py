@@ -34,6 +34,15 @@ def _cross(a, b) -> float:
     return a[0] * b[1] - a[1] * b[0]
 
 
+def _lerp(a: float, b: float, t: float) -> float:
+    """Exact at the ends and for constant coordinates (keeps axis walls exactly axis-parallel)."""
+    if a == b or t == 0.0:
+        return a
+    if t == 1.0:
+        return b
+    return a + t * (b - a)
+
+
 def snap_free(free: list[Seg], fixed: list[Seg], tol: float) -> list[Seg]:
     """Snap ends of non-axis walls to nearby wall ends, else onto nearby walls."""
     out = []
@@ -66,15 +75,16 @@ def snap_free(free: list[Seg], fixed: list[Seg], tol: float) -> list[Seg]:
 
 def node_segments(segs: list[Seg], eps: float) -> list[Seg]:
     """Split segments at T-junctions and crossings (planar noding)."""
-    splits: list[list[float]] = [[] for _ in segs]
+    splits: list[list[tuple[float, Point]]] = [[] for _ in segs]
     for i, s in enumerate(segs):
         p, r = s.p0, (s.p1[0] - s.p0[0], s.p1[1] - s.p0[1])
         Lr = math.hypot(*r)
         if Lr < 1e-9:
             continue
         for j in range(i + 1, len(segs)):
-            q = segs[j].p0
-            sv = (segs[j].p1[0] - q[0], segs[j].p1[1] - q[1])
+            o = segs[j]
+            q = o.p0
+            sv = (o.p1[0] - q[0], o.p1[1] - q[1])
             Ls = math.hypot(*sv)
             if Ls < 1e-9:
                 continue
@@ -85,17 +95,25 @@ def node_segments(segs: list[Seg], eps: float) -> list[Seg]:
             t = _cross(qp, sv) / den
             u = _cross(qp, r) / den
             et, eu = eps / Lr, eps / Ls
-            if -et <= t <= 1 + et and -eu <= u <= 1 + eu:
-                if et < t < 1 - et:
-                    splits[i].append(t)
-                if eu < u < 1 - eu:
-                    splits[j].append(u)
+            if not (-et <= t <= 1 + et and -eu <= u <= 1 + eu):
+                continue
+            # exact point for axis-on-axis junctions, else interpolated on segment i
+            if r[1] == 0 and sv[0] == 0:
+                x = (q[0], p[1])
+            elif r[0] == 0 and sv[1] == 0:
+                x = (p[0], q[1])
+            else:
+                x = (_lerp(p[0], s.p1[0], t), _lerp(p[1], s.p1[1], t))
+            if et < t < 1 - et:
+                splits[i].append((t, x))
+            if eu < u < 1 - eu:
+                splits[j].append((u, x))
     out = []
     for s, ts in zip(segs, splits, strict=True):
-        params = [0.0, *sorted(set(round(t, 9) for t in ts)), 1.0]
-        pts = [(s.p0[0] + t * (s.p1[0] - s.p0[0]), s.p0[1] + t * (s.p1[1] - s.p0[1])) for t in params]
+        pts = [s.p0, *(x for _, x in sorted(ts)), s.p1]
         for a, b in zip(pts[:-1], pts[1:], strict=True):
-            out.append(Seg(a, b, s.t, s.kind))
+            if a != b:
+                out.append(Seg(a, b, s.t, s.kind))
     return out
 
 
@@ -290,7 +308,9 @@ def find_rooms(nodes: list[Node], walls: list[Wall], prm: GeometryParams) -> tup
     return rooms, n_small
 
 
-def label_rooms(rooms: list[Room], stamps: list[tuple[RoomStamp, Point]], issues: list[str]) -> None:
+def label_rooms(
+    rooms: list[Room], stamps: list[tuple[RoomStamp, Point]], issues: list[str]
+) -> None:
     polys = [Polygon(r.polygon) for r in rooms]
     chosen: dict[int, tuple[float, RoomStamp]] = {}
     lost = []

@@ -1,0 +1,11 @@
+{
+ "manifest_version": 1,
+ "split": "test-real",
+ "status": "pending",
+ "kind": "sealed",
+ "family": "test-real",
+ "created_utc": "2026-11-24 01:34",
+ "note": "~/kelpod-data/sealed/real-test does not exist yet",
+ "n_items": 0,
+ "items": []
+}

@@ -79,9 +79,15 @@ def closure_metrics(graph: PlanGraph) -> ConsistencyReport:
                 )
     residual = graph.report.dimension_residual_m if graph.report else None
     return ConsistencyReport(
-        n_nodes=n_nodes, n_walls=len(graph.walls), n_rooms=len(graph.rooms), n_components=n_comp,
-        dangling_nodes=dangling, node_closure=node_closure, room_closure=room_closure,
-        dimension_residual_m=residual, issues=issues,
+        n_nodes=n_nodes,
+        n_walls=len(graph.walls),
+        n_rooms=len(graph.rooms),
+        n_components=n_comp,
+        dangling_nodes=dangling,
+        node_closure=node_closure,
+        room_closure=room_closure,
+        dimension_residual_m=residual,
+        issues=issues,
     )
 
 
@@ -96,14 +102,16 @@ class GroundTruthComparison(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     offset_m: tuple[float, float] = (0.0, 0.0)
-    """Translation added to the prediction before comparing (bounding-box alignment)."""
+    """Translation added to the prediction before comparing."""
+    alignment: str = "none"
+    """How ``offset_m`` was chosen: ``none``, ``bbox_min`` or ``bbox_max``."""
     n_rooms_pred: int = 0
     n_rooms_gt: int = 0
     room_iou_mean: float = 0.0
     """Mean IoU over ground-truth rooms after Hungarian matching (unmatched rooms count as 0)."""
     room_precision: float = 0.0
     room_recall: float = 0.0
-    """Matched pairs with IoU >= ``room_iou_threshold`` / number of predicted (ground-truth) rooms."""
+    """Pairs with IoU >= ``room_iou_threshold`` / number of predicted (ground-truth) rooms."""
     room_area_error: float | None = None
     """Mean relative area error |A_pred - A_gt| / A_gt over matched rooms."""
     total_area_error: float | None = None
@@ -123,13 +131,22 @@ class GroundTruthComparison(BaseModel):
     """Mean |width_pred - width_gt| over kind-matched openings."""
 
 
-def _bbox_min(graph: PlanGraph) -> tuple[float, float] | None:
+def _bbox(graph: PlanGraph) -> tuple[float, float, float, float] | None:
     used = {e for w in graph.walls for e in (w.start, w.end)}
     pts = [(n.x, n.y) for n in graph.nodes if n.id in used] or [(n.x, n.y) for n in graph.nodes]
     if not pts:
         return None
     xs, ys = zip(*pts, strict=True)
-    return (min(xs), min(ys))
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
+def _candidate_offsets(pred: PlanGraph, gt: PlanGraph) -> dict[str, tuple[float, float]]:
+    out = {"none": (0.0, 0.0)}
+    a, b = _bbox(pred), _bbox(gt)
+    if a is not None and b is not None:
+        out["bbox_min"] = (b[0] - a[0], b[1] - a[1])
+        out["bbox_max"] = (b[2] - a[2], b[3] - a[3])
+    return out
 
 
 def _segments(graph: PlanGraph, offset: tuple[float, float]) -> np.ndarray:
@@ -206,23 +223,38 @@ def compare_to_ground_truth(
     pred: PlanGraph,
     gt: PlanGraph,
     *,
-    align: Literal["bbox", "none"] = "bbox",
+    align: Literal["best", "bbox", "none"] = "best",
     wall_tol_m: float = 0.10,
     room_iou_threshold: float = 0.5,
     opening_tol_m: float = 0.30,
 ) -> GroundTruthComparison:
     """Compare a predicted plan graph with the ground truth.
 
-    The prediction is first shifted so the minimum corner of its wall-node bounding box meets the
-    ground truth's (``align="bbox"``); rotation is not compensated, so deskew errors show up here.
+    Alignment (translation only; rotation is not compensated, so deskew errors show up here):
+    ``"bbox"`` shifts the prediction so the minimum corners of the wall-node bounding boxes meet;
+    ``"none"`` compares as is (the pipeline and the generator share the plan-space origin, the
+    bottom-left page corner); ``"best"`` (default) tries no shift and min- and max-corner
+    alignment and keeps the one with the highest wall F1, so one spurious wall outside the
+    building cannot spoil every score.
     """
-    offset = (0.0, 0.0)
-    if align == "bbox":
-        a, b = _bbox_min(pred), _bbox_min(gt)
-        if a is not None and b is not None:
-            offset = (b[0] - a[0], b[1] - a[1])
-    res = GroundTruthComparison(offset_m=offset, n_rooms_pred=len(pred.rooms),
-                                n_rooms_gt=len(gt.rooms))
+    cands = _candidate_offsets(pred, gt)
+    if align == "none" or len(cands) == 1:
+        name = "none"
+    elif align == "bbox":
+        name = "bbox_min"
+    else:
+        gs0 = _segments(gt, (0.0, 0.0))
+
+        def f1(off):
+            ps0 = _segments(pred, off)
+            p, r = _covered_share(ps0, gs0, wall_tol_m), _covered_share(gs0, ps0, wall_tol_m)
+            return 2 * p * r / (p + r) if p + r > 0 else 0.0
+
+        name = max(cands, key=lambda k: (f1(cands[k]), k == "none"))
+    offset = cands[name]
+    res = GroundTruthComparison(
+        offset_m=offset, alignment=name, n_rooms_pred=len(pred.rooms), n_rooms_gt=len(gt.rooms)
+    )
 
     # rooms: Hungarian matching on IoU
     def polys(graph: PlanGraph, off):
@@ -246,9 +278,9 @@ def compare_to_ground_truth(
         res.room_precision = len(tp) / len(pred.rooms)
         res.room_recall = len(tp) / len(gt.rooms)
         if tp:
-            res.room_area_error = float(np.mean(
-                [abs(pr[r][1].area - gr[c][1].area) / gr[c][1].area for r, c in tp]
-            ))
+            res.room_area_error = float(
+                np.mean([abs(pr[r][1].area - gr[c][1].area) / gr[c][1].area for r, c in tp])
+            )
             named = [(pr[r][0], gr[c][0]) for r, c in tp if gr[c][0].name]
             if named:
                 res.room_name_accuracy = sum(

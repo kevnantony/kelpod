@@ -49,9 +49,9 @@ class Fixture:
 
 
 def _text_img(text: str, f, pad: int = 2) -> Image.Image:
-    l, t, r, b = f.getbbox(text)
-    im = Image.new("L", (r - l + 2 * pad, b - t + 2 * pad), 255)
-    ImageDraw.Draw(im).text((pad - l, pad - t), text, font=f, fill=0)
+    left, t, r, b = f.getbbox(text)
+    im = Image.new("L", (r - left + 2 * pad, b - t + 2 * pad), 255)
+    ImageDraw.Draw(im).text((pad - left, pad - t), text, font=f, fill=0)
     return im
 
 
@@ -105,7 +105,7 @@ def make_fixture(text_px: int = 22) -> Fixture:
     h_vals = [("3,51", 3.51), ("0,885", 0.885), ("4,26", 4.26), ("88,5", 0.885), ("2,01", 2.01)]
     xs = [300.0]
     for _, v in h_vals:
-        xs.append(xs[-1] + max(v, 1.0) * 110)
+        xs.append(xs[-1] + v * 110)
     for xa, xb, t, q in draw_chain_h(img, xs, 200, [t for t, _ in h_vals], f):
         v = dict(h_vals)[t]
         fx.chains.append(Chain(t, v, False, ((xa, 200.0), (xb, 200.0)), q))
@@ -113,7 +113,7 @@ def make_fixture(text_px: int = 22) -> Fixture:
     v_vals = [("2,76", 2.76), ("1,26", 1.26), ("76", 0.76), ("3,01", 3.01)]
     ys = [1250.0]
     for _, v in v_vals:
-        ys.append(ys[-1] - max(v, 1.0) * 110)
+        ys.append(ys[-1] - v * 110)
     for ya, yb, t, q in draw_chain_v(img, 200, ys, [t for t, _ in v_vals], f):
         v = dict(v_vals)[t]
         fx.chains.append(Chain(t, v, True, ((200.0, ya), (200.0, yb)), q))
