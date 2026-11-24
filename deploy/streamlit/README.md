@@ -12,6 +12,9 @@ Free hosting with uploads, no card. Deploy once:
 3. Deploy. The first build takes a few minutes.
 
 The app installs Kelpod from GitHub at the commit pinned in `requirements.txt`; bump it to update.
+System libraries for OpenCV come from `packages.txt` at the repo root (Streamlit Cloud only reads it
+there).
+
 It uses the classical segmenter (no model weights) at 160 dpi, runs one conversion at a time in a
 short-lived child process, and deletes uploads right after converting. Measured on the Mac: the
 page idles at about 150 MB; a conversion peaks at about 0.93 GB (8-room synthetic plan). Run locally:
