@@ -8,10 +8,14 @@ Read `KELPOD_CONTEXT.md`, `CLAUDE.md` and `docs/ARCHITECTURE.md` first. Work on 
 The pipeline runs end to end on at least 3 synthetic sample plans, writes IFC files that IfcOpenShell
 re-opens, the closure metric and runtime are reported honestly, and `uv run pytest` passes.
 
-## TOP PRIORITY (user request, 2026-11-24 13:00 CET): make Kelpod work on real historic plans
+## Queued, not urgent (user, 2026-11-24 13:15 CET): make Kelpod work on real historic plans
 
-The user uploaded three real German plans to the sandbox and the results were bad. Before any other
-experiment, improve Kelpod for this type of plan. Files (licence unchecked, keep them out of the
+**Not a priority.** The user asked to keep working on what was in progress before (fine-tuning,
+evaluation, continuous improvement) and to take this up afterwards, as one of the normal
+improvement items. The measurements below stay valid.
+
+The user uploaded three real German plans to the sandbox and the results were bad. When the current
+work is done, improve Kelpod for this type of plan. Files (licence unchecked, keep them out of the
 repo): `~/kelpod-data/real/user-feedback-2026-11-24/` (README.txt describes each).
 
 Measured with the current pipeline (160 dpi, classical segmenter) on 2026-11-24:

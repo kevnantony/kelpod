@@ -9,7 +9,8 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-24 14:10 CET. Numbers are synthetic unless marked "real"._
+_Last updated: 2026-11-24 13:20 CET (priorities reset by the user; agent paused for a usage
+limit until 17:20)._ Numbers are synthetic unless marked "real"._
 
 **Done**
 - MVP promoted to `main` as **`baseline-v0`**: pipeline, API, evaluation protocol v1
@@ -20,7 +21,11 @@ _Last updated: 2026-11-24 14:10 CET. Numbers are synthetic unless marked "real".
 - Learned segmentation (fine-tuned U-Net) is available as an option. On val-synth: correct-closed
   98 % vs. 72 % (synthetic).
 
-**Doing now: real historic plans (top priority)**
+**Doing now**
+- Resume `exp/ocr-chainsum` (joint reading of dimension chains) and the other work that was in
+  progress before the historic-plans detour.
+
+**Next: real historic plans (queued by the user, not urgent)**
 - Your 3 historic plans, real, measured 2026-11-24: **none works yet**, with either segmenter.
   - Villa Garten/Vorhof: classical gives 9 rooms but 19 loose wall ends.
   - Villa Gundel: 1 room.
@@ -32,9 +37,9 @@ _Last updated: 2026-11-24 14:10 CET. Numbers are synthetic unless marked "real".
   resolution, scale bars, clutter) plus randomised styles, 2 seeds.
 - Collecting more openly licensed historic German plans for a real dev set.
 
-**Next**
-- Report per plan which of the 3 work after each change; then promote what passes the protocol.
-- Paused: `exp/ocr-chainsum` (joint reading of dimension chains), work in progress on its branch.
+**After that**
+- Report per plan which of the 3 historic plans work after each change; then promote what passes
+  the protocol.
 <!-- status:end -->
 
 ```bash
