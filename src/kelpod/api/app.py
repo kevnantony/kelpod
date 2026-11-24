@@ -166,8 +166,12 @@ def create_app(
         storey_height_m: Annotated[float, Form(gt=1.5, le=10, description="Room height")] = 2.60,
         page: Annotated[int, Form(ge=0, description="Page of a multi-page PDF (0-based)")] = 0,
         ocr_backend: Annotated[str, Form()] = "rapidocr",
-        segment_backend: Annotated[str, Form()] = "classical",
+        segment_backend: Annotated[str | None, Form()] = None,
     ) -> dict[str, Any]:
+        if not segment_backend:  # the run configuration's default (learned)
+            from kelpod.runconfig import default_segment_backend
+
+            segment_backend = default_segment_backend()
         if ocr_backend not in ocr.available_engines():
             raise HTTPException(
                 422, f"Unknown ocr_backend {ocr_backend!r}; use one of {ocr.available_engines()}."
@@ -206,6 +210,10 @@ def create_app(
             try:
                 res = await anyio.to_thread.run_sync(work, limiter=limiter)
             except Exception as exc:  # any pipeline failure is reported as unprocessable input
+                from kelpod.runconfig import CheckpointError
+
+                if isinstance(exc, CheckpointError | ImportError):  # server set-up, not input
+                    raise HTTPException(503, f"Segmentation model unavailable: {exc}") from exc
                 hint = ""
                 if isinstance(exc, IndexError) and page > 0:
                     hint = f" Does the file have a page {page} (0-based)?"

@@ -1,0 +1,10 @@
+# Run configuration of this branch (read by kelpod.runconfig; later also by scripts/locked_eval.py).
+# PROVISIONAL: points at r34 exported to ONNX until the learned-v1 seeds are trained.
+segment_backend = "learned"
+ocr_backend = "rapidocr"
+python_project = "."
+
+[[checkpoints]]
+seed = 0
+path = "~/kelpod-models/kelpod-seg/r34-onnx/model.onnx"
+sha256 = "1ccecf59d02966e1b76959c94642f550f9b82e0ed308582bfa9ceb0b97a195d1"

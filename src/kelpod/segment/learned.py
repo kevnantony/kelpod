@@ -100,6 +100,21 @@ def load_model(path: str | Path, *, threads: int | None = None):
     return _TorchScriptModel(p, threads)
 
 
+_CACHE: dict[tuple, object] = {}
+
+
+def load_model_cached(path: str | Path, *, threads: int | None = None):
+    """:func:`load_model`, kept per process (keyed by path, size and mtime), so a server or a
+    batch run loads the network once."""
+    p = Path(path)
+    st = p.stat()
+    key = (str(p.resolve()), st.st_size, st.st_mtime_ns, threads)
+    if key not in _CACHE:
+        _CACHE.clear()
+        _CACHE[key] = load_model(p, threads=threads)
+    return _CACHE[key]
+
+
 def predict_tiled(
     model: Callable[[np.ndarray], np.ndarray],
     gray: np.ndarray,
@@ -506,7 +521,9 @@ class LearnedSegmenter:
                     f"{ENV_CHECKPOINT}=/path/to/model.pt (see training/README.md); or use "
                     "backend='classical'"
                 )
-            self._model = load_model(self.weights, threads=self.threads)
+            if not self.weights.is_file():
+                raise FileNotFoundError(f"segmentation checkpoint not found: {self.weights}")
+            self._model = load_model_cached(self.weights, threads=self.threads)
         logits = predict_tiled(self._model, gray, tile=self.tile)
         return np.argmax(logits, axis=0).astype(np.uint8)
 
