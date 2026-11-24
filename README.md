@@ -9,9 +9,14 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-24 20:00 CET. Numbers are synthetic unless marked "real"._
+_Last updated: 2026-11-24 22:30 CET (branch exp/historic-plans, not promoted). Numbers are synthetic unless marked "real"._
 
 **Done**
+- `exp/historic-plans` (not promoted): hand labels for the 3 historic plans (outside git, my labels, not an
+  expert's) + dev scorer; scale-bar detection, interior dimension lines, multi-plan sheet splitting,
+  historic room names (hyphen joins, exterior spaces flagged). Real, 3 plans: scale error 1-5 % (was 59-95 %
+  on the two bar plans); rooms still poor (villa 3 of 19, gundel IoU 0.30, tafel plans 0.18 / 0.29).
+  Synthetic benchmark unchanged (closed 0.85, IoU 0.990).
 - Branch `exp/din-web-plans` (not promoted): low-resolution web plans are upscaled instead of shrunk,
   a thin-line ("double line") wall detector exists as a fallback. Real, 2 web plans: 0 -> 5 rooms each,
   but neither closes (see docs/EXPERIMENTS.md `din-web-plans`). Synthetic benchmark unchanged.

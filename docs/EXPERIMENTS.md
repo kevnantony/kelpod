@@ -147,3 +147,21 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
   lines, open outline at window gaps.
 - **Decision:** the upscale and footprint-guard changes are safe candidates (no synthetic change);
   the `pairs` backend is an experimental fallback, not a result. Not promoted, no locked run.
+
+
+## historic-plans (2026-11-24, CPU only, no GPU used)
+
+Branch `exp/historic-plans` (on top of main + `exp/din-web-plans`). Labels: `~/kelpod-data/real/user-feedback-2026-11-24/labels/`
+(outside git; hand-made by the agent with `scripts/dev/annotate_assist.py`, +-5 px, scales of the villa and the sheet ASSUMED
+from unnumbered scale bars). Scorer: `scripts/dev/realdev_score.py`. Real, 3 plans, not a benchmark; scale_err in the table is
+partly circular for the two bar plans (label scale uses the same bar).
+
+| plan | before: rooms / wall F1 / room IoU / scale err | after |
+|---|---|---|
+| villa-garten-vorhof (19 GT rooms) | 5 / 0.16 / 0.02 / 59 % | 3 / 0.32 / 0.07 / 1 % |
+| villa-gundel (7) | 12 / 0.59 / 0.31 / 4 % | 13 / 0.55 / 0.30 / 5 % (source: dimensions) |
+| tafel71 plan 2 (7) | 12 / 0.27 / 0.23 / 59 % (whole sheet) | 3 / 0.41 / 0.18 / 2 % |
+| tafel71 plan 3 (6) | 12 / 0.23 / 0.14 / 59 % | 4 / 0.71 / 0.29 / 2 % |
+
+Synthetic (`benchmark.py --n 20 --seed 300 --degrade 0.5`): before closed 0.850, IoU 0.991, wall F1 0.996; after 0.850, 0.990, 0.995.
+Tried and dropped: snapping partitions across 1.2 m door gaps in massive walls (made tafel rooms worse).
