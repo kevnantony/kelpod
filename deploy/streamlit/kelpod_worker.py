@@ -11,6 +11,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Import kelpod from the repo checkout (see streamlit_app.py), also when run without PYTHONPATH.
+_SRC = Path(__file__).resolve().parents[2] / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
 # The viewer page shows plan and model side by side; Streamlit shows the plan itself, so the
 # embedded page keeps only its 3D pane, filling the frame.
 ONLY_3D = ("<style>header,main>section:first-child,.pane h2,.stats{display:none!important}"
