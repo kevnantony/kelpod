@@ -13,5 +13,8 @@
 #SBATCH -o logs/slurm-agent-%j.out
 export CLAUDE_CONFIG_DIR=${CLAUDE_CONFIG_DIR:-$HOME/.claude-kelpod}
 export KELPOD_MODEL=${KELPOD_MODEL:-claude-opus-5-5}
+# Spend the usage limit wisely: Opus leads (plans, reviews, integrates, decides promotions);
+# subagents run on Sonnet by default and may pick Haiku for mechanical work.
+export CLAUDE_CODE_SUBAGENT_MODEL=${CLAUDE_CODE_SUBAGENT_MODEL:-claude-sonnet-5-5}
 cd "${SLURM_SUBMIT_DIR:-$HOME/kelpod}"
 bash scripts/agent-loop.sh

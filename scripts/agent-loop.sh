@@ -26,6 +26,12 @@ beats the benchmark, revert what does not, log every experiment in docs/EXPERIME
 - Work multi-agent: whenever two or more pieces of work are independent (modules, experiments,
   training runs, evaluation, research, docs), start one subagent per piece IN PARALLEL with the
   shared rules and a clear brief. You review, test, integrate.
+- Usage budget: the 5-hour account limit is the bottleneck, so spend it where judgement matters.
+  You (Opus) plan, review diffs, integrate and decide promotions. Subagents run on Sonnet by default
+  (give model "haiku" to mechanical ones: data conversion, log digging, reformatting). At most 3
+  subagents at a time; give each a narrow brief and ask for a short report. Let scripts and Slurm
+  jobs do long or repetitive work instead of agents watching it; never poll in a loop, never read
+  whole logs or data files (tail/grep them), and do not re-read files you already know.
 - Check whether something already exists (open source, papers) before building it.
 - Commit and push about once an hour (bundle the work of the hour; also before a promotion and before
   stopping for a usage limit). No need to commit after every small change.
