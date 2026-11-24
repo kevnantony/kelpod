@@ -70,8 +70,16 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   deterministic vectoriser (oracle check: wall recall >= 0.995, room IoU 0.98); CubiCasa5k released
   model as zero-shot baseline; converters for Swiss Dwellings / ResPlan / CubiCasa5k; 4000 synth
   train pages built. No training run finished yet, no comparison numbers yet.
-- [ ] (step 0, parallel) `eval/protocol-v1` in worktree ~/kelpod-wt/protocol-v1: held-out generator
-  style WIP, uncommitted; splits, manifests and locked_eval.py not done yet.
+- [x] (step 0) `eval/protocol-v1` built and merged into this branch (cc4518a, no pipeline change):
+  held-out generator style (default output byte-identical), frozen val-synth (200, train style,
+  degrade 0-1.2) and test-synth (300, held-out style) in ~/kelpod-data/eval/ with SHA-256 manifests
+  in `eval/manifests/`, fresh split per promotion, `scripts/locked_eval.py` (input-only temp dir,
+  panel, paired bootstrap, promotion rule, 2-run budget, TEST_LOG), overlap/pHash checks; the gate
+  now commits the TEST_LOG line. Smoke run of the current baseline on val-synth (200, synthetic):
+  correct-closed 0.525, closed 0.585, room IoU 0.901, wall F1 0.974, doors P/R 0.93/0.94, 0 crashes.
+  Pending: test-ood splits (need a committed renderer writing full GT graphs), real-dev / test-real
+  (no files in ~/kelpod-data/real yet), OCR panel metrics (pipeline result exposes no OCR output).
+  Open protocol points are listed in eval/README.md.
 - [x] Minimal FastAPI endpoint (`kelpod.api`): `GET /health`, `POST /convert` (multipart upload,
   extension + magic-byte check, 415/413/422, pipeline in a worker thread), `GET /jobs/{id}` and
   `GET /jobs/{id}/model.ifc`; jobs keep-last-N + TTL, temp dir removed on shutdown. Run with
