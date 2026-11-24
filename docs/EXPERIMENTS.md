@@ -2,6 +2,18 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## din-web-v2 (2026-11-25, branch exp/din-web-v2, locked run 1 of 2: FAIL on door recall only)
+
+- **Change vs din-web-plans:** footprint guard fixed (in the partial-footprint case only wall and
+  window networks that border the footprint and total >= 3 m are kept; loose stubs such as
+  dimension extension lines dropped). Root cause found on one val plan (s200009, open outline).
+- **Val-synth (200, synthetic), main -> branch:** correct-closed 0.720 -> 0.725, room IoU 0.9401 ->
+  0.9443, edit cost -3.7 %, ext wall length error +4.9 % (not flagged), door recall 0.961 -> 0.959.
+- **Locked run (test-synth 300 + fresh 200, synthetic):** correct-closed +2.0 pp [-0.3, +4.3]
+  (test-synth), +3.0 pp [+1.0, +5.5] (fresh, primary): rules 2 and 4 pass. Rule 3 fails: door
+  recall Δ CI [-3.3, -1.1] pp (test-synth) and [-4.5, -1.3] pp (fresh). **Not promoted.**
+- **Next:** find the door-recall loss on val/dev data only, fix, then the second locked run.
+
 ## historic-plans (2026-11-24, branch exp/historic-plans @ d4ef811, includes din-web-plans; not gated)
 
 - **Change:** scale-bar detection (`geometry/scalebar.py`), interior dimension arrows
