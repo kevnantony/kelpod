@@ -15,6 +15,13 @@ pipeline runs there in a subprocess (``<worktree>/.venv`` python, ``-I``, the ru
 this process. Results with ``scale_source == "ground_truth"`` are rejected (scored as crashes, and
 the run fails). The IFC is re-opened here, independently of the pipeline's own check.
 
+Each worktree may declare a run config, ``kelpod-run.toml`` (``kelpod.evaluation.run_config``):
+backends, the uv project whose interpreter runs the pipeline, and one checkpoint per training
+seed (path outside the worktree + sha256). Every checkpoint is hash-verified, its training
+manifests are checked for test overlap, and it is staged read-only and passed only through
+``KELPOD_SEG_CHECKPOINT``. Each candidate checkpoint is its own side (``cand0``, ``cand1``, ...);
+rule 5 must hold for the worse seed. The configs are printed in the report.
+
 Output: a Markdown comparison table (stdout and ``<out>/comparison.md``), ``<out>/results.json``
 (per-plan panels, for audits only: locked splits are read as aggregates), and one appended line in
 ``--log``. Exit 0 = promotion rule met (or a smoke/val run without integrity problems).
@@ -51,10 +58,14 @@ LOG_HEADER = (
 # --------------------------------------------------------------------------------------------
 
 
-def worktree_python(wt: Path) -> str:
-    """Interpreter of a worktree's own environment (created with ``uv sync --frozen``)."""
-    subprocess.run(["uv", "sync", "--project", str(wt), "--frozen", "--quiet"], check=True, cwd=wt)
-    py = wt / ".venv" / "bin" / "python"
+def worktree_python(wt: Path, project: str = ".") -> str:
+    """Interpreter of a worktree's own environment (created with ``uv sync --frozen``), of the uv
+    project ``project`` inside it (the run config's ``python_project``; "." = the root)."""
+    proj = wt / project
+    subprocess.run(
+        ["uv", "sync", "--project", str(proj), "--frozen", "--quiet"], check=True, cwd=proj
+    )
+    py = proj / ".venv" / "bin" / "python"
     probe = subprocess.run(
         [str(py), "-I", "-c", "import kelpod, sys; print(kelpod.__file__)"],
         capture_output=True,
@@ -75,13 +86,115 @@ def commit_of(wt: Path) -> str:
 
 
 # --------------------------------------------------------------------------------------------
+# run configs (kelpod-run.toml) and sides (one per worktree and training seed)
+# --------------------------------------------------------------------------------------------
+
+
+def load_run_configs(
+    baseline: Path, cands: list[Path], manifests: dict, kind: str, notes: list[str]
+) -> tuple[dict, list[str]]:
+    """Every worktree's declared run config, and the integrity problems that stop the run.
+    A config that is not committed is refused in locked runs (it must be part of the commit that
+    promotion_check sees) and only noted in smoke/val runs."""
+    from kelpod.evaluation import run_config as rc
+
+    configs, problems = {}, []
+    wts = list(dict.fromkeys([baseline, *cands]))
+    for wt in wts:
+        try:
+            cfg = rc.load(wt)
+        except rc.RunConfigError as exc:
+            problems.append(str(exc))
+            continue
+        cfg.state = rc.git_state(wt)
+        if cfg.state in ("modified", "untracked"):
+            msg = f"{wt}: {rc.FILENAME} is {cfg.state}; the run config must be committed"
+            if kind == "locked":
+                problems.append(msg)
+            else:
+                notes.append(f"{msg} (tolerated in a {kind} run only)")
+        others = [w for w in (*wts, HERE) if w != wt]
+        problems += [f"{wt}: {p}" for p in rc.check(wt, cfg, manifests, other_worktrees=others)]
+        configs[wt] = cfg
+    return configs, problems
+
+
+def build_sides(baseline: Path, cands: list[Path], configs: dict, staging: Path) -> dict:
+    """``base`` plus ``cand0``, ``cand1``, ...: one candidate side per declared checkpoint (training
+    seed) of every candidate worktree (one side if it declares none). The baseline runs with its
+    first declared checkpoint, if any. Checkpoints are staged read-only under ``staging``."""
+    from kelpod.evaluation import run_config as rc
+
+    pythons: dict = {}
+    sides: dict = {}
+
+    def add(side: str, wt: Path, cfg, ck) -> None:
+        key = (wt, cfg.python_project)
+        if key not in pythons:
+            pythons[key] = worktree_python(wt, cfg.python_project)
+        env = {}
+        if ck is not None:
+            env[rc.CHECKPOINT_ENV] = str(rc.stage_checkpoint(ck, staging / side))
+        sides[side] = {
+            "worktree": str(wt), "commit": commit_of(wt), "python": pythons[key],
+            "python_project": cfg.python_project, "args": cfg.runner_args(), "env": env,
+            "seed": ck.seed if ck else None, "sha256": ck.sha256 if ck else None,
+            "checkpoint": str(ck.path) if ck else None,
+        }  # fmt: skip
+
+    bcfg = configs[baseline]
+    add("base", baseline, bcfg, bcfg.checkpoints[0] if bcfg.checkpoints else None)
+    k = 0
+    for wt in cands:
+        cfg = configs[wt]
+        for ck in cfg.checkpoints or [None]:
+            add(f"cand{k}", wt, cfg, ck)
+            k += 1
+    return sides
+
+
+def staged_checkpoints_changed(sides: dict) -> list[str]:
+    """Problems if a staged checkpoint no longer has its declared hash after the runs."""
+    from kelpod.evaluation import run_config as rc
+
+    out = []
+    for side, i in sides.items():
+        staged = i["env"].get(rc.CHECKPOINT_ENV)
+        if staged and rc.sha256_file(Path(staged)) != i["sha256"]:
+            out.append(f"{side}: checkpoint changed during the run ({staged})")
+    return out
+
+
+def side_label(info: dict) -> str:
+    args = " ".join(info["args"]) or "defaults"
+    ck = f", seed {info['seed']} sha256 {info['sha256'][:12]}" if info["sha256"] else ""
+    return f"{Path(info['worktree']).name}@{info['commit'][:10]}, {args}{ck}"
+
+
+def log_cell(sides: dict, names: list[str]) -> str:
+    """Commit(s) and checkpoint hashes of the given sides for the TEST_LOG line."""
+    commits = list(dict.fromkeys(sides[n]["commit"][:10] for n in names))
+    hashes = [f"s{sides[n]['seed']}:{sides[n]['sha256'][:12]}" for n in names if sides[n]["sha256"]]
+    return " ".join(commits) + (f" ckpt {', '.join(hashes)}" if hashes else "")
+
+
+# --------------------------------------------------------------------------------------------
 # one plan
 # --------------------------------------------------------------------------------------------
 
 
-def _clean_env() -> dict[str, str]:
-    env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "VIRTUAL_ENV")}
+def _clean_env(extra: dict[str, str] | None = None) -> dict[str, str]:
+    """The caller's environment without Python path overrides and without any ``KELPOD_*``
+    variable (so an operator's ``KELPOD_SEG_CHECKPOINT`` cannot leak into a side that did not
+    declare it), CPU only, then the side's declared variables."""
+    env = {
+        k: v
+        for k, v in os.environ.items()
+        if k not in ("PYTHONPATH", "VIRTUAL_ENV") and not k.startswith("KELPOD_")
+    }
     env.update(OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", MKL_NUM_THREADS="1")
+    env["CUDA_VISIBLE_DEVICES"] = ""  # the reference node is a CPU node
+    env.update(extra or {})
     return env
 
 
@@ -134,9 +247,9 @@ def run_task(task: dict) -> dict:
     try:
         try:
             subprocess.run(
-                [task["python"], "-I", str(RUNNER), name, str(out)],
+                [task["python"], "-I", str(RUNNER), name, str(out), *task.get("args", [])],
                 cwd=work,
-                env=_clean_env(),
+                env=_clean_env(task.get("env")),
                 timeout=TIMEOUT_S,
                 capture_output=True,
                 check=False,
@@ -323,6 +436,48 @@ def pooled(res: dict, names: list[str], side: str, commits: dict) -> dict:
     return out
 
 
+def seed_rule(sides_info: dict, passed: dict[str, bool], heads: dict):
+    """Rule 5: a trained candidate (one with checkpoints) needs at least 2 distinct training
+    seeds, and the promotion rule must hold for every seed, i.e. for the worse one."""
+    from kelpod.evaluation.stats import RuleResult
+
+    sides = list(passed)
+    worse = min(sides, key=lambda s: heads[s][0])
+    trained = [s for s in sides if sides_info[s]["sha256"]]
+    n_seeds = len({sides_info[s]["sha256"] for s in trained})
+    held = sum(bool(passed[s]) for s in sides)
+    worse_txt = f"worse seed: {worse} ({side_label(sides_info[worse])}), {heads[worse][1]}"
+    if trained and n_seeds < 2:
+        return RuleResult(
+            "5 seed stability", False,
+            f"trained model with {n_seeds} declared checkpoint(s); at least 2 training seeds "
+            f"are needed. {worse_txt}",
+        )  # fmt: skip
+    if len(sides) > 1:
+        return RuleResult(
+            "5 seed stability", held == len(sides),
+            f"rule held for {held} of {len(sides)} seeds (must hold for the worse seed); "
+            f"{worse_txt}",
+        )  # fmt: skip
+    return RuleResult("5 seed stability", None, "report only: one candidate, no checkpoints")
+
+
+def primary_headline(res_side: dict, test_real_pages: int, side: str, commits: dict):
+    """(sort key, text) of Δ correct-closed on the primary split; without a primary split in the
+    run (smoke/val), pooled over all splits of the run, so seeds can still be ranked."""
+    names, _ = primary_of(res_side, test_real_pages)
+    label = "+".join(names)
+    if not names:
+        names = list(res_side)
+        label = "all splits, no primary in this run: " + "+".join(names)
+    if not names:
+        return (0.0, 0.0), "n/a (no split)"
+    d = pooled(res_side, names, side, commits)["correct_closed"]
+    if d.delta is None:
+        return (0.0, 0.0), f"n/a ({label})"
+    return (d.delta, d.lo), f"{d.delta:+.3f} [{d.lo:+.3f}, {d.hi:+.3f}] ({label})"
+
+
 def _fmt(v, rel=False):
     if v is None:
         return "–"
@@ -340,6 +495,7 @@ def markdown(res: dict, decisions: dict, meta: dict) -> str:
         f"{meta['cores_per_plan']} dedicated physical core(s) per plan",
         f"- splits: {', '.join(f'{n} ({r["n"]})' for n, r in res['cand0'].items())}",
         *[f"- note: {n}" for n in meta["notes"]],
+        *[f"- side {s}: {side_label(i)}" for s, i in meta["sides"].items()],
         "- synthetic splits only say something about synthetic plans, not real scans",
         "",
     ]
@@ -374,7 +530,12 @@ def markdown(res: dict, decisions: dict, meta: dict) -> str:
         for rule in dec["rules"]:
             st = {True: "pass", False: "FAIL", None: "n/a"}[rule["passed"]]
             lines.append(f"- {side} rule {rule['rule']}: **{st}**. {rule['detail']}")
-    lines += ["", f"**Decision: {meta['decision']}**", ""]
+    lines += ["", f"**Decision: {meta['decision']}**", "", "### Run configs (kelpod-run.toml)", ""]
+    for wt, c in meta["run_configs"].items():
+        lines.append(f"- `{wt}` ({c['state']}): {c['summary']}")
+        if c["text"]:
+            lines += ["", "```toml", c["text"].rstrip("\n"), "```", ""]
+    lines.append("")
     return "\n".join(lines)
 
 
@@ -459,6 +620,7 @@ def main(argv: list[str] | None = None) -> int:
     if not (args.candidate and args.baseline and args.branch):
         ap.error("--candidate, --baseline and --branch are needed (or --verify-manifests)")
 
+    from kelpod.evaluation import run_config as rc
     from kelpod.evaluation.splits import load_manifests, verify_manifest
     from kelpod.evaluation.stats import RuleResult, decide
 
@@ -485,12 +647,21 @@ def main(argv: list[str] | None = None) -> int:
 
     args.baseline = args.baseline.resolve()
     cands = [c.resolve() for c in (args.candidate, *args.extra_candidate)]
-    sides = [f"cand{i}" for i in range(len(cands))]
-    pythons = {"base": worktree_python(args.baseline)}
-    commits = {"base": commit_of(args.baseline)}
-    for side, wt in zip(sides, cands, strict=True):
-        pythons[side] = worktree_python(wt)
-        commits[side] = commit_of(wt)
+    configs, problems = load_run_configs(args.baseline, cands, manifests, kind, notes)
+    if problems:
+        print("\n".join(f"FAIL: {p}" for p in problems))
+        print("FAIL: run config integrity (kelpod-run.toml); nothing was run")
+        return 2
+    staging = rc.staging_dir()
+    try:
+        sides_info = build_sides(args.baseline, cands, configs, staging)
+    except rc.RunConfigError as exc:
+        shutil.rmtree(staging, ignore_errors=True)
+        print(f"FAIL: {exc}")
+        return 2
+    sides = [s for s in sides_info if s != "base"]
+    pythons = {s: i["python"] for s, i in sides_info.items()}
+    commits = {s: i["commit"] for s, i in sides_info.items()}
 
     fresh_dir = None
     if any(s["split"] == "fresh" for s in splits):
@@ -508,6 +679,7 @@ def main(argv: list[str] | None = None) -> int:
                 tasks.append({
                     "split": s["split"], "id": it["id"], "side": side, "python": pythons[side],
                     "input": str(it["input"]), "gt": str(it["gt"]) if it["gt"] else None,
+                    "args": sides_info[side]["args"], "env": sides_info[side]["env"],
                 })  # fmt: skip
     print(f"{len(tasks)} runs on {args.workers} workers", flush=True)
     rows = []
@@ -517,16 +689,23 @@ def main(argv: list[str] | None = None) -> int:
     slots = mp.Manager().Queue()
     for k in range(args.workers):
         slots.put(k)
-    with ProcessPoolExecutor(
-        args.workers, initializer=_pin_worker, initargs=(slots, args.cores_per_plan)
-    ) as ex:
-        futs = [ex.submit(run_task, t) for t in tasks]
-        for k, fu in enumerate(as_completed(futs), 1):
-            rows.append(fu.result())
-            if k % 50 == 0 or k == len(futs):
-                print(f"  {k}/{len(futs)} ({time.time() - t0:.0f} s)", flush=True)
-    if fresh_dir is not None:
-        shutil.rmtree(fresh_dir, ignore_errors=True)
+    try:
+        with ProcessPoolExecutor(
+            args.workers, initializer=_pin_worker, initargs=(slots, args.cores_per_plan)
+        ) as ex:
+            futs = [ex.submit(run_task, t) for t in tasks]
+            for k, fu in enumerate(as_completed(futs), 1):
+                rows.append(fu.result())
+                if k % 50 == 0 or k == len(futs):
+                    print(f"  {k}/{len(futs)} ({time.time() - t0:.0f} s)", flush=True)
+        changed = staged_checkpoints_changed(sides_info)
+    finally:
+        if fresh_dir is not None:
+            shutil.rmtree(fresh_dir, ignore_errors=True)
+        shutil.rmtree(staging, ignore_errors=True)
+    if changed:
+        print("\n".join(f"FAIL: {c}" for c in changed))
+        return 2
 
     rejected = [r for r in rows if r.get("rejected")]
     res = compare(rows, splits, sides, commits)
@@ -555,19 +734,10 @@ def main(argv: list[str] | None = None) -> int:
                 0, RuleResult("integrity", False, f"{len(rejected)} result(s) used GT scale")
             )
         decisions[side] = dec
-    if len(sides) > 1:
-        worst = all(d.passed for d in decisions.values())
-        decisions["cand0"].rules.append(
-            RuleResult(
-                "5 seed stability",
-                worst,
-                f"rule held for {sum(d.passed for d in decisions.values())} of {len(sides)} seeds",
-            )  # noqa: E501
-        )
-    else:
-        decisions["cand0"].rules.append(
-            RuleResult("5 seed stability", None, "report only: one candidate, no extra seeds")
-        )
+    heads = {s: primary_headline(res[s], test_real_pages, s, commits) for s in sides}
+    worse = min(sides, key=lambda s: heads[s][0])
+    rule5 = seed_rule(sides_info, {s: decisions[s].passed for s in sides}, heads)
+    decisions["cand0"].rules.append(rule5)
     passed = all(d.passed for d in decisions.values())
     decision = (
         f"smoke run, no promotion decision (rule {'met' if passed else 'not met'})"
@@ -588,6 +758,14 @@ def main(argv: list[str] | None = None) -> int:
         "workers": args.workers,
         "cores_per_plan": args.cores_per_plan,
         "notes": notes + ([f"{len(rejected)} rejected results"] if rejected else []),
+        "sides": {
+            s: {k: v for k, v in i.items() if k not in ("python", "env")}
+            for s, i in sides_info.items()
+        },
+        "run_configs": {
+            str(wt): {"state": c.state, "summary": c.summary(), "text": c.text}
+            for wt, c in configs.items()
+        },
         "decision": decision,
         "limit": args.limit,
     }
@@ -614,18 +792,16 @@ def main(argv: list[str] | None = None) -> int:
             indent=1,
         )
     )
-    names, _ = primary_of(res["cand0"], test_real_pages)
-    if names:
-        d = pooled(res["cand0"], names, "cand0", commits)["correct_closed"]
-        head = f"{d.delta:+.3f} [{d.lo:+.3f}, {d.hi:+.3f}] ({'+'.join(names)})"
-    else:
-        head = "n/a (no primary split in this run)"
+    head = heads[worse][1]
+    if len(sides) > 1:
+        head = f"worse seed {worse}: {head}"
     split_list = ", ".join(f"{n} ({r['n']})" for n, r in res["cand0"].items())
     branch_cell = args.branch if kind == "locked" else f"{args.branch} ({kind})"
     short = "PASS" if decision == "PASS" else "FAIL" if decision == "FAIL" else kind
     append_log(
         args.log,
-        f"| {date} | {kind} | {branch_cell} | {commits['cand0'][:10]} | {commits['base'][:10]} "
+        f"| {date} | {kind} | {branch_cell} | {log_cell(sides_info, sides)} "
+        f"| {log_cell(sides_info, ['base'])} "
         f"| {split_list} | {head} | {short} | {args.job_id} "
         f"({str(out).replace(str(Path.home()), '~')}) |",
     )
