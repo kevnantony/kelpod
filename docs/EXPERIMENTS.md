@@ -86,3 +86,47 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
 - **Decision:** candidate for promotion by the lead (`scripts/promotion_check.sh`, not run here).
   Ideas not built: margin by re-solving, page-level length style (cm / ⁵ / m) as a prior, the room
   stamp area as a further constraint, using `origin` as a weight in the geometry fit.
+
+## din-web-plans (2026-11-24, branch exp/din-web-plans)
+
+- **Hypothesis:** real DIN plans from the web fail for three separable reasons: (1) tiny images
+  were *shrunk* (file dpi 96/300 assumed, resampled to 200 dpi), (2) the classical footprint filter
+  deletes every wall outside a small enclosed region, (3) walls drawn as two thin lines are
+  invisible to the solid/hatched wall mask.
+- **Change:** `clean/io.py`: effective dpi from the modal glyph height (2.5 mm digits); images
+  below 130 dpi are upscaled (Lanczos + unsharp mask, factor 200/eff, max 3x) instead of using the
+  file dpi. `segment/classical.py`: the footprint filter is skipped when the enclosed footprint
+  touches under 65 % of the wall length (synthetic plans: min 70 %, positionsplan 60 %).
+  `segment/pairs.py` (new backend `pairs`): line components per direction (0/90 and, in 45-degree
+  rotated copies, 45/135), parallel pairs at the plan's dominant (length-weighted) spacing, fill
+  test, widest-pair dedupe, heavy single strokes as walls, network filter (isolated furniture,
+  chains, terrace grids drop out), door-gap closing, rooms from the barrier. `pipeline.convert`
+  tries `pairs` only if the classical graph is not closed and under half its wall length is
+  hatched/solid, and takes it only if it scores better (rooms, dangling ends, groups).
+  Script `scripts/web_plan_check.py` (real plans, no ground truth). Tests: `tests/segment/test_pairs.py`.
+- **Data:** two web plans in `~/kelpod-data/real/din-web-2026-11-24/` (dev only, licence
+  unchecked, not committed; no ground truth, no hand labels); synthetic seeds 300-319, degrade
+  0.5 and 1.0. The web collector had written no plan images when this ran. CPU only, 0 GPU hours.
+- **Results (real, main -> branch):**
+
+  | plan | before | after |
+  |---|---|---|
+  | efh-erdgeschoss-550.jpg | 23 walls, 0 rooms, 13 dangling, 4 groups, scale guessed | 48 walls, 5 rooms (0.7-9.2 m2, not the real rooms), 12 dangling, 1 group, scale from dims (src=dimensions) |
+  | positionsplan-fig134.png | 18 walls, 0 rooms | 37 walls, 5 rooms (one 77 m2 merged), 9 dangling, 1 group |
+
+  Not solved: neither plan is closed. Segmenter overlay checked by eye (Read tool).
+- **Synthetic guard** (20 plans, seed 300): identical to main on all means at degrade 0.5
+  (closed 0.85, room IoU 0.990, wall F1 0.995) and 1.0 (closed 0.75, IoU 0.985, F1 0.992).
+  Runtime 4.9 s/plan (0.5) and 4.9 s (1.0); the main run was taken while other jobs ran
+  (6.7 / 7.9 s), so no clean ratio; against the ocr-chainsum figure (4.4-4.6 s) it is within +25 %.
+  `uv run pytest`: 337 passed, 1 skipped (existing).
+- **What still fails and why:** (a) efh: the pairs path finds the axis-aligned double lines (see
+  overlays) but misses walls whose faces fuse into one line at this resolution, the 45-degree
+  hall/bay walls (diagonals are chopped by aliasing; only ~3 short pieces found) and curved
+  walls, so no closed outline; the classical result (garbage rooms) is therefore still chosen.
+  Closing with 5 px line bridging raised clutter and was reverted. (b) Only two dimensions match
+  at the nominal scale, so the scale rests on few labels; OCR of 178^5-style cm chains was not
+  improved here. (c) positionsplan: partial hatched walls, circled position numbers cross wall
+  lines, open outline at window gaps.
+- **Decision:** the upscale and footprint-guard changes are safe candidates (no synthetic change);
+  the `pairs` backend is an experimental fallback, not a result. Not promoted, no locked run.
