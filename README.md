@@ -9,26 +9,27 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-24 02:30 CET. All numbers are from synthetic plans; nothing has been tested on real scans yet._
+_Last updated: 2026-11-24 07:30 CET. All numbers are from synthetic plans; nothing has been tested on real scans yet._
 
 **Done**
-- Pipeline steps built and tested: clean, classical segmentation, OCR (RapidOCR), geometry
-  (fit to dimensions, closed graph), IFC4 / IFC2X3 export; `kelpod convert` writes IFC that re-opens.
-- Closure fixes in segmentation. Held-out synthetic seeds 100-129, before -> after: degrade 0.5
-  fully closed 73 % -> 80 %, room IoU 0.94 -> 0.96; degrade 1.0 closed 7 % -> 53 %, room IoU
-  0.77 -> 0.87 (synthetic, dev numbers).
-- FastAPI endpoint (`kelpod serve`): `/health`, `/convert`, `/jobs/{id}`. No auth yet.
+- Pipeline (clean, classical segmentation, OCR, geometry, IFC4 / IFC2X3 export); `kelpod convert`
+  writes IFC that re-opens. FastAPI endpoint (`kelpod serve`).
+- Closure fixes. Held-out synthetic seeds, before -> after: degrade 0.5 fully closed 73 % -> 80 %;
+  degrade 1.0 7 % -> 53 % (synthetic, dev numbers).
+- Evaluation protocol v1: frozen val-synth (200) and test-synth (300, held-out drawing style),
+  `scripts/locked_eval.py`. Current baseline on val-synth: correct-closed 52.5 %, room IoU 0.90
+  (synthetic smoke run).
+- First fine-tuning run of a U-Net segmenter finished (1.0 GPU hour on the cluster).
+- MVP report draft: [docs/MVP_REPORT.md](docs/MVP_REPORT.md).
 
 **Doing now**
-- Paused for a usage limit until about 02:20 CET; the loop resumes the work.
-- Fine-tuning a learned segmentation model (U-Net, CubiCasa5k zero-shot baseline); training data
-  built, no training results yet.
-- Evaluation protocol v1 (frozen splits, locked evaluation) on branch `eval/protocol-v1`.
+- Evaluating the fine-tuned segmenter against the classical one and the zero-shot CubiCasa5k model
+  (zero-shot is worse: closed 20 % vs. 88 % at degrade 0.5, synthetic).
+- Collecting openly licensed real floor-plan scans for a real dev / sealed test set.
 
 **Next**
-- Compare the learned model with the classical baseline; write `docs/MVP_REPORT.md`.
-- Merge MVP + eval protocol into `main` as `baseline-v0`; then experiments on `exp/*` branches,
-  scored on real dev scans as well.
+- Finish `docs/MVP_REPORT.md`; merge MVP + eval protocol into `main` as `baseline-v0`.
+- Then experiments on `exp/*` branches, each promoted only through `scripts/promotion_check.sh`.
 <!-- status:end -->
 
 ```bash
