@@ -155,6 +155,9 @@ class TextItem(_Model):
     angle_deg: float = 0.0
     """Reading direction in image space: 0 = left-to-right, 90 = bottom-to-top (rotated text)."""
     confidence: float = 1.0
+    alternatives: list[tuple[str, float]] = Field(default_factory=list)
+    """n-best readings ``(text, probability)``, most probable first, if the engine provides them
+    (empty otherwise). ``text`` is the engine's own best guess and need not be the first entry."""
 
     @property
     def center(self) -> Point:
@@ -174,6 +177,10 @@ class DimensionLabel(_Model):
     line: tuple[Point, Point] | None = None
     """Endpoints (ticks) of the measured span on the dimension line, image space, if found."""
     confidence: float = 1.0
+    origin: Literal["read", "corrected", "inferred"] = "read"
+    """``read``: as recognised; ``corrected``: another n-best reading or the chain arithmetic
+    replaced the recognised value; ``inferred``: no label was read, the value comes from the
+    other labels of its chains (``text`` is then empty)."""
 
 
 class SillHeight(_Model):

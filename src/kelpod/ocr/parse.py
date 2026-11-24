@@ -167,7 +167,7 @@ def parse_sill_height(text: str) -> float | None:
 
 _AREA_RE = re.compile(
     rf"(?:^|(?<=\s)|(?<=[:=]))(?P<num>[{_NUMBER_CHARS}]+(?:\s?[,.]\s?[{_NUMBER_CHARS}]+)?)"
-    r"\s*(?P<unit>(?i:m\s?²|m\s?2|m\s?\^\s?2|qm))\.?\s*$",
+    r"\s*(?P<unit>(?i:m\s?²|m\s?2|m\s?\^\s?2|qm|m[FfIl1|]))\.?\s*$",
 )
 
 
@@ -175,6 +175,8 @@ def parse_area(text: str) -> tuple[float, str] | None:
     """Find an area at the end of ``text``: returns ``(m², text before the area)`` or ``None``.
 
     ``14,52 m²`` -> (14.52, ""), ``Wohnen 14,52 m2`` -> (14.52, "Wohnen"), ``7,9 qm`` -> (7.9, "").
+    A lost comma (``2091m²``, three or more digits) means two decimals; ``mF`` / ``m1`` are
+    accepted as a misread ``m²``.
     """
     m = _AREA_RE.search(text.strip())
     if not m:
@@ -182,9 +184,12 @@ def parse_area(text: str) -> tuple[float, str] | None:
     n = parse_number(m.group("num"))
     if n is None:
         return None
-    if not (0.3 <= n.value <= 500.0):
+    value = n.value
+    if not n.has_comma and n.integer_digits >= 3:
+        value = n.value / 100.0  # comma lost: areas are written to the cm², "2091 m²" = 20,91
+    if not (0.3 <= value <= 500.0):
         return None
-    return n.value, text.strip()[: m.start()].strip(" :=-")
+    return value, text.strip()[: m.start()].strip(" :=-")
 
 
 # Canonical room names (as written on stamps) and accepted variants. All lower case and without

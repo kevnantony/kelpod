@@ -19,6 +19,7 @@ dependencies = [
     "ifcopenshell>=0.8",         # LGPL-3.0, used as a library
     "rapidocr-onnxruntime>=1.3", # Apache-2.0 (PaddleOCR models via ONNX Runtime, MIT)
     "typer>=0.12",               # MIT
+    "ortools>=9.10",
 ]
 
 [project.optional-dependencies]
