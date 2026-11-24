@@ -2,6 +2,34 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## learned-v1 (2026-11-24, branch exp/learned-v1, not yet run through the gate)
+
+- **Change:** U-Net ResNet-34 retrained with train-only style and degradation randomisation (held-out
+  options guarded by a test), synth_v1 / swiss_v1 / resplan_v1 renders, CubiCasa5k; learned is the
+  default backend on the branch (no silent fallback); ONNX export.
+- **GPU:** kseg-v1-s1 1.86 GPU-h, kseg-v1-s2 1.65 GPU-h (ampere; expected ~4 GPU-h total).
+- **Val-synth (200, synthetic):** both seeds correct-closed 0.985 (classical 0.720), edit cost
+  0.435, room IoU 0.982, wall F1 0.999. Runtime about 81-84 s per plan under load in the eval job,
+  against about 49 s for classical on the same node.
+- **Blocker:** protocol rule 3 tolerates at most +25 % runtime, so the current model cannot be
+  promoted however accurate it is. Next: `exp/learned-fast` (faster CPU inference: int8 ONNX,
+  lower inference resolution, lighter encoder) before the locked run. The runtime rule itself is a
+  decision for the founders (asked in README), not changed by the agent.
+
+## din-web-plans (2026-11-24, branch exp/din-web-plans @ 2430913, includes ocr-chainsum; FAIL)
+
+- **Change:** effective-resolution estimate from glyph height + Lanczos/unsharp upscaling of
+  low-res inputs, footprint-filter guard, thin double-line wall detector (`segment/pairs.py`,
+  used only when classical does not close), plus the ocr-chainsum OCR changes.
+- **Real web plans (dev, no labels):** efh 0 -> 5 rooms (not the real rooms), 1 component, scale
+  from dimensions; Positionsplan 0 -> 5 rooms (one merged), 1 component. Neither plan correct.
+- **Locked run 1 of 2 (2026-11-24 18:09, test-synth 300 + fresh 200, synthetic):** primary (fresh)
+  correct-closed +0.005 [-0.010, +0.020]; room IoU +0.047 [+0.025, +0.071] (rule 2 passes via the
+  IoU alternative, rule 4 passes); rule 3 FAILS: door precision -3 to -6 pp, edit cost +11 to +24 %,
+  exterior wall length error +16 to +69 % on both splits. **Not promoted.**
+- **Next:** a new branch with the regression found and fixed on dev/val data only (which component
+  costs doors and envelope length), keeping the room IoU gain.
+
 ## ocr-chainsum (2026-11-24, branch exp/ocr-chainsum @ 9fe1219, not promoted)
 
 - **Hypothesis:** joint decoding of Maßketten (n-best readings from RapidOCR's CTC output, chain
