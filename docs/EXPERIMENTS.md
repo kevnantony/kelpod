@@ -2,6 +2,24 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## historic-plans (2026-11-24, branch exp/historic-plans @ d4ef811, includes din-web-plans; not gated)
+
+- **Change:** scale-bar detection (`geometry/scalebar.py`), interior dimension arrows
+  (`ocr/interior.py`), sheet splitting (`clean/sheets.py`, `pipeline.convert_all`), historic room
+  names, exterior spaces (Garten, Vorhof, Altan, ...) flagged and left out of the IFC.
+- **Labels:** the 3 user plans, labelled by the agent from overlays (+-5 px, not an expert),
+  outside git. The scale-bar tick value (1 m) was assumed with these plans in view.
+- **Real, 3 plans (room IoU / wall F1), main+din-web -> branch, classical:** villa 0.02/0.16 ->
+  0.07/0.32; Gundel 0.31/0.59 -> 0.30/0.55; Tafel 71 plan 2 0.23/0.27 -> 0.18/0.41, plan 3
+  0.14/0.23 -> 0.29/0.71. Scale error 59 % -> 1-2 % on villa and Tafel.
+- **Same branch with the learned v1 segmenter (seed 1, ONNX), measured by the lead:** wall F1
+  villa 0.70, Gundel 0.46, Tafel 0.97 / 0.84; room IoU 0.19 / 0.12 / 0.46 / 0.50. The learned model
+  finds the walls; rooms stay open (dangling ends at door gaps in solid walls).
+- **Synthetic guard:** benchmark seeds 300-319 at degrade 0.5 unchanged; val-synth smoke (40) flags
+  ext_wall_length_error (inherited from din-web, being fixed on exp/din-web-v2).
+- **Next:** rebase on exp/din-web-v2 once fixed; learned segmenter + door-gap closing in solid
+  walls; then gate.
+
 ## learned-v1 (2026-11-24, branch exp/learned-v1, not yet run through the gate)
 
 - **Change:** U-Net ResNet-34 retrained with train-only style and degradation randomisation (held-out
