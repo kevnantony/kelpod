@@ -266,7 +266,8 @@ def parse_commons(data: dict, query: str) -> list[Candidate]:
             return _strip_html((meta.get(k) or {}).get("value", ""))
 
         c = Candidate(
-            source="commons", query=query, image_url=ii.get("url", ""),
+            source="commons", query=query,
+            image_url=ii.get("thumburl") or ii.get("url", ""),  # cached thumbnail (Wikimedia asks for these)
             page_url=ii.get("descriptionurl", ""), title=p.get("title", "").removeprefix("File:"),
             licence=mv("LicenseShortName") or mv("License") or "unknown", licence_url=mv("LicenseUrl"),
             author=mv("Artist"), width=_int(ii.get("width")), height=_int(ii.get("height")),
@@ -311,7 +312,7 @@ def fetch_commons(http, query: str, page: int) -> list[Candidate]:
     params = {
         "action": "query", "format": "json", "generator": "search", "gsrnamespace": 6,
         "gsrsearch": query, "gsrlimit": 20, "gsroffset": 20 * (page - 1),
-        "prop": "imageinfo", "iiprop": "url|size|mime|extmetadata",
+        "prop": "imageinfo", "iiprop": "url|size|mime|extmetadata", "iiurlwidth": 2000,
     }
     return parse_commons(http.get_json(COMMONS_URL, params), query)
 
