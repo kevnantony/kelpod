@@ -97,6 +97,28 @@ def _ifc_reopens(path: Path) -> bool:
         return False
 
 
+def physical_cores() -> list[list[int]]:
+    """Usable logical CPUs grouped by physical core (hyperthread siblings together)."""
+    allowed = sorted(os.sched_getaffinity(0))
+    groups: dict[str, list[int]] = {}
+    for c in allowed:
+        f = Path(f"/sys/devices/system/cpu/cpu{c}/topology/thread_siblings_list")
+        key = f.read_text().strip() if f.is_file() else str(c)
+        groups.setdefault(key, []).append(c)
+    return sorted(groups.values())
+
+
+def _pin_worker(slots, cores_per_plan: int) -> None:
+    """Pool initializer: give this worker its own ``cores_per_plan`` physical cores (all their
+    hyperthreads; inherited by the pipeline subprocess), so parallel plans do not share cores
+    and candidate and baseline run under the same conditions."""
+    cores = physical_cores()
+    k = slots.get()
+    mine = [c for g in cores[k * cores_per_plan : (k + 1) * cores_per_plan] for c in g]
+    if mine:
+        os.sched_setaffinity(0, mine)
+
+
 def run_task(task: dict) -> dict:
     """Run one worktree on one input and score it (runs in a pool worker)."""
     from kelpod.contracts import PlanGraph
@@ -314,7 +336,8 @@ def markdown(res: dict, decisions: dict, meta: dict) -> str:
         f"## Locked evaluation {meta['date']} ({meta['kind']})",
         "",
         f"- branch `{meta['branch']}`; candidate `{meta['commits']['cand0'][:10]}`, baseline "
-        f"`{meta['commits']['base'][:10]}`; {meta['machine']}; {meta['workers']} workers",
+        f"`{meta['commits']['base'][:10]}`; {meta['machine']}; {meta['workers']} workers x "
+        f"{meta['cores_per_plan']} dedicated physical core(s) per plan",
         f"- splits: {', '.join(f'{n} ({r["n"]})' for n, r in res['cand0'].items())}",
         *[f"- note: {n}" for n in meta["notes"]],
         "- synthetic splits only say something about synthetic plans, not real scans",
@@ -416,7 +439,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--smoke", action="store_true", help="log as smoke run; no promotion")
     ap.add_argument("--extra-candidate", type=Path, action="append", default=[],
                     help="same change from another training seed (rule 5)")  # fmt: skip
-    ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 2))
+    ap.add_argument("--cores-per-plan", type=int, default=1,
+                    help="dedicated physical cores per run (reference: 1)")  # fmt: skip
+    ap.add_argument("--workers", type=int, help="default: usable CPUs // cores-per-plan")
     ap.add_argument("--fresh-n", type=int, default=None)
     ap.add_argument("--out", type=Path)
     ap.add_argument("--job-id", default=os.environ.get("SLURM_JOB_ID", "-"))
@@ -426,6 +451,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.verify_manifests:
         return verify(args.training_manifests)
+    n_cores = len(physical_cores())
+    if args.workers is None:
+        args.workers = max(1, n_cores // args.cores_per_plan)
+    if args.workers * args.cores_per_plan > n_cores:
+        ap.error(f"{args.workers} workers x {args.cores_per_plan} > {n_cores} physical cores")
     if not (args.candidate and args.baseline and args.branch):
         ap.error("--candidate, --baseline and --branch are needed (or --verify-manifests)")
 
@@ -453,7 +483,8 @@ def main(argv: list[str] | None = None) -> int:
     test_real = manifests.get("test-real", {})
     test_real_pages = test_real.get("n_items", 0) if test_real.get("status") == "frozen" else 0
 
-    cands = [args.candidate, *args.extra_candidate]
+    args.baseline = args.baseline.resolve()
+    cands = [c.resolve() for c in (args.candidate, *args.extra_candidate)]
     sides = [f"cand{i}" for i in range(len(cands))]
     pythons = {"base": worktree_python(args.baseline)}
     commits = {"base": commit_of(args.baseline)}
@@ -481,7 +512,14 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{len(tasks)} runs on {args.workers} workers", flush=True)
     rows = []
     t0 = time.time()
-    with ProcessPoolExecutor(args.workers) as ex:
+    import multiprocessing as mp
+
+    slots = mp.Manager().Queue()
+    for k in range(args.workers):
+        slots.put(k)
+    with ProcessPoolExecutor(
+        args.workers, initializer=_pin_worker, initargs=(slots, args.cores_per_plan)
+    ) as ex:
         futs = [ex.submit(run_task, t) for t in tasks]
         for k, fu in enumerate(as_completed(futs), 1):
             rows.append(fu.result())
@@ -548,6 +586,7 @@ def main(argv: list[str] | None = None) -> int:
         "commits": commits,
         "machine": f"{platform.node()} {platform.machine()}, {os.cpu_count()} cpus",
         "workers": args.workers,
+        "cores_per_plan": args.cores_per_plan,
         "notes": notes + ([f"{len(rejected)} rejected results"] if rejected else []),
         "decision": decision,
         "limit": args.limit,
