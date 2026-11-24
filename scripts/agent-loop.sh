@@ -26,6 +26,12 @@ beats the benchmark, revert what does not, log every experiment in docs/EXPERIME
 - Work multi-agent: whenever two or more pieces of work are independent (modules, experiments,
   training runs, evaluation, research, docs), start one subagent per piece IN PARALLEL with the
   shared rules and a clear brief. You review, test, integrate.
+- Usage budget: the 5-hour account limit is the bottleneck, so spend it where judgement matters.
+  You (Opus) plan, review diffs, integrate and decide promotions. Subagents run on Sonnet by default
+  (give model "haiku" to mechanical ones: data conversion, log digging, reformatting). At most 3
+  subagents at a time; give each a narrow brief and ask for a short report. Let scripts and Slurm
+  jobs do long or repetitive work instead of agents watching it; never poll in a loop, never read
+  whole logs or data files (tail/grep them), and do not re-read files you already know.
 - Check whether something already exists (open source, papers) before building it.
 - Commit and push about once an hour (bundle the work of the hour; also before a promotion and before
   stopping for a usage limit). No need to commit after every small change.
@@ -56,6 +62,21 @@ autosave() { while true; do sleep 3600; git push -q origin HEAD 2>/dev/null; sna
 autosave & AUTOSAVE_PID=$!
 trap 'kill $AUTOSAVE_PID 2>/dev/null' EXIT
 
+resize_if_needed() { # during a usage-limit pause nothing is in flight: if this job holds more
+  # CPUs than scripts/slurm/agent-loop.sbatch now asks for, queue a right-sized job that starts at
+  # the reset time and leave, so the cluster gets the cores back while we sleep.
+  local want have
+  [ -n "${SLURM_JOB_ID:-}" ] || return 0
+  want=$(grep -oE '^#SBATCH -c [0-9]+' scripts/slurm/agent-loop.sbatch | grep -oE '[0-9]+$')
+  have=${SLURM_CPUS_ON_NODE:-$want}
+  if [ -n "$want" ] && [ "$have" -gt "$want" ]; then
+    git push -q origin HEAD 2>/dev/null; snapshot 2>/dev/null
+    out=$(sbatch --begin="@$1" scripts/slurm/agent-loop.sbatch 2>&1)
+    echo "[$(date -Is)] job holds $have CPUs, script asks for $want: $out; this job ends" | tee -a logs/agent-loop.log
+    exit 0
+  fi
+}
+
 wait_for_reset() { # sleep until the reset time in the last run's output ("resets 8:50pm",
   # "resets Nov 30, 8pm"), else retry in 15 minutes
   local reset t now
@@ -63,6 +84,7 @@ wait_for_reset() { # sleep until the reset time in the last run's output ("reset
   if [ -n "$reset" ] && t=$(date -d "$reset" +%s 2>/dev/null); then
     now=$(date +%s); [ "$t" -le "$now" ] && t=$((t + 86400))
     echo "[$(date -Is)] usage limit, sleeping until $reset" | tee -a logs/agent-loop.log
+    resize_if_needed "$t"
     sleep $((t - now + 120))
   else
     sleep 900

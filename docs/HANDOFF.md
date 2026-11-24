@@ -8,6 +8,91 @@ Read `KELPOD_CONTEXT.md`, `CLAUDE.md` and `docs/ARCHITECTURE.md` first. Work on 
 The pipeline runs end to end on at least 3 synthetic sample plans, writes IFC files that IfcOpenShell
 re-opens, the closure metric and runtime are reported honestly, and `uv run pytest` passes.
 
+## Next up, right after the experiment in progress (user, 2026-11-24 13:35 CET)
+
+The user wants these three set up and run by the agents here on pascal (not on the Mac). Finish
+the experiment that is in progress (e.g. `exp/ocr-chainsum`), then do these, in parallel where
+possible (Sonnet subagents, one per task):
+
+### A. Make Kelpod work on real DIN 1356-1 plans from the web ("do the max you can")
+The user tested a real, modern DIN-style plan from Google Images in the sandbox and the result was
+bad. Files: `~/kelpod-data/real/din-web-2026-11-24/` (licence unchecked: keep out of the repo).
+Worktree `~/kelpod-wt/din-web` on branch `exp/din-web-plans` (from main) is already created for it.
+Measured with main on 2026-11-24 (default settings):
+- `efh-erdgeschoss-550.jpg` (550 x 550 px, single-family house, ground floor): 23 walls, **0 rooms**,
+  13 dangling ends, 4 components; the 16 dimension labels "disagree", so the scale was guessed.
+- `positionsplan-fig134.png` (685 x 666 px, structural position plan): 18 walls, **0 rooms**.
+Diagnosis (overlay of the classical segmenter on the first plan):
+1. Walls are drawn as two thin parallel lines with an empty or lightly filled interior; the wall
+   mask misses them and grabs furniture, stairs, the hatched terrace and text instead.
+2. Very low resolution (a 24 cm wall is about 2 px). Upscale (Lanczos/bicubic) and sharpen (unsharp
+   mask) before segmentation and OCR; consider super-resolution if justified.
+3. OCR misreads centimetre chains with raised millimetre digits: "178⁵" read as "2865", "124⁵" as
+   "1245". Detect the unit per plan (cm integers vs. m with comma), use chain sums (total = sum of
+   parts) to correct digits, and read stamps like "20,91 m²" that came out as "2091".
+4. 45-degree walls, bay shapes, lots of furniture and stair lines.
+Do the most you can: wall detection from parallel line pairs (any angle), upscale + sharpen + OCR,
+cm/superscript parsing with chain-sum checks, clutter suppression. Measure per plan before/after and
+keep the synthetic benchmark from regressing; promote via the protocol. Report honestly in README.
+
+### B. Keep the Streamlit sandbox in sync with main
+The sandbox (https://kelpod.streamlit.app, code in `deploy/streamlit/`) currently installs kelpod
+from a pinned commit (`requirements.txt`). Change it so the app imports kelpod from the repo
+checkout it is deployed from (`sys.path` to `src/`, also for the worker subprocess via PYTHONPATH),
+and `requirements.txt` lists only the third-party dependencies. Merge that into main (deploy-only
+change, no pipeline change). After that, every push to main redeploys the sandbox automatically.
+Note for the user in README: the Streamlit app must be switched to deploy from `main` once (the
+user or the Mac session does that in the Streamlit UI; agents here cannot log in there).
+
+### C. Collector for real DIN-style plan images
+A draft is in `~/kelpod-drafts/collector/` (unfinished, untested; written on the Mac and stopped).
+Finish it as `scripts/collect_plans.py` + `tests/collect/`: official APIs only, never HTML-scraping
+Google or any CAPTCHA workaround: Openverse and Wikimedia Commons (no key, licences included) and
+the Google Programmable Search JSON API (image search) only when `GOOGLE_CSE_KEY` and
+`GOOGLE_CSE_CX` are set (100 free queries/day; the user would create the key). German queries
+("Grundriss Erdgeschoss Bemaßung", "Bestandsplan Grundriss", "Grundriss DIN 1356", ...), polite
+rate limits, robots.txt, a manifest with source, licence and URL per image, sha256 + dHash dedupe,
+a cheap "is this a plan" filter. Run it as a small Slurm job (1 CPU) into `~/kelpod-data/web/`
+(never into the repo), then use the plans that pass as a real dev set for task A (no ground truth:
+report closure and visual checks; hand-label a few if useful).
+
+## Queued, not urgent (user, 2026-11-24 13:15 CET): make Kelpod work on real historic plans
+
+**Not a priority.** The user asked to keep working on what was in progress before (fine-tuning,
+evaluation, continuous improvement) and to take this up afterwards, as one of the normal
+improvement items. The measurements below stay valid.
+
+The user uploaded three real German plans to the sandbox and the results were bad. When the current
+work is done, improve Kelpod for this type of plan. Files (licence unchecked, keep them out of the
+repo): `~/kelpod-data/real/user-feedback-2026-11-24/` (README.txt describes each).
+
+Measured with the current pipeline (160 dpi, classical segmenter) on 2026-11-24:
+- villa-garten-vorhof.jpg: 81 walls, 5 rooms, 3 components, 25 dangling ends, 25 loose pieces dropped.
+- bauernhaeuser-oberbayern-1900-tafel71.jpg: 7 walls, 0 rooms, 7 openings not placed on any wall.
+- villa-gundel-drempelgeschoss.jpg: 6 walls, 0 rooms, no dimension read.
+- Scale fell back to "1:100 at the file's dpi" on all three: meaningless for web JPEGs.
+
+What these plans have that our synthetic DIN-style plans do not (each is a work item):
+1. Walls drawn solid black (poché) or as thin double lines with black pillars; no hatching.
+2. Scale from a graphic scale bar (plans 1, 2) or from dimensions written INSIDE rooms with arrowheads
+   and dotted lines (plan 3: "4,35", "3,00"); no outside Maßketten; unknown scan dpi.
+3. Several plans on one sheet (plan 2: 7 floor plans, captions "ERDGESCHOSS", "I. STOCK", Fraktur
+   text): detect and split plans, convert each (or let the user pick one).
+4. Non-orthogonal walls: bay windows, octagonal rooms, curved stairs.
+5. Clutter that is not walls: stairs, bathtubs, stoves, furniture, columns, garden/courtyard outlines.
+6. Room names in capitals split across lines with hyphens ("SPEISE-/S.", "ANRICHTE-/Z."), old
+   abbreviations (Schlafz., Fremdenz., Frühstz.); exterior spaces (Garten, Vorhof, Altan) are not rooms.
+7. Low resolution (540-1024 px wide JPEGs).
+
+How: research first (what handles solid-wall historic plans: CubiCasa5k-trained models, scale-bar
+detection, plan-region detection). Then (a) add a "historic" style to the synthetic generator
+(poché walls, scale bars, multi-plan sheets, interior dimension arrows, low res) and train/fine-tune
+on it; (b) label these 3 plans by hand-assisted annotation (walls + rooms) as a tiny real-dev set
+and report per-plan numbers before/after; (c) collect more openly licensed historic German plans
+(Wikimedia Commons, LABW, Wien Museum) for real-dev. Use Sonnet subagents in parallel, GPUs via
+Slurm as justified. Report honestly: these are 3 plans, not a benchmark. When something improves,
+tell the user in README status which of the 3 plans now work.
+
 ## Status (keep this up to date; newest first)
 
 - [x] Old LoRA-factory code deleted (it stays in git history).
@@ -90,7 +175,12 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
 - [x] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans (2026-11-24).
 - [x] baseline-v0 on main (40546a9, 2026-11-24): MVP + eval protocol v1 merged, tagged, pushed.
 - [ ] Continuous improvement (approved 2026-11-23; never checked, runs until a person stops the loop):
-  running 2026-11-24 12:50: exp/learned-v1 (style-randomised U-Net, 2 seeds, learned default),
+  2026-11-24 14:10: eval/learned-runner and a load-aware OCR timing test merged into main.
+  Historic plans (top priority) measured: classical 9/1/2 rooms, learned (r34) 4/1/0 rooms, none
+  closed, scale guessed. Now: exp/historic-plans (labels for the 3 plans, scale bar, interior
+  dimensions, multi-plan sheets, poché walls), exp/learned-v1 redirected to a historic training
+  style, real-scan collection. exp/ocr-chainsum paused (WIP pushed).
+  Earlier, 2026-11-24 12:50: exp/learned-v1 (style-randomised U-Net, 2 seeds, learned default),
   exp/ocr-chainsum (joint Maßketten decoding), eval/learned-runner (locked_eval for learned
   checkpoints), real-scan collection (~/kelpod-data/real, not yet written). Worktrees ~/kelpod-wt/.
   see "Continuous improvement" below.
@@ -138,6 +228,13 @@ paid version could not use). Research and ranked bets: `docs/research/V2_RESEARC
 6. Repeat. Every few cycles, re-check the state of the art online.
 
 ## Compute
+
+**Resource audit (2026-11-24, 12:40 CET).** Measured over 14 h: the agent job held 16 CPUs / 48 GB
+but used ~1.1 CPUs on average and 17.5 GB at peak, so it now asks for 8 CPUs / 24 GB (it switches
+itself to the new size at its next usage-limit pause). Cancelled: `kelpod-real` (held 4 CPUs / 8 GB
+for 13.5 h only waiting for `sources.csv`; submit `~/kelpod-jobs/real-scans.sbatch` once real/dev
+exists, it no longer waits) and the `kelpod-cockroach` watchdog job (2 CPUs idle; the cron entry
+covers it). Rule in `CLAUDE.md` ("Cluster resources").
 
 The MVP runs on CPU. If a step needs a GPU (e.g. fine-tuning or running a learned segmenter, a
 heavier OCR model), use the cluster's GPUs through Slurm from the login host; never run GPU jobs on

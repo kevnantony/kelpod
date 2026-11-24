@@ -17,8 +17,12 @@ for HottCAD), the pipeline, the strategy, the pilot and the course requirements.
   `exp/<name>` branches in their own worktrees. Ask before publishing anything outside this repo.
 - Never weaken, bypass or game the evaluation (`docs/EVAL_PROTOCOL.md` §6). Report flaws, fix them on
   an `eval/*` branch.
-- GPUs: the whole pascal cluster may be used when justified. Write the justification and expected
-  GPU hours for each job in `docs/EXPERIMENTS.md`, checkpoint long jobs, cancel idle ones.
+- Cluster resources: every job must be explainable. The whole pascal cluster (GPUs included) may be
+  used when that gets results faster, as long as `docs/EXPERIMENTS.md` says why. For every job,
+  CPU or GPU: size the request from measurements, log the justification, the expected and the
+  measured CPU/GPU hours, and checkpoint long runs. Never hold a job that waits or polls for input
+  (submit it when the input exists), cancel jobs idle for more than 30 minutes, and keep the agent
+  job itself small (heavy evaluation and training go to their own jobs).
 - Keep the `## Status` block in `README.md` (between the `status:start` / `status:end` markers)
   current: **Done**, **Doing now**, **Next**, with a "Last updated" timestamp (date, time, CET).
   Update it about once an hour while working (also when pausing for a usage limit: say so and when
