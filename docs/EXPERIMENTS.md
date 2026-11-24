@@ -147,3 +147,38 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
   lines, open outline at window gaps.
 - **Decision:** the upscale and footprint-guard changes are safe candidates (no synthetic change);
   the `pairs` backend is an experimental fallback, not a result. Not promoted, no locked run.
+
+## din-web-v2 (2026-11-24, branch exp/din-web-v2 = exp/din-web-plans + main)
+
+- **Why:** the locked run of exp/din-web-plans gained room IoU (+0.047) but regressed door precision
+  (-3 to -6 pp), edit cost (+11 to +24 %) and exterior wall length error (+16 to +69 %).
+- **Method:** val-synth only (never test splits). Smoke runner, first 30 val plans, main vs branch
+  (before the fix): ext_wall_length_error 0.0009 -> 0.0310, door precision 0.996 -> 0.979, edit
+  cost 1.97 -> 3.37. The per-plan table showed the whole regression in one plan (s200009: ext wall
+  error 0.02 -> 0.92, door/window precision 1.0 -> 0.5/0.4, edit cost 17 -> 59, room IoU
+  0.58 -> 0.92). Component switch on that plan (segmenter wall count): footprint guard off -> 15
+  walls (as main), guard on -> 31 walls; the upscale (no effect on a 200 dpi plan) and the `pairs`
+  fallback (not triggered: hatched walls) were not involved. The OCR chain decoder was not ablated
+  separately (it does not change walls/openings; no per-plan difference was seen outside s200009).
+  The full 5-way ablation was cut short by a heavily loaded node (jobs 2 min/plan).
+- **Root cause:** the footprint guard (skip the "delete walls outside the enclosed footprint" filter
+  when the footprint touches under 65 % of the wall length) kept *everything* when the outline was
+  open. On a skewed, shaded plan the outline is open, so dimension-chain artefacts (extension lines,
+  ticks, outline-only "E" runs 29-55 px thick) stayed as walls, windows and door gaps: wrong
+  exterior walls, openings and rooms (the IoU gain on that plan was the rooms merging).
+- **Fix:** in the partial case, keep only the networks (pieces touching within 6 px) that border
+  the footprint and are at least 3 m long in total (`_connected_to_footprint`); loose stubs go.
+  Full footprint case unchanged. Test: `tests/segment/test_pairs.py::test_partial_footprint_*`.
+- **Result (val-synth, n=200, main -> branch, CPU, ~1300 s wall for the run on 8 cores):**
+  correct_closed 0.720 -> 0.725, room IoU 0.9401 -> 0.9443 [+0.0025, +0.0062], wall F1
+  0.9878 -> 0.9889, door precision 0.9748 -> 0.9738 [-0.0030, 0.0], door recall 0.9609 -> 0.9587,
+  window precision 0.9963 -> 0.9963, edit cost 4.135 -> 3.980 (-3.7 %, CI [-11.5, +4.1]),
+  ext_wall_length_error 0.0058 -> 0.0061 (+4.9 %, CI [0, +22.4], not flagged), runtime median
+  within +25 % (loaded node). No rule-3 regression on val-synth.
+- **Web plans (real, dev only):** unchanged by the fix, identical before and after: efh 48 walls,
+  5 rooms, 12 dangling, 1 group; positionsplan 37 walls, 5 rooms, 9 dangling, 1 group; neither
+  closed.
+- **Caveat:** val-synth did not show the test regression at the 200-plan level before the fix (only
+  the 30-plan subset was run before). The test splits use a held-out style; the mechanism
+  (partial footprint + dimension artefacts) is style independent, but whether it explains all of the
+  test regression is unverified. Not tested on test splits by design.
