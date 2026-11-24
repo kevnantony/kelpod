@@ -21,7 +21,7 @@ it does on real scans.
     the dimension chains, closed rooms, NetworkX checks.
   - **export:** closed corners, openings, spaces with areas, IsExternal.
 - **Viewer:** `scripts/demo.py --seed N` writes the input plan next to the 3D IFC model.
-- **Tests:** 284 passing (`uv run pytest`, about 2 min on the CPU node).
+- **Tests:** 298 passing (`uv run pytest`, about 2 min on the CPU node).
 
 ## Measured on synthetic plans
 
@@ -54,12 +54,42 @@ our training-style drawings.
 Runtime is 5 to 9 s per plan when the node is not loaded. The target is under 3 minutes. OCR takes
 about 75 % of that time.
 
-## Learned segmentation (fine-tuning)
+## Learned segmentation (fine-tuned)
 
-The candidates are a CubiCasa5k released model (zero-shot) and a ResNet-34 U-Net fine-tuned on our
-synthetic plans and on Swiss Dwellings, ResPlan and CubiCasa5k. In both cases the predicted masks
-are turned into vectors by a deterministic vectoriser. Results: see `training/README.md`. Until
-that file reports a measured comparison, there is none.
+A U-Net with an ImageNet ResNet-34 encoder predicts five classes: background, wall, window, door,
+room. A deterministic vectoriser turns the masks into walls, openings and rooms. Training took
+1.01 GPU hours on one RTX A6000. Training data:
+
+- 4000 synthetic pages;
+- Swiss Dwellings (CC BY 4.0) and ResPlan (CC BY 4.0), re-rendered in our drawing style;
+- CubiCasa5k (CC BY-NC 4.0).
+
+The model is available as `--segment-backend learned` (checkpoint from `KELPOD_SEG_CHECKPOINT`,
+needs PyTorch). **Classical stays the default** until the switch passes the promotion protocol.
+Details are in `training/README.md`.
+
+These are dev and val numbers on synthetic and re-rendered plans. They are not from a locked run,
+and none of them come from real German plans.
+
+| Set | Metric | Classical | Zero-shot CubiCasa5k | Fine-tuned |
+|---|---|---|---|---|
+| val-synth (200, frozen) | correct-closed | 0.720 | n/a | 0.980 |
+| val-synth | edit cost (edits/plan) | 4.14 | n/a | 0.45 |
+| synth test seeds, degrade 0.5 (50) | closed / room IoU | 0.88 / 0.970 | 0.36 / 0.883 | 1.00 / 0.983 |
+| synth test seeds, degrade 1.0 (50) | closed / room IoU | 0.70 / 0.937 | 0.16 / 0.892 | 1.00 / 0.980 |
+| Swiss Dwellings, held-out sites (96) | room IoU (mask level) | 0.31 | 0.68 | 0.97 |
+| ResPlan test (100) | room IoU (mask level) | 0.60 | 0.54 | 0.98 |
+| CubiCasa5k test (first 100) | room IoU (mask level) | 0.20 | 0.84 | 0.86 |
+
+Caveats:
+
+- **Training style:** only the default synthetic drawing style was used. The held-out test style is
+  likely to cost accuracy, and it has not been measured.
+- **CubiCasa5k:** these are real but Finnish plans, and the fine-tuned model is only slightly ahead
+  of zero-shot there.
+- **CPU runtime:** the segment step takes 3.4–5.4 s per page alone, against 0.3–0.5 s for
+  classical.
+- **Seeds:** there is one training seed only; promotion needs two.
 
 ## What does not work yet
 

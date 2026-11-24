@@ -20,4 +20,25 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
     to also run on the CPU in the pipeline.
   - Evaluation runs on CPUs (pascal partition for free cores; GPU not used, runtime measured on
     CPU): 0 GPU hours of compute, ~1-3 h allocation each.
-- **Results:** see `training/README.md` (dev/synthetic numbers; not a locked evaluation).
+- **GPU hours used:** training job 128281, 1.01 GPU h (RTX A6000); evaluation jobs 128282,
+  128297, 128312, 128313 CPU-only (GPU hidden), roughly 3-4 h of GPU allocation, no GPU compute.
+- **Results** (dev/synthetic numbers, not a locked evaluation; details in `training/README.md`):
+  - Synth test seeds 100000-100049, after geometry, closed share classical / zero-shot CubiCasa5k
+    / fine-tuned: degrade 0.5: 0.88 / 0.36 / 1.00; degrade 1.0: 0.70 / 0.16 / 1.00. Room IoU at
+    degrade 1.0: 0.937 / 0.892 / 0.980; door recall 0.950 / 0.993 / 1.000.
+  - val-synth (frozen, 200, eval-branch panel), classical vs fine-tuned: correct-closed 0.720 vs
+    0.980, edit cost 4.14 vs 0.45, wall F1 0.988 vs 0.999, room IoU 0.940 vs 0.982.
+  - Held-out dataset pages (mask level), room IoU classical / zero-shot / fine-tuned: Swiss (by
+    site) 0.31 / 0.68 / 0.97; ResPlan test 0.60 / 0.54 / 0.98; CubiCasa5k test (100, real Finnish
+    raster plans, in-domain for the zero-shot model) 0.20 / 0.84 / 0.86.
+  - CPU runtime of the segmentation step: fine-tuned 3.4-5.4 s per page (single process,
+    8 threads) vs classical 0.3-0.5 s.
+  - Found and fixed on the way: a vectoriser sliver bug (door next to a perpendicular wall face);
+    with oracle class maps, 12/12 dev plans now close after geometry.
+- **Caveats:** no real German plans; Swiss/ResPlan are re-rendered in our default style; the
+  test-synth held-out style (other fonts, hatching, line weights, damage) was never seen in
+  training, so a drop there is likely; one training seed only (rule 5 needs two before promotion).
+- **Decision:** the learned backend is available as `backend="learned"` (checkpoint via
+  `KELPOD_SEG_CHECKPOINT`). The default stays `classical`. Making `learned` the default is a
+  separate experiment (`exp/<name>` branch, second training seed), promoted only via
+  `docs/EVAL_PROTOCOL.md`.

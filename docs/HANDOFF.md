@@ -63,13 +63,15 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   100-129 (not tuned on), before -> after: degrade 0.5 closed 0.733 -> 0.800, room IoU 0.936 ->
   0.962; degrade 1.0 closed 0.067 -> 0.533, room IoU 0.774 -> 0.869 (docs/results/closurefix_*.md).
   Synthetic only; dev numbers, not a locked evaluation.
-- [ ] Fine-tune a state-of-the-art segmentation model (brief "finetune" in docs/AGENT_BRIEFS.md;
-  approved 2026-11-23). Starts after integration; GPUs via Slurm.
-  In progress (uncommitted in the main checkout: `training/`, `src/kelpod/segment/learned.py`,
-  `tests/segment/test_segment.py`, `docs/EXPERIMENTS.md`): ResNet-34 U-Net (smp) 5-class masks +
-  deterministic vectoriser (oracle check: wall recall >= 0.995, room IoU 0.98); CubiCasa5k released
-  model as zero-shot baseline; converters for Swiss Dwellings / ResPlan / CubiCasa5k; 4000 synth
-  train pages built. No training run finished yet, no comparison numbers yet.
+- [x] Fine-tune a state-of-the-art segmentation model (done 2026-11-24, e19fb69): ResNet-34 U-Net
+  (smp) + deterministic vectoriser, `backend="learned"` / `kelpod convert --segment-backend learned`
+  (checkpoint `~/kelpod-models/kelpod-seg/r34/model.pt` via KELPOD_SEG_CHECKPOINT; needs torch, the
+  training env has it). 1.01 GPU h. Dev/val numbers, synthetic and re-rendered only: val-synth
+  correct-closed classical 0.720 -> learned 0.980 (edit cost 4.14 -> 0.45); synth test seeds closed
+  0.88/0.70 -> 1.00/1.00 at degrade 0.5/1.0; Swiss/ResPlan/CubiCasa5k room IoU 0.97/0.98/0.86.
+  Zero-shot CubiCasa5k model clearly worse on our style. Classical stays default; switching is the
+  first exp/* experiment (needs 2 training seeds, test-synth held-out style unmeasured, and
+  locked_eval must be able to pass a checkpoint / torch env to the candidate). See training/README.md.
 - [x] (step 0) `eval/protocol-v1` built and merged into this branch (cc4518a, no pipeline change):
   held-out generator style (default output byte-identical), frozen val-synth (200, train style,
   degrade 0-1.2) and test-synth (300, held-out style) in ~/kelpod-data/eval/ with SHA-256 manifests
@@ -85,7 +87,7 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   `GET /jobs/{id}/model.ifc`; jobs keep-last-N + TTL, temp dir removed on shutdown. Run with
   `uv run --extra api kelpod serve` or `python -m kelpod.api`. 12 tests (1 slow). No auth yet;
   the size limit is checked while reading, so a reverse proxy should also cap request size.
-- [ ] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans.
+- [x] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans (2026-11-24).
 - [ ] Continuous improvement (approved 2026-11-23; never checked, runs until a person stops the loop):
   see "Continuous improvement" below.
 
