@@ -8,6 +8,39 @@ Read `KELPOD_CONTEXT.md`, `CLAUDE.md` and `docs/ARCHITECTURE.md` first. Work on 
 The pipeline runs end to end on at least 3 synthetic sample plans, writes IFC files that IfcOpenShell
 re-opens, the closure metric and runtime are reported honestly, and `uv run pytest` passes.
 
+## TOP PRIORITY (user request, 2026-11-24 13:00 CET): make Kelpod work on real historic plans
+
+The user uploaded three real German plans to the sandbox and the results were bad. Before any other
+experiment, improve Kelpod for this type of plan. Files (licence unchecked, keep them out of the
+repo): `~/kelpod-data/real/user-feedback-2026-11-24/` (README.txt describes each).
+
+Measured with the current pipeline (160 dpi, classical segmenter) on 2026-11-24:
+- villa-garten-vorhof.jpg: 81 walls, 5 rooms, 3 components, 25 dangling ends, 25 loose pieces dropped.
+- bauernhaeuser-oberbayern-1900-tafel71.jpg: 7 walls, 0 rooms, 7 openings not placed on any wall.
+- villa-gundel-drempelgeschoss.jpg: 6 walls, 0 rooms, no dimension read.
+- Scale fell back to "1:100 at the file's dpi" on all three: meaningless for web JPEGs.
+
+What these plans have that our synthetic DIN-style plans do not (each is a work item):
+1. Walls drawn solid black (poché) or as thin double lines with black pillars; no hatching.
+2. Scale from a graphic scale bar (plans 1, 2) or from dimensions written INSIDE rooms with arrowheads
+   and dotted lines (plan 3: "4,35", "3,00"); no outside Maßketten; unknown scan dpi.
+3. Several plans on one sheet (plan 2: 7 floor plans, captions "ERDGESCHOSS", "I. STOCK", Fraktur
+   text): detect and split plans, convert each (or let the user pick one).
+4. Non-orthogonal walls: bay windows, octagonal rooms, curved stairs.
+5. Clutter that is not walls: stairs, bathtubs, stoves, furniture, columns, garden/courtyard outlines.
+6. Room names in capitals split across lines with hyphens ("SPEISE-/S.", "ANRICHTE-/Z."), old
+   abbreviations (Schlafz., Fremdenz., Frühstz.); exterior spaces (Garten, Vorhof, Altan) are not rooms.
+7. Low resolution (540-1024 px wide JPEGs).
+
+How: research first (what handles solid-wall historic plans: CubiCasa5k-trained models, scale-bar
+detection, plan-region detection). Then (a) add a "historic" style to the synthetic generator
+(poché walls, scale bars, multi-plan sheets, interior dimension arrows, low res) and train/fine-tune
+on it; (b) label these 3 plans by hand-assisted annotation (walls + rooms) as a tiny real-dev set
+and report per-plan numbers before/after; (c) collect more openly licensed historic German plans
+(Wikimedia Commons, LABW, Wien Museum) for real-dev. Use Sonnet subagents in parallel, GPUs via
+Slurm as justified. Report honestly: these are 3 plans, not a benchmark. When something improves,
+tell the user in README status which of the 3 plans now work.
+
 ## Status (keep this up to date; newest first)
 
 - [x] Old LoRA-factory code deleted (it stays in git history).
