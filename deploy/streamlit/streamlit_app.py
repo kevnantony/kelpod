@@ -19,6 +19,15 @@ from pathlib import Path
 
 os.environ.setdefault("OMP_NUM_THREADS", "2")
 
+# Kelpod comes from the repo checkout this app is deployed from (not a pinned install), so every
+# push to the deployed branch also updates the pipeline. The worker gets the same path.
+SRC = Path(__file__).resolve().parents[2] / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+os.environ["PYTHONPATH"] = os.pathsep.join(
+    [str(SRC)] + [p for p in os.environ.get("PYTHONPATH", "").split(os.pathsep) if p]
+)
+
 import streamlit as st  # noqa: E402
 import streamlit.components.v1 as components  # noqa: E402
 
