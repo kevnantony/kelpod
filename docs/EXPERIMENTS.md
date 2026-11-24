@@ -2,6 +2,23 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## ocr-chainsum (2026-11-24, branch exp/ocr-chainsum @ 9fe1219, not promoted)
+
+- **Hypothesis:** joint decoding of Maßketten (n-best readings from RapidOCR's CTC output, chain
+  sums, pixel spans, shared ticks; CP-SAT) raises dimension recall/precision and, through the
+  dimension fit, closure and area accuracy.
+- **Data:** synthetic dev seeds 200000-200049 (tuning), 200050-200099 (held-out dev), frozen
+  val-synth (200). No test or sealed data looked at. CPU only, 0 GPU-h.
+- **Results (val-synth, synthetic, main -> branch):** dimension precision 0.803 -> 0.878, recall
+  0.708 -> 0.793, linked to the right span 0.530 -> 0.775; correct-closed 0.720 -> 0.725, room IoU
+  0.9401 -> 0.9443, edit cost 4.14 -> 4.00. Runtime +20-26 % per plan (OR-Tools import + solve).
+  Real web plan (550 px): area stamps fixed (`2091mF` -> 20,91 m²), chain decoding falls back
+  (too few consistent labels at that resolution).
+- **Decision:** not run through the locked evaluation. The end-to-end gain on val is far below the
+  promotion bar (+3 pp correct-closed, or edit cost -10 %, or room IoU +0.02), so a locked run
+  would only spend budget. Kept as the OCR base for `exp/din-web-plans` (cm chains with raised mm
+  digits, low-resolution web plans), which will be promoted together if it clears the bar.
+
 ## finetune-unet-v0 (2026-11-23, branch claude/kelpod-mvp-fa1abc, training/)
 
 - **Hypothesis:** a 5-class U-Net (background, wall, window, door, room interior; ImageNet
