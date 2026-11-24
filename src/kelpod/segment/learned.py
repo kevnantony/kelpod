@@ -491,6 +491,11 @@ class LearnedSegmenter:
     ``KELPOD_SEG_CHECKPOINT`` environment variable. ``predictor``: any callable that maps a
     grayscale page at the training scale to a class map (used to evaluate other networks, e.g.
     the CubiCasa5k model zero-shot, through the same post-processing).
+
+    ``infer_scale``: the page is shrunk by this factor (INTER_AREA) before the network and the
+    logits are resized back (bilinear). 0.65 with whole-page inference (``tile=2048``) cuts the CPU
+    time of the network about 10x against 1024 px tiles at full scale (docs/EXPERIMENTS.md,
+    learned-fast).
     """
 
     name = "learned"
@@ -502,7 +507,8 @@ class LearnedSegmenter:
         predictor: LabelPredictor | None = None,
         params: PostParams | None = None,
         threads: int | None = None,
-        tile: int = 1024,
+        tile: int = 2048,
+        infer_scale: float = 0.65,
     ) -> None:
         env = os.environ.get(ENV_CHECKPOINT)
         self.weights = Path(weights) if weights else (Path(env) if env else None)
@@ -510,6 +516,7 @@ class LearnedSegmenter:
         self.params = params
         self.threads = threads
         self.tile = tile
+        self.infer_scale = infer_scale
         self._model = None
 
     def _predict(self, gray: np.ndarray) -> np.ndarray:
@@ -525,7 +532,17 @@ class LearnedSegmenter:
             if not self.weights.is_file():
                 raise FileNotFoundError(f"segmentation checkpoint not found: {self.weights}")
             self._model = load_model_cached(self.weights, threads=self.threads)
+        h, w = gray.shape
+        s = self.infer_scale
+        if s != 1.0:
+            gray = cv2.resize(
+                gray, (max(32, round(w * s)), max(32, round(h * s))), interpolation=cv2.INTER_AREA
+            )
         logits = predict_tiled(self._model, gray, tile=self.tile)
+        if s != 1.0:
+            logits = np.stack(
+                [cv2.resize(c, (w, h), interpolation=cv2.INTER_LINEAR) for c in logits]
+            )
         return np.argmax(logits, axis=0).astype(np.uint8)
 
     def predict_labels(self, page: RasterPage) -> np.ndarray:

@@ -1,10 +1,17 @@
-# Run configuration of this branch (read by kelpod.runconfig; later also by scripts/locked_eval.py).
-# PROVISIONAL: points at r34 exported to ONNX until the learned-v1 seeds are trained.
+# Run configuration of this branch (read by kelpod.runconfig and scripts/locked_eval.py).
+# Final: the two learned-v1 seeds (U-Net ResNet-34, ONNX), run with whole-page inference at 0.65 scale
+# (LearnedSegmenter defaults), see docs/EXPERIMENTS.md "learned-fast". Training manifests: every
+# training/manifests/*.json (checked by scripts/locked_eval.py --verify-manifests).
 segment_backend = "learned"
 ocr_backend = "rapidocr"
 python_project = "."
 
 [[checkpoints]]
-seed = 0
-path = "~/kelpod-models/kelpod-seg/r34-onnx/model.onnx"
-sha256 = "1ccecf59d02966e1b76959c94642f550f9b82e0ed308582bfa9ceb0b97a195d1"
+seed = 1
+path = "~/kelpod-models/kelpod-seg/v1-s1/model.onnx"
+sha256 = "6d1b6d39941510a3fae85048cbc7eb860a841d4084d2d5860b870022d48b79bc"
+
+[[checkpoints]]
+seed = 2
+path = "~/kelpod-models/kelpod-seg/v1-s2/model.onnx"
+sha256 = "9ed1bed6a149f23a778dc9e8987e4be643abadbed15222c4600e134844f01a07"
