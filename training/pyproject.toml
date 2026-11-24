@@ -1,0 +1,31 @@
+[project]
+name = "kelpod-training"
+version = "0.1.0"
+description = "Training and evaluation of Kelpod's learned segmentation backend (GPU via Slurm)"
+requires-python = ">=3.12,<3.13"
+# Heavy ML dependencies live here, not in the main kelpod project.
+dependencies = [
+    "kelpod",
+    "torch==2.6.0",                       # BSD-3-Clause
+    "torchvision==0.21.0",                # BSD-3-Clause
+    "segmentation-models-pytorch>=0.4",   # MIT
+    "timm>=1.0",                          # Apache-2.0
+    "gdown>=5.2",                         # MIT (Google Drive download of CubiCasa5k weights)
+    "svgpathtools>=1.6",                  # MIT (CubiCasa5k SVG parsing)
+    "pandas>=2.2",                        # BSD-3-Clause
+    "tqdm>=4.66",
+    "pytest>=8.3",
+]
+
+[tool.uv.sources]
+kelpod = { path = "..", editable = true }
+torch = { index = "pytorch-cu124" }
+torchvision = { index = "pytorch-cu124" }
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv]
+package = false

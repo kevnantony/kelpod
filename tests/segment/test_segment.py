@@ -28,10 +28,12 @@ def house_result():
     return segment.run(page_from(img)), gt
 
 
-def test_registry_and_learned_stub():
+def test_registry_and_learned_stub(monkeypatch):
     assert {"classical", "learned"} <= set(segment.available())
     img = np.full((50, 50), 255, np.uint8)
-    with pytest.raises(NotImplementedError):
+    # without a checkpoint the learned backend fails with a clear message
+    monkeypatch.delenv("KELPOD_SEG_CHECKPOINT", raising=False)
+    with pytest.raises(RuntimeError, match="KELPOD_SEG_CHECKPOINT"):
         segment.run(page_from(img), backend="learned")
     with pytest.raises(ValueError):
         segment.run(page_from(img), backend="nope")
