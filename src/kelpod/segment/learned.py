@@ -77,8 +77,9 @@ class _OnnxModel:
         except ImportError as exc:  # pragma: no cover
             raise ImportError("an .onnx checkpoint needs onnxruntime") from exc
         so = ort.SessionOptions()
-        if threads:
-            so.intra_op_num_threads = threads
+        # explicit thread count (usable CPUs, capped): ORT's default pins threads to CPUs that
+        # may lie outside a Slurm/cgroup allocation
+        so.intra_op_num_threads = threads or min(8, len(os.sched_getaffinity(0)))
         self.sess = ort.InferenceSession(str(path), so, providers=["CPUExecutionProvider"])
         meta = self.sess.get_modelmeta().custom_metadata_map
         self.meta = json.loads(meta.get("kelpod", "{}"))

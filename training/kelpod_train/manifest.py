@@ -46,9 +46,6 @@ def _entries(args) -> list[dict]:
     if source == "synth":
         extra = {"seed": int(meta.get("seed", key.split("_")[1])), "style": "train",
                  "degrade": meta.get("degrade")}
-    if v1:  # style-randomised page: the full train style (split "train") and render seed
-        extra["style"] = meta.get("style", {"split": "train"})
-        extra["render_seed"] = meta.get("seed")
     elif source == "swiss":
         extra = dict(ids.get(int(key.split("_")[1]), {}))
     elif source == "cubicasa":
@@ -56,6 +53,9 @@ def _entries(args) -> list[dict]:
         extra = {"cubicasa_id": folder}
     elif source == "resplan":
         extra = {"resplan_id": int(key.split("_")[1])}
+    if v1:  # style-randomised page: the full train style (split "train") and render seed
+        extra["style"] = meta.get("style", {"split": "train"})
+        extra["render_seed"] = meta.get("seed")
     out = [{"path": img.name, "sha256": _sha(img), "phash": phash(img), **extra}]
     if lab.exists():
         out.append({"path": lab.name, "sha256": _sha(lab), **extra})

@@ -23,6 +23,9 @@ each licence's terms. Add an entry whenever you add something.
 | FastAPI / Uvicorn | MIT / BSD-3-Clause | https://fastapi.tiangolo.com |
 | Starlette | BSD-3-Clause | https://github.com/encode/starlette |
 | python-multipart | Apache-2.0 | https://github.com/Kludex/python-multipart |
+| Augraphy (training-only degradations, `training/`) | MIT | https://github.com/sparkfish/augraphy |
+| ONNX (model export, `training/`) / ONNX Runtime (CPU inference) | Apache-2.0 / MIT | https://onnx.ai |
+| Indie Flower font, Kimberly Geswein (`training/fonts/`, not used in the learned-v1 data build) | SIL OFL 1.1 | https://fonts.google.com/specimen/Indie+Flower |
 
 ## Models and datasets
 
