@@ -8,6 +8,54 @@ Read `KELPOD_CONTEXT.md`, `CLAUDE.md` and `docs/ARCHITECTURE.md` first. Work on 
 The pipeline runs end to end on at least 3 synthetic sample plans, writes IFC files that IfcOpenShell
 re-opens, the closure metric and runtime are reported honestly, and `uv run pytest` passes.
 
+## Next up, right after the experiment in progress (user, 2026-11-24 13:35 CET)
+
+The user wants these three set up and run by the agents here on pascal (not on the Mac). Finish
+the experiment that is in progress (e.g. `exp/ocr-chainsum`), then do these, in parallel where
+possible (Sonnet subagents, one per task):
+
+### A. Make Kelpod work on real DIN 1356-1 plans from the web ("do the max you can")
+The user tested a real, modern DIN-style plan from Google Images in the sandbox and the result was
+bad. Files: `~/kelpod-data/real/din-web-2026-11-24/` (licence unchecked: keep out of the repo).
+Worktree `~/kelpod-wt/din-web` on branch `exp/din-web-plans` (from main) is already created for it.
+Measured with main on 2026-11-24 (default settings):
+- `efh-erdgeschoss-550.jpg` (550 x 550 px, single-family house, ground floor): 23 walls, **0 rooms**,
+  13 dangling ends, 4 components; the 16 dimension labels "disagree", so the scale was guessed.
+- `positionsplan-fig134.png` (685 x 666 px, structural position plan): 18 walls, **0 rooms**.
+Diagnosis (overlay of the classical segmenter on the first plan):
+1. Walls are drawn as two thin parallel lines with an empty or lightly filled interior; the wall
+   mask misses them and grabs furniture, stairs, the hatched terrace and text instead.
+2. Very low resolution (a 24 cm wall is about 2 px). Upscale (Lanczos/bicubic) and sharpen (unsharp
+   mask) before segmentation and OCR; consider super-resolution if justified.
+3. OCR misreads centimetre chains with raised millimetre digits: "178⁵" read as "2865", "124⁵" as
+   "1245". Detect the unit per plan (cm integers vs. m with comma), use chain sums (total = sum of
+   parts) to correct digits, and read stamps like "20,91 m²" that came out as "2091".
+4. 45-degree walls, bay shapes, lots of furniture and stair lines.
+Do the most you can: wall detection from parallel line pairs (any angle), upscale + sharpen + OCR,
+cm/superscript parsing with chain-sum checks, clutter suppression. Measure per plan before/after and
+keep the synthetic benchmark from regressing; promote via the protocol. Report honestly in README.
+
+### B. Keep the Streamlit sandbox in sync with main
+The sandbox (https://kelpod.streamlit.app, code in `deploy/streamlit/`) currently installs kelpod
+from a pinned commit (`requirements.txt`). Change it so the app imports kelpod from the repo
+checkout it is deployed from (`sys.path` to `src/`, also for the worker subprocess via PYTHONPATH),
+and `requirements.txt` lists only the third-party dependencies. Merge that into main (deploy-only
+change, no pipeline change). After that, every push to main redeploys the sandbox automatically.
+Note for the user in README: the Streamlit app must be switched to deploy from `main` once (the
+user or the Mac session does that in the Streamlit UI; agents here cannot log in there).
+
+### C. Collector for real DIN-style plan images
+A draft is in `~/kelpod-drafts/collector/` (unfinished, untested; written on the Mac and stopped).
+Finish it as `scripts/collect_plans.py` + `tests/collect/`: official APIs only, never HTML-scraping
+Google or any CAPTCHA workaround: Openverse and Wikimedia Commons (no key, licences included) and
+the Google Programmable Search JSON API (image search) only when `GOOGLE_CSE_KEY` and
+`GOOGLE_CSE_CX` are set (100 free queries/day; the user would create the key). German queries
+("Grundriss Erdgeschoss Bemaßung", "Bestandsplan Grundriss", "Grundriss DIN 1356", ...), polite
+rate limits, robots.txt, a manifest with source, licence and URL per image, sha256 + dHash dedupe,
+a cheap "is this a plan" filter. Run it as a small Slurm job (1 CPU) into `~/kelpod-data/web/`
+(never into the repo), then use the plans that pass as a real dev set for task A (no ground truth:
+report closure and visual checks; hand-label a few if useful).
+
 ## Queued, not urgent (user, 2026-11-24 13:15 CET): make Kelpod work on real historic plans
 
 **Not a priority.** The user asked to keep working on what was in progress before (fine-tuning,
