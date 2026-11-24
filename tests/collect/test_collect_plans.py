@@ -337,3 +337,12 @@ def test_circuit_breaker_skips_failing_source(tmp_path):
     col.run({"bad": bad, "good": good}, ["a", "b", "c"], max_pages=2, breaker_n=3)
     assert calls["bad"] == 3 and calls["good"] == 6
     assert any("circuit breaker" in l for l in logs)
+
+
+def test_host_breaker(tmp_path):
+    class Fail(FakeHttp):
+        def get(self, url, params=None, max_bytes=None, headers=None):
+            raise urllib.error.HTTPError(url, 429, "slow down", {}, None)
+    col = cp.Collector(out=tmp_path, http=Fail(), max_new=9, log=lambda *_: None)
+    st = [col.process(cp.Candidate("commons", "q", f"https://h/{i}.png", licence="cc0")) for i in range(5)]
+    assert st == ["error"] * 3 + ["host_skipped"] * 2

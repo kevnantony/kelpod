@@ -447,6 +447,7 @@ class Collector:
     ref_dirs: tuple = ()
     licence_skipped: dict = field(default_factory=dict)
     query_count: dict = field(default_factory=dict)
+    host_fails: dict = field(default_factory=dict)  # consecutive download failures per image host
     log: callable = print
     seen_urls: set = field(default_factory=set)
     seen_sha: set = field(default_factory=set)
@@ -515,6 +516,9 @@ class Collector:
         if cls == "no" or (cls == "nc" and not self.allow_nc):
             self.licence_skipped[c.licence] = self.licence_skipped.get(c.licence, 0) + 1
             return "licence"
+        host = urllib.parse.urlsplit(c.image_url).netloc
+        if self.host_fails.get(host, 0) >= BREAKER_N:
+            return "host_skipped"  # circuit breaker: this host kept failing (e.g. HTTP 429)
         if not self.http.robots_allowed(c.image_url):
             return "robots"
         try:
@@ -523,7 +527,11 @@ class Collector:
             return "too_large"
         except Exception as e:  # network / HTTP error: skip this image
             self.log(f"  download failed {c.image_url}: {e}")
+            self.host_fails[host] = self.host_fails.get(host, 0) + 1
+            if self.host_fails[host] == BREAKER_N:
+                self.log(f"  circuit breaker: skipping image host {host} for the rest of the run")
             return "error"
+        self.host_fails[host] = 0
         self.fetched[c.source] = self.fetched.get(c.source, 0) + 1
         sha = hashlib.sha256(data).hexdigest()
         if sha in self.seen_sha:
