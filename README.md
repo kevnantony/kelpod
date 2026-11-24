@@ -9,27 +9,29 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-24 07:30 CET. All numbers are from synthetic plans; nothing has been tested on real scans yet._
+_Last updated: 2026-11-24 19:10 CET. Numbers are synthetic unless marked "real"._
 
 **Done**
-- Pipeline (clean, classical segmentation, OCR, geometry, IFC4 / IFC2X3 export); `kelpod convert`
-  writes IFC that re-opens. FastAPI endpoint (`kelpod serve`).
-- Closure fixes. Held-out synthetic seeds, before -> after: degrade 0.5 fully closed 73 % -> 80 %;
-  degrade 1.0 7 % -> 53 % (synthetic, dev numbers).
-- Evaluation protocol v1: frozen val-synth (200) and test-synth (300, held-out drawing style),
-  `scripts/locked_eval.py`. Current baseline on val-synth: correct-closed 52.5 %, room IoU 0.90
-  (synthetic smoke run).
-- First fine-tuning run of a U-Net segmenter finished (1.0 GPU hour on the cluster).
-- MVP report draft: [docs/MVP_REPORT.md](docs/MVP_REPORT.md).
+- MVP promoted to `main` as **`baseline-v0`**: pipeline, API, evaluation protocol v1
+  ([docs/MVP_REPORT.md](docs/MVP_REPORT.md)). Baseline on val-synth (200 synthetic plans):
+  correct-closed 72 %.
+- The locked evaluation can score learned models (declared checkpoints, checked by hash).
+- Streamlit sandbox: the app now imports Kelpod from the repo it is deployed from.
+  **Action for you:** in the Streamlit UI, switch the app to deploy from the `main` branch, once.
+  After that, every push to `main` updates https://kelpod.streamlit.app.
+- The OCR timing test no longer fails just because the shared cluster node is busy.
 
 **Doing now**
-- Evaluating the fine-tuned segmenter against the classical one and the zero-shot CubiCasa5k model
-  (zero-shot is worse: closed 20 % vs. 88 % at degrade 0.5, synthetic).
-- Collecting openly licensed real floor-plan scans for a real dev / sealed test set.
+- `exp/ocr-chainsum`: read dimension chains jointly (chain sums, pixel spans, n-best readings),
+  including centimetre chains with raised millimetre digits (`178⁵`).
+- `exp/learned-v1`: learned segmenter retrained on randomised drawing styles, 2 seeds, as the default.
+- Collector for real plan images from the web, via official APIs (Openverse, Wikimedia Commons);
+  first run on the cluster.
 
 **Next**
-- Finish `docs/MVP_REPORT.md`; merge MVP + eval protocol into `main` as `baseline-v0`.
-- Then experiments on `exp/*` branches, each promoted only through `scripts/promotion_check.sh`.
+- Real DIN plans from the web (`exp/din-web-plans`): double-line walls, upscaling of low-resolution
+  images, cm/superscript OCR. Your two web plans currently give **0 rooms** each (real).
+- Then the 3 historic plans (queued): none works yet (real).
 <!-- status:end -->
 
 ```bash

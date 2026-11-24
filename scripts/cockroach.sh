@@ -4,8 +4,7 @@
 # Three layers, each able to bring the others back:
 #   1. the agent job (scripts/slurm/agent-loop.sbatch) waits out usage limits itself and, when it
 #      starts, makes sure a watchdog job exists;
-#   2. a tiny watchdog Slurm job (kelpod-cockroach, 1 CPU) checks every 5 minutes and resubmits the
-#      agent job if it is gone (time limit, node failure, scancel, crash);
+#   2. (removed 2026-11-24: a separate watchdog Slurm job idled on 2 CPUs; cron covers it);
 #   3. a cron entry on the login node runs `check` every 10 minutes and revives both.
 #
 # Usage (from anywhere):
@@ -32,11 +31,8 @@ check() {
   if ! alive "$AGENT"; then
     out=$(cd "$REPO" && sbatch scripts/slurm/agent-loop.sbatch 2>&1); log "agent missing -> $out"
   fi
-  if [ "${SLURM_JOB_NAME:-}" != "$DOG" ] && ! alive "$DOG"; then
-    out=$(cd "$REPO" && sbatch -J "$DOG" -p pascal --exclude=pascal-node03.l3s.intra -c 1 --mem=512M \
-      --time=30-00:00:00 -o logs/slurm-cockroach-%j.out --wrap "bash scripts/cockroach.sh watch" 2>&1)
-    log "watchdog missing -> $out"
-  fi
+  # No separate watchdog job: the cron entry on the login node is enough and holds no cluster
+  # resources (a 1-CPU job idling for weeks was not justifiable on a shared cluster).
 }
 
 case "${1:-status}" in
