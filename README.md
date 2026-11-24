@@ -9,29 +9,33 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-24 19:10 CET. Numbers are synthetic unless marked "real"._
+_Last updated: 2026-11-24 22:45 CET. Numbers are synthetic unless marked "real"._
 
 **Done**
-- MVP promoted to `main` as **`baseline-v0`**: pipeline, API, evaluation protocol v1
-  ([docs/MVP_REPORT.md](docs/MVP_REPORT.md)). Baseline on val-synth (200 synthetic plans):
-  correct-closed 72 %.
-- The locked evaluation can score learned models (declared checkpoints, checked by hash).
-- Streamlit sandbox: the app now imports Kelpod from the repo it is deployed from.
-  **Action for you:** in the Streamlit UI, switch the app to deploy from the `main` branch, once.
-  After that, every push to `main` updates https://kelpod.streamlit.app.
-- The OCR timing test no longer fails just because the shared cluster node is busy.
+- `main` = **`baseline-v0`** (pipeline, API, evaluation protocol). On val-synth (200 synthetic
+  plans): correct-closed 72 %.
+- Sandbox: the app imports Kelpod from the repo. **Action for you (once):** switch the Streamlit
+  app to deploy from `main`.
+- Learned segmenter v1 (2 training seeds, 3.5 GPU-h): correct-closed **98.5 %** on val-synth for
+  both seeds (synthetic). It is not promoted, because it is about 65 % slower than the baseline on
+  one CPU core (81 s vs 49 s per plan).
+- Web-plan work (`exp/din-web-plans`), locked run 1 of 2: room IoU +0.05 on the held-out test style,
+  but door precision, edit cost and exterior wall length got worse. **Not promoted.**
+  - Your 2 real web plans: before, 0 rooms each. Now each comes out as one connected wall network
+    with 5 rooms, but the rooms are still wrong (real).
+- Plan collector (Openverse, Wikimedia Commons): code and tests done. Kept 0 images: Wikimedia
+  answers every download from the cluster with HTTP 429, and Openverse returned 504.
 
 **Doing now**
-- `exp/ocr-chainsum`: read dimension chains jointly (chain sums, pixel spans, n-best readings),
-  including centimetre chains with raised millimetre digits (`178⁵`).
-- `exp/learned-v1`: learned segmenter retrained on randomised drawing styles, 2 seeds, as the default.
-- Collector for real plan images from the web, via official APIs (Openverse, Wikimedia Commons);
-  first run on the cluster.
+- `exp/learned-fast`: make the learned segmenter fast enough on CPU to pass the runtime rule.
+- `exp/din-web-v2`: find and fix the door / envelope regressions on validation data only.
+- `exp/historic-plans`: labels for your 3 historic plans, solid walls, scale bars, sheets with
+  several plans. **None of the 3 works yet (real).**
 
-**Next**
-- Real DIN plans from the web (`exp/din-web-plans`): double-line walls, upscaling of low-resolution
-  images, cm/superscript OCR. Your two web plans currently give **0 rooms** each (real).
-- Then the 3 historic plans (queued): none works yet (real).
+**Question for you**
+- The protocol blocks any change that makes a plan more than 25 % slower, even one far more accurate
+  and still well under the 3-minute target. Keep that rule as it is, or allow, for example, "p95
+  under 180 s" alone? I have not changed it.
 <!-- status:end -->
 
 ```bash
