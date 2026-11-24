@@ -44,7 +44,7 @@ def prefill_walls(gray: np.ndarray, k: int = 5, run: int = 25, min_len: int = 20
         m = cv2.morphologyEx(ink, cv2.MORPH_OPEN, ker)
         n, lab, st, _ = cv2.connectedComponentsWithStats(m, connectivity=8)
         for i in range(1, n):
-            x, y, w, h, a = st[i]
+            x, y, w, h, a = (int(v) for v in st[i])
             length, thick = (w, h) if horizontal else (h, w)
             if length < min_len:
                 continue
@@ -72,6 +72,8 @@ def build_spaces(labels: dict) -> dict:
     free = (wall_mask(labels, (h, w)) == 0).astype(np.uint8)
     n, lab = cv2.connectedComponents(free, connectivity=4)
     for sp in labels["spaces"]:
+        if sp.get("manual"):  # polygon given by hand (curved/diagonal boundaries)
+            continue
         sx, sy = int(sp["seed"][0]), int(sp["seed"][1])
         comp = lab[sy, sx]
         if comp == 0:
