@@ -53,3 +53,15 @@ def test_crop_page_keeps_origin_and_shape():
     assert sub.image.shape == sub.ink.shape
     assert sub.origin[0] <= reg.x0 and sub.origin[1] <= reg.y0
     assert sub.image.shape[1] < page.image.shape[1]
+
+
+def test_dimension_chain_strips_around_a_hatched_plan_are_not_plans():
+    ink = np.zeros((900, 1200), np.uint8)
+    cv2.rectangle(ink, (200, 200), (1000, 700), 1, 2)  # thin-walled plan: no heavy ink
+    for y in (120, 800):  # chains: long thin line with ticks
+        cv2.line(ink, (200, y), (1000, y), 1, 2)
+        for x in range(200, 1001, 50):
+            cv2.line(ink, (x, y - 8), (x, y + 8), 1, 2)
+    for x in (120, 1080):
+        cv2.line(ink, (x, 200), (x, 700), 1, 2)
+    assert len(split_plans(ink.astype(bool))) < 2

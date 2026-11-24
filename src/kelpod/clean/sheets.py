@@ -22,6 +22,9 @@ class PlanRegion:
     x1: int
     y1: int
     ink_px: int
+    solid: float = 1.0
+    """Share of the region's ink that is heavy (walls/poche): thin-line and hatched DIN plans, and
+    their dimension chains, are low."""
     """Heavy (wall) ink inside the box: the ordering key (largest plan first)."""
 
     @property
@@ -54,13 +57,30 @@ def split_plans(
     side = min_side_frac * max(h, w)
     for i in range(1, n):
         x, y, cw, ch, _ = (int(v) for v in st[i])
-        if cw < side or ch < side:
-            continue
+        if cw < side or ch < side or min(cw, ch) < 0.25 * max(cw, ch):
+            continue  # too small, or a thin strip (dimension chain, caption line, border)
         hv = int(heavy[y : y + ch, x : x + cw][lab[y : y + ch, x : x + cw] == i].sum())
-        if hv < 0.0005 * cw * ch + 10:  # a bar, a caption block: no wall mass
+        if hv < 0.004 * cw * ch:  # a bar, a caption block: no wall mass
             continue
-        out.append(PlanRegion(x, y, x + cw, y + ch, hv))
+        # a plan encloses several rooms; chains, captions and scale bars enclose nothing
+        sub = (lab[y : y + ch, x : x + cw] == i).astype(np.uint8)
+        cs, hier = cv2.findContours(sub, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        holes = sum(
+            1
+            for k, c in enumerate(cs)
+            if hier[0][k][3] >= 0 and cv2.contourArea(c) >= 0.01 * cw * ch
+        )
+        if holes < 2:
+            continue
+        total = int(m[y : y + ch, x : x + cw][lab[y : y + ch, x : x + cw] == i].sum())
+        out.append(PlanRegion(x, y, x + cw, y + ch, hv, hv / max(total, 1)))
     out.sort(key=lambda r: -r.ink_px)
+    if out:
+        out = [r for r in out if r.ink_px >= 0.015 * out[0].ink_px]
+    # a sheet: at least two clearly solid-walled plans (poche). Anything else (DIN plans with
+    # their chains, a single historic plan with a caption) is left to the normal pipeline.
+    if sum(r.solid >= 0.25 for r in out) < 2:
+        return out[:1]
     return out
 
 
