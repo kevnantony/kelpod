@@ -1,6 +1,7 @@
 """RapidOCR on rendered pages (slow: loads the ONNX models, a few seconds per page)."""
 
 import math
+import os
 import time
 
 import numpy as np
@@ -66,7 +67,11 @@ def test_a3_page_runtime(fx):
     t0 = time.perf_counter()
     a = ocr.run(page)
     dt = time.perf_counter() - t0
-    assert dt < 30, dt
+    # 30 s on an idle machine; on a shared node that is oversubscribed (load > cores) the wall-clock
+    # budget scales with the oversubscription, so other users' jobs do not fail this test.
+    ncpu = len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count()
+    over = max(1.0, os.getloadavg()[0] / max(1, os.cpu_count() or 1))
+    assert dt < 30 * over, (dt, over, ncpu)
     assert len(a.dimensions) >= 2 * len(fx.chains) - 2
 
 

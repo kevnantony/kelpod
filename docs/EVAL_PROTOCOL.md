@@ -97,7 +97,8 @@ A candidate is promoted only if **all** of the following hold:
    fresh, not only on one. A gain that appears only on synthetic splits is reported, but it is not
    enough for promotion once test-real exists.
 5. **Seed stability.** Trained models are evaluated from at least 2 training seeds, and the rule
-   must hold for the **worse** seed.
+   must hold for the **worse** seed. The seeds are the checkpoints declared in the candidate's
+   run config (`kelpod-run.toml`, §6); each is compared with the baseline on its own.
 6. **Budget.** At most **2 locked runs per experiment branch**. Further tries need a new branch with a
    new idea, recorded in `docs/EXPERIMENTS.md`. This prevents trying until a lucky draw passes.
 
@@ -119,7 +120,8 @@ version.
 `scripts/promotion_check.sh` fails the candidate if:
 
 - it changes any **protected path** (`src/kelpod/evaluation/`, `scripts/benchmark.py`,
-  `scripts/promotion_check.sh`, `docs/EVAL_PROTOCOL.md`, `eval/`) compared with `main`. Evaluation
+  `scripts/promotion_check.sh`, `scripts/locked_eval.py`, `docs/EVAL_PROTOCOL.md`, `eval/`)
+  compared with `main`. Evaluation
   changes go on `eval/*` branches with no model change. They must report both the old and new metric
   on the current baseline, and they are merged on their own, never in the same step as a model that
   benefits from them.
@@ -130,7 +132,12 @@ version.
 - a training manifest overlaps a test split.
 
 During locked runs, the benchmark copies **only the input file** (`plan.pdf`) into an empty temporary
-directory and runs the pipeline there, so ground truth cannot be read. It rejects any result whose
+directory and runs the pipeline there, so ground truth cannot be read. How each worktree's
+pipeline is run (backends, interpreter project, one trained checkpoint per seed with its SHA-256)
+comes only from its committed run config `kelpod-run.toml` (format: `eval/README.md`); absent
+means the defaults. The config is not protected, but it is printed in the report, and the run
+stops if a checkpoint's hash does not match, if it lies inside a worktree or an evaluation/sealed
+data directory, or if its training manifests overlap a test split. Checkpoint hashes are logged. It rejects any result whose
 scale came from `scale_source="ground_truth"`.
 
 **Things the agent must never do:**
