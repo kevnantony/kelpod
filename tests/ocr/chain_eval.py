@@ -35,6 +35,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+VAL = Path.home() / "kelpod-data/eval/val-synth"
 CACHE = Path(os.environ.get("KELPOD_DEV_CACHE", Path.home() / "kelpod-data/dev-cache/ocr-chainsum"))
 DPI = 200.0
 VALUE_TOL = 0.0005
@@ -53,13 +54,18 @@ def prepare(args: tuple[int, float]) -> str:
     if path.exists():
         return f"{seed}/{degrade}: cached"
     from kelpod import clean, segment
-    from kelpod.evaluation.synth import generate, save
+    from kelpod.evaluation.synth import generate, load, save
     from kelpod.ocr.engines import get_engine, read_page, remove_long_lines
 
-    sp = generate(seed, degrade)
-    with tempfile.TemporaryDirectory() as td:
-        save(sp, td)
-        page = clean.run(Path(td) / "plan.pdf", dpi=DPI, plan_scale=100.0)[0]
+    if degrade < 0:  # frozen val-synth item (per-item use allowed for val)
+        d = VAL / f"s{seed}"
+        sp = load(d)
+        page = clean.run(d / "plan.pdf", dpi=DPI, plan_scale=100.0)[0]
+    else:
+        sp = generate(seed, degrade)
+        with tempfile.TemporaryDirectory() as td:
+            save(sp, td)
+            page = clean.run(Path(td) / "plan.pdf", dpi=DPI, plan_scale=100.0)[0]
     t0 = time.perf_counter()
     seg = segment.run(page)
     t_seg = time.perf_counter() - t0
@@ -223,7 +229,8 @@ def _seeds(spec: str) -> list[int]:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--seeds", default="200000-200019")
-    ap.add_argument("--degrade", type=float, nargs="+", default=[0.5, 1.0])
+    ap.add_argument("--degrade", type=float, nargs="+", default=[0.5, 1.0],
+                    help="-1 = frozen val-synth items s<seed> (val split)")
     ap.add_argument("--modes", nargs="+", default=["greedy", "chain"])
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--prepare-only", action="store_true")

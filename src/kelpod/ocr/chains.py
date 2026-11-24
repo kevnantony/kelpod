@@ -71,19 +71,23 @@ class ChainParams:
     superscript_cost_blind: float = 2.5
     min_prob: float = 1e-3
     confident_prob: float = 0.8
+    min_consistent_share: float = 0.5
+    """Below this share of consistent labels the page is too unclear (scale, reads): keep greedy."""
     robust_margin: float = 1.0
     """Corrected / inferred values are only emitted if every unchecked label they depend on
     would cost at least this much more to read differently."""
     tail_prob: float = 0.3
+    raised_mm_prob: float = 0.5
+    """Probability factor for reading ``1245`` as 124⁵ cm (raised mm digit read inline)."""
     """Probability factor for reading a 4th decimal as a tick stub and dropping it."""
     max_options: int = 12
-    max_values: int = 200
+    max_values: int = 120
     """At most this many candidate coordinates per node."""
-    domain_mm: float = 60.0
+    domain_mm: float = 40.0
     domain_rel: float = 0.01
     """A tick coordinate stays within domain_mm + domain_rel x (distance from the first tick
     of its orientation) of its drawn position."""
-    time_limit_s: float = 2.0
+    time_limit_s: float = 1.0
     min_value_m: float = 0.02
 
 
@@ -140,11 +144,16 @@ def reading_values(item: TextItem, p: ChainParams | None = None) -> list[tuple[f
     for t, raw, q in clean:
         if len(t) >= 4 and re.search(r"[,.]\d{3}\d$", t):
             tails.append((t[:-1], raw, q * p.tail_prob))
+    for t, raw, q in clean:
+        # centimetre chains with a raised millimetre digit read inline: "1245" = 124⁵ cm
+        if re.fullmatch(r"\d{3,4}5", t):
+            tails.append((f"{t[:-1]},5" if len(t) == 4 else f"{t[:-3]},{t[-3:]}", raw,
+                          q * p.raised_mm_prob))
     for t, raw, q in clean + tails:
         v = parse_length_m(t)
         if v is None or abs(v * 1000 - round(v * 1000)) > 1e-6:
             continue
-        probs[v] = probs.get(v, 0.0) + max(q, 0.0)
+        probs[v] = probs.get(v, 0.0) + max(q, 1e-9)  # engines may report 0
         n = parse_number(t)
         if n is not None and not n.superscript and (
             (n.has_comma and n.decimal_digits == 2) or (not n.has_comma and n.integer_digits == 2)
@@ -514,16 +523,6 @@ def decode(
         path = nx.shortest_path(g, a, b)
         return not any(weak(u, v) for u, v in zip(path[:-1], path[1:], strict=True))
 
-    import os
-    if os.environ.get("KELPOD_CHAIN_DEBUG"):
-        for k in sorted(chain_of):
-            c = cands[k]
-            ch = chains[chain_of[k]]
-            o = chosen.get(k)
-            alts = [(round(opts[oi].value_m, 4), opts[oi].i, opts[oi].j, round(opts[oi].cost, 2))
-                    for oi in by_cand.get(k, [])][:6]
-            print(chain_of[k], ch.vertical, round(ch.y), [round(t) for t in ch.ticks], repr(c.item.text),
-                  "->", None if o is None else (o.value_m, o.i, o.j, round(o.cost, 2)), alts)
     labels: dict[int, DimensionLabel] = {}
     n_corr = 0
     for k, o in chosen.items():
@@ -555,6 +554,10 @@ def decode(
             for e in range(len(t) - 1):
                 if t[e] <= c.ticks.cx <= t[e + 1]:
                     dropped_at.setdefault((ci, e), k)
+    if len(chosen) < p.min_consistent_share * len(chain_of):
+        return ChainResult({}, set(), [], [
+            f"chain decoding: only {len(chosen)} of {len(chain_of)} labels on chains are "
+            "consistent with each other and their spans; greedy readings kept"])
     inferred: list[DimensionLabel] = []
     dropped: set[int] = {k for k in chain_of if k not in chosen}
     # a clear reading that was dropped is kept as read (greedy) unless another label took
