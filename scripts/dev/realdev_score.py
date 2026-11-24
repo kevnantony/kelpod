@@ -145,23 +145,20 @@ def score(graph, lab: dict, plan: int | None, m_per_orig_px: float, tol: float =
 
 def run_pipeline(path: Path, all_plans: bool = False):
     """Returns [(PlanGraph, m_per_orig_px)] for the plans the pipeline produced."""
-    import inspect
-
     from kelpod import pipeline
 
-    kw = {}
-    if all_plans and "all_plans" in inspect.signature(pipeline.convert).parameters:
-        kw["all_plans"] = True
-    res = pipeline.convert(path, None, **kw)
-    results = res if isinstance(res, list) else [res]
+    if hasattr(pipeline, "convert_all"):
+        results = pipeline.convert_all(path, None, all_plans=all_plans)
+    else:
+        results = [pipeline.convert(path, None)]
     from kelpod import clean
 
     page = clean.run(path)[0]
     w0 = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE).shape[1]
     out = []
     for r in results:
-        f = getattr(r.graph, "source_px_per_px", None) or (page.width / w0)
-        out.append((r.graph, r.graph.m_per_px / f))
+        f = page.width / w0
+        out.append((r.graph, r.graph.m_per_px * f))
     return out
 
 

@@ -80,6 +80,40 @@ def run(
         return graph
 
 
+def _scale_from_bar(page, seg, ocr, m_per_px, scale_source, issues):
+    """Graphic scale bar as the scale when no dimensions fixed it (see :mod:`.scalebar`)."""
+    from .scalebar import bar_scale
+
+    if page.scale_hint is not None:  # the sheet's bar, found outside this plan's crop
+        issues.append(
+            f"Scale from the sheet's graphic scale bar ({page.scale_hint[1]}); "
+            "check the scale."
+        )
+        return page.scale_hint
+    ths = sorted(
+        (w.thickness_px for w in (seg.walls if seg is not None else []) if _finite(w.thickness_px)),
+    )
+    th = ths[int(0.75 * len(ths))] if ths else None  # exterior walls: upper quartile
+    try:
+        found = bar_scale(page.ink, ocr.items, th)
+    except Exception:  # never let the optional bar break the step
+        log.exception("scale bar detection failed")
+        return m_per_px, scale_source
+    if found is None:
+        return m_per_px, scale_source
+    m, src, bar = found
+    issues.append(
+        f"Scale from the graphic scale bar ({len(bar.ticks_x)} ticks of {bar.tick_px:.1f} px): "
+        + (
+            "numbers read."
+            if src == "scale_bar"
+            else "its numbers were not legible, the tick value was guessed from the wall "
+            "thickness. Check the scale."
+        )
+    )
+    return m, src
+
+
 def _finite(*vals: float) -> bool:
     return all(isinstance(v, (int, float)) and math.isfinite(v) for v in vals)
 
@@ -92,6 +126,8 @@ def _run(
     # 1. scale and residual skew ---------------------------------------------------------------
     m_per_px, scale_source, scale_issues = estimate_scale(page, ocr.dimensions, prm)
     issues += scale_issues
+    if scale_source != "dimensions":
+        m_per_px, scale_source = _scale_from_bar(page, seg, ocr, m_per_px, scale_source, issues)
     raw = [
         w
         for w in (seg.walls if seg is not None else [])
