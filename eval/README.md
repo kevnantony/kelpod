@@ -107,6 +107,56 @@ python -m kelpod.evaluation.splits pending                       # (re)write pen
 ```
 
 Results go to `~/kelpod-runs/locked/<UTC time>_<branch>/` (`comparison.md`, `results.json`).
+
+## Run config (`kelpod-run.toml`): learned backends and training seeds
+
+By default each worktree's pipeline runs `kelpod.pipeline.convert(plan.pdf, model.ifc)` with its
+defaults, using the root uv project's `.venv`. A candidate that needs something else declares it
+in `kelpod-run.toml` at the repo root (parsed by `kelpod.evaluation.run_config`):
+
+```toml
+version = 1
+segment_backend = "learned"        # passed to convert(); omit = convert() default
+ocr_backend = "rapidocr"           # passed to convert(); omit = convert() default
+python_project = "training"        # uv project whose .venv runs the pipeline ("." = root)
+manifests = ["training/manifests/synth.json", "training/manifests/swiss.json"]  # optional
+
+[[checkpoints]]                    # one table per training seed
+path = "~/kelpod-models/kelpod-seg/r34-s0/model.pt"
+sha256 = "<64 hex>"
+seed = 0                           # label
+# manifests = [...]                # optional, overrides the top-level list for this seed
+[[checkpoints]]
+path = "~/kelpod-models/kelpod-seg/r34-s1/model.pt"
+sha256 = "<64 hex>"
+seed = 1
+```
+
+- **Absent file = today's defaults.** `locked_eval.py` reads the file from the candidate **and**
+  the baseline worktree. The baseline runs with its first declared checkpoint, if any.
+- **Part of the commit.** The file is not a protected path: an `exp/*` branch may add or change
+  it. A locked run refuses a config that is modified or untracked (smoke and val runs only note
+  it). The full text of every config is printed in `comparison.md`.
+- **Checkpoints.** Each must live outside every worktree under evaluation and outside the eval
+  data root, the sealed directory and every split's `data_dir` (symlinks are resolved). Its
+  SHA-256 must match the declared hash (a mismatch stops the run before anything is run). Seeds
+  must be distinct files (distinct hashes). Each checkpoint is copied to a private read-only
+  temp file, which is re-hashed after the runs, and reaches the pipeline **only** through
+  `KELPOD_SEG_CHECKPOINT`. The plan's temp dir still holds only `plan.pdf`. Every `KELPOD_*`
+  variable of the operator's shell is removed from the pipeline's environment, and
+  `CUDA_VISIBLE_DEVICES` is empty (the reference node is a CPU node).
+- **Leak hygiene.** The training manifests of a checkpoint (its own list, else the top-level
+  `manifests`, else every `training/manifests/*.json` of the worktree; relative paths inside the
+  worktree only) go through the same overlap check as `--verify-manifests`. Overlap, a missing
+  manifest, or no manifest at all stops the run.
+- **Seeds (rule 5).** Every candidate checkpoint is its own side (`cand0`, `cand1`, ...), each
+  compared with the baseline on the same plans. A candidate with checkpoints needs at least 2
+  distinct seeds, and the promotion rule must hold for every seed, i.e. the worse one. The
+  report shows all seeds; the TEST_LOG line shows the worse seed's headline Δ and the checkpoint
+  hashes (`ckpt s0:<12 hex>, s1:<12 hex>`) next to the commits.
+- **Backends** are passed to `locked_runner.py` as `--segment-backend` / `--ocr-backend`, and
+  to `convert()` only when declared. `python_project` must be a relative path to a directory with
+  a `pyproject.toml`; its `.venv` must import `kelpod` from the worktree (checked).
 Runs whose kind is `smoke` or `val` are logged with `(<kind>)` after the branch name, so they do
 not use up the 2-run budget (rule 6).
 
@@ -136,6 +186,8 @@ not use up the 2-run budget (rule 6).
   storey.
 - **IFC.** Re-opened by the evaluator with ifcopenshell (at least one `IfcWall` and one
   `IfcSpace`), independent of the pipeline's own `reopened_ok`.
+- **Baseline seeds.** The baseline runs one checkpoint (its first declared one), so baseline
+  seed variance is not in the CI. This only matters once `main` itself has a trained model.
 - **Not measured yet:** the OCR panel (dimension-value P/R, dimension-to-wall linking).
   `PipelineResult` exposes no OCR annotations, and the runner may only call the public
   `kelpod.pipeline.convert`.
