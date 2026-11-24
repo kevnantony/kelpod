@@ -8,6 +8,7 @@ All size thresholds are given in metres and converted with the page scale.
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 
 import cv2
@@ -33,6 +34,8 @@ class ClassicalParams:
     max_wall_m: float = 0.60
     max_fill_radius_m: float = 0.20
     """Enclosed background with a smaller inscribed radius is treated as wall interior."""
+    min_face_th_m: float = 0.09
+    """Walls whose faces (pen width removed) are closer than this are single lines (fold marks)."""
     min_wall_len_m: float = 0.12
     min_component_m: float = 0.40
     """Wall-mask components whose bounding box is smaller than this are dropped (text blobs)."""
@@ -95,53 +98,76 @@ def segment_classical(page: RasterPage, p: ClassicalParams | None = None) -> Seg
         max_w_px=px(p.max_opening_m),
         min_ext_th_px=px(p.min_exterior_m),
     )
-    window_runs = [r for r in runs if r.is_window]
-    walls = wl.merge_walls(runs, max_gap_px=2.0)
-    walls = [w for w in walls if w.length >= px(p.min_wall_len_m)]
-    wl.snap_junctions(walls, tol_px=max(2.0, px(0.03)))
-    # outlines are drawn centred on the wall faces: remove the pen width from thickness and
-    # from free wall ends (jambs) so walls describe the faces, not the ink extent
-    lws = [r.meta.get("face_lw", 0.0) for r in runs if r.label == "H" and not r.is_window]
-    lws = [v for v in lws if v > 0] or [
-        r.meta.get("face_lw", 0.0) for r in runs if r.meta.get("face_lw", 0.0) > 0
-    ]
-    face_lw = float(np.median(lws)) if lws else 0.0
-    face_lw = min(face_lw, 0.25 * px(p.min_wall_m) * 1.5)
-    if face_lw > 0:
-        for w in walls + window_runs:
-            w.th = max(w.th - face_lw, 0.5 * w.th)
-            if not w.meta.get("snap0"):
-                w.a0 += face_lw / 2
-            if not w.meta.get("snap1"):
-                w.a1 -= face_lw / 2
-    for r in window_runs:  # window edges = the neighbouring jambs
-        _snap_window_ends(r, walls, tol=face_lw + 3)
-
-    # 3. openings in gaps
     ink_d = cv2.dilate(ink.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    # windows sit in the building outline: a "window" with building interior on both sides is
+    # a wall whose band holds a stray line (fold mark, text); rebuild once with it as a wall
+    base_runs, demoted = runs, set()
+    for attempt in range(2):
+        runs = copy.deepcopy(base_runs)
+        for r in runs:
+            if _run_key(r) in demoted:
+                r.is_window = False
+        window_runs = [r for r in runs if r.is_window]
+        walls = wl.merge_walls(runs, max_gap_px=2.0)
+        walls = [w for w in walls if w.length >= px(p.min_wall_len_m)]
+        # outlines are drawn centred on the wall faces: the pen width is removed below from
+        # thickness and from free wall ends (jambs) so walls describe the faces, not the ink
+        lws = [r.meta.get("face_lw", 0.0) for r in runs if r.label == "H" and not r.is_window]
+        lws = [v for v in lws if v > 0] or [
+            r.meta.get("face_lw", 0.0) for r in runs if r.meta.get("face_lw", 0.0) > 0
+        ]
+        face_lw = float(np.median(lws)) if lws else 0.0
+        face_lw = min(face_lw, 0.25 * px(p.min_wall_m) * 1.5)
+        # a single (blurred) line - fold mark, dimension line - is not a wall: walls have two faces
+        # at least ~10 cm apart
+        walls = [w for w in walls if _face_th(w.th, face_lw) >= px(p.min_face_th_m)]
+        wl.snap_junctions(walls, tol_px=max(2.0, px(0.03)))
+        walls = wl.drop_face_bumps(walls, px(p.min_wall_len_m))
+        if face_lw > 0:
+            for w in walls + window_runs:
+                w.th = _face_th(w.th, face_lw)
+                if not w.meta.get("snap0"):
+                    w.a0 += face_lw / 2
+                if not w.meta.get("snap1"):
+                    w.a1 -= face_lw / 2
+        for r in window_runs:  # window edges = the neighbouring jambs
+            _snap_window_ends(r, walls, tol=face_lw + 3)
 
-    def openings_in_gaps():
-        gs = op.find_gaps(
-            walls, min_w_px=px(p.min_opening_m), max_w_px=px(p.max_opening_m), blockers=window_runs
-        )
-        return op.classify_gaps(gs, ink, ink_d, door_thr=p.door_score)
+        # 3. openings in gaps
 
-    gaps = openings_in_gaps()
-    # walls and windows outside the building footprint are dimension-chain artefacts
-    fp = _footprint(
-        walls, window_runs, gaps, ink.shape, face_lw, px(1.0) ** 2 * p.min_room_m2, m_per_px
-    )
-    if fp is not None:
-        n_w, n_r = len(walls), len(window_runs)
-        walls = [w for w in walls if _inside(fp, w)]
-        window_runs = [r for r in window_runs if _inside(fp, r)]
-        if len(walls) != n_w or len(window_runs) != n_r:
-            notes.append(
-                f"dropped {n_w - len(walls)} walls and {n_r - len(window_runs)} "
-                "windows outside the masonry footprint"
+        def openings_in_gaps(walls=walls, window_runs=window_runs):
+            gs = op.find_gaps(
+                walls,
+                min_w_px=px(p.min_opening_m),
+                max_w_px=px(p.max_opening_m),
+                blockers=window_runs,
             )
-            gaps = openings_in_gaps()
-            gaps = [g for g in gaps if _inside(fp, g)]
+            return op.classify_gaps(
+                gs, ink, ink_d, door_thr=p.door_score, min_window_th=px(p.min_exterior_m)
+            )
+
+        gaps = openings_in_gaps()
+        # walls and windows outside the building footprint are dimension-chain artefacts
+        fp = _footprint(
+            walls, window_runs, gaps, ink.shape, face_lw, px(1.0) ** 2 * p.min_room_m2, m_per_px
+        )
+        if fp is not None:
+            n_w, n_r = len(walls), len(window_runs)
+            walls = [w for w in walls if _inside(fp, w)]
+            window_runs = [r for r in window_runs if _inside(fp, r)]
+            if len(walls) != n_w or len(window_runs) != n_r:
+                notes.append(
+                    f"dropped {n_w - len(walls)} walls and {n_r - len(window_runs)} "
+                    "windows outside the masonry footprint"
+                )
+                gaps = openings_in_gaps(walls, window_runs)
+                gaps = [g for g in gaps if _inside(fp, g)]
+
+        inner = [] if fp is None else [r for r in window_runs if _interior_both_sides(fp, r)]
+        if not inner or attempt == 1:
+            break
+        demoted = {_run_key(r) for r in inner}
+        notes.append(f"{len(inner)} window(s) inside the building treated as walls")
 
     # 4. wall mask = wall bodies under the vectorised walls; barrier adds openings
     rect = np.zeros_like(body)
@@ -227,6 +253,32 @@ def segment_classical(page: RasterPage, p: ClassicalParams | None = None) -> Seg
     )
 
 
+def _run_key(r: wl.Run) -> tuple:
+    return (r.orient, r.comp, r.order)
+
+
+def _interior_both_sides(interior: np.ndarray, r) -> bool:
+    """True if the building interior lies on both sides of the run (at most positions)."""
+    h, w = interior.shape
+    hits = 0
+    for t in (0.3, 0.5, 0.7):
+        a = r.a0 + t * (r.a1 - r.a0)
+        both = True
+        for side in (-1, 1):
+            n = r.c + side * (r.th / 2 + 6)
+            x, y = (a, n) if r.orient == wl.H else (n, a)
+            xi, yi = int(round(x)), int(round(y))
+            if not (0 <= yi < h and 0 <= xi < w and interior[yi, xi]):
+                both = False
+        hits += both
+    return hits >= 2
+
+
+def _face_th(th: float, face_lw: float) -> float:
+    """Face-to-face thickness of a run measured over the ink (outline pen width removed)."""
+    return max(th - face_lw, 0.5 * th)
+
+
 def _touches_outside(w: wl.Run, lab: np.ndarray, outside: np.ndarray) -> bool | None:
     """True if one side of the wall is the outside free space, False if neither is, None if
     the sides could not be sampled."""
@@ -291,11 +343,21 @@ def _footprint(walls, window_runs, gaps, shape, face_lw, min_hole_px, mpp) -> np
             rm.draw_rect(m, g.orient, g.c, g.a0 - 2, g.a1 + 2, g.th + face_lw + 2)
     n, lab, outside = rm.free_space(m)
     areas = np.bincount(lab.ravel(), minlength=n)
-    keep = (~outside) & (areas >= min_hole_px)
-    keep[0] = False
-    if not keep.any():
+    rooms = (~outside) & (areas >= min_hole_px)
+    rooms[0] = False
+    if not rooms.any():
         return None
-    return keep[lab]
+    # the footprint is everything the outside cannot reach (walls and small enclosed slivers
+    # included, e.g. between a wall and text touching it), restricted to the connected pieces
+    # that enclose at least one room-sized space
+    notout = ~outside
+    notout[0] = True
+    blob = notout[lab].astype(np.uint8)
+    nb, blab = cv2.connectedComponents(blob, connectivity=4)
+    hit = np.zeros(nb, bool)
+    hit[np.unique(blab[rooms[lab]])] = True
+    hit[0] = False
+    return hit[blab]
 
 
 def _inside(interior: np.ndarray, r) -> bool:

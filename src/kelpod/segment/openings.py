@@ -89,11 +89,18 @@ def _sample(mask: np.ndarray, pts: np.ndarray) -> np.ndarray:
     return mask[ys, xs] & inside
 
 
-def door_arc_score(gap: Gap, ink_d: np.ndarray) -> tuple[float, tuple, tuple] | None:
-    """Best quarter-arc fit over the four hinge candidates. Returns (score, hinge, swing_into)."""
+def door_arc_score(
+    gap: Gap, ink_d: np.ndarray, *, max_swing_fill: float = 0.3
+) -> tuple[float, tuple, tuple] | None:
+    """Best quarter-arc fit over the four hinge candidates. Returns (score, hinge, swing_into).
+
+    The swing area inside the arc must be mostly empty: a candidate whose inner area is inked
+    over more than ``max_swing_fill`` (text, hatching, another wall) cannot be told from an arc
+    and is skipped."""
     w = gap.width
     thetas = np.deg2rad(np.linspace(8, 82, 24))
     radii = w * np.linspace(0.82, 1.12, 7)
+    inner = w * np.linspace(0.25, 0.7, 10)
     best = None
     for hinge_a, u in ((gap.a0, 1.0), (gap.a1, -1.0)):
         for side in (-1.0, 1.0):
@@ -112,6 +119,12 @@ def door_arc_score(gap: Gap, ink_d: np.ndarray) -> tuple[float, tuple, tuple] | 
             lp = np.stack([la, ln], -1) if gap.orient == H else np.stack([ln, la], -1)
             leaf = float(_sample(ink_d, lp).mean())
             score = 0.75 * arc + 0.25 * leaf
+            da = u * np.cos(thetas)[:, None] * inner[None, :]
+            dn = side * np.sin(thetas)[:, None] * inner[None, :]
+            a, n = hinge_a + da, hn + dn
+            pts = np.stack([a, n], -1) if gap.orient == H else np.stack([n, a], -1)
+            if float(_sample(ink_d, pts).mean()) > max_swing_fill:
+                continue
             if best is None or score > best[0]:
                 hinge = gap.to_xy(hinge_a, hn)
                 swing = gap.to_xy(hinge_a + u * 0.4 * w, hn + side * 0.4 * w)
@@ -135,8 +148,18 @@ def window_lines(gap: Gap, ink: np.ndarray) -> int:
     return int(np.sum(frac[1:] & ~frac[:-1]) + (1 if frac.size and frac[0] else 0))
 
 
-def classify_gaps(gaps: list[Gap], ink: np.ndarray, ink_d: np.ndarray, *, door_thr: float = 0.6):
-    """Decide door / window / unknown for every gap; returns the kept gaps."""
+def classify_gaps(
+    gaps: list[Gap],
+    ink: np.ndarray,
+    ink_d: np.ndarray,
+    *,
+    door_thr: float = 0.6,
+    min_window_th: float = 0.0,
+):
+    """Decide door / window / unknown for every gap; returns the kept gaps.
+
+    Lines across a gap only make a window if the wall is at least ``min_window_th`` thick
+    (windows sit in exterior walls; text or hatching beside a thin stub also gives "lines")."""
     kept = []
     for g in gaps:
         nlines = window_lines(g, ink)
@@ -145,7 +168,7 @@ def classify_gaps(gaps: list[Gap], ink: np.ndarray, ink_d: np.ndarray, *, door_t
             g.kind = OpeningKind.DOOR
             g.confidence = min(1.0, door[0])
             g.hinge, g.swing_into = door[1], door[2]
-        elif nlines >= 2:
+        elif nlines >= 2 and g.th >= min_window_th:
             g.kind = OpeningKind.WINDOW
             g.confidence = 0.8
         elif g.right is not None:

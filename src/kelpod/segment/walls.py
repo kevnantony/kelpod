@@ -149,6 +149,22 @@ def _smooth_labels(labels: list[str], min_len: int) -> list[str]:
     return labels
 
 
+def _peel_outline(frac: np.ndarray, *, thr: float = 0.6, max_skip: int = 2) -> tuple[int, int]:
+    """Rows of the face outline at the start of ``frac`` (per-row ink share across a band).
+
+    Up to ``max_skip`` weak rows at the very edge are skipped when a strong row follows, then
+    the contiguous strong rows are the outline. Returns (first row after the outline, outline
+    width in rows); (0, 0) if there is no outline."""
+    n = len(frac)
+    first = next((i for i in range(min(max_skip + 1, n)) if frac[i] >= thr), None)
+    if first is None:
+        return 0, 0
+    i = first
+    while i < n and frac[i] >= thr:
+        i += 1
+    return i, i - first
+
+
 def _column_labels(band: np.ndarray, th: float) -> tuple[list[str], float]:
     """Label every column of a wall band (rows across the wall, columns along it).
 
@@ -160,12 +176,13 @@ def _column_labels(band: np.ndarray, th: float) -> tuple[list[str], float]:
     frac = band.mean(axis=1)
     if (frac >= 0.75).all():  # solid poché
         return ["H"] * cols, 0.0
-    top, bot = 0, rows
-    while top < rows and frac[top] >= 0.6:
-        top += 1
-    while bot > top and frac[bot - 1] >= 0.6:
-        bot -= 1
-    face_lw = (top + (rows - bot)) / 2.0
+    # the face outlines are the inked rows near each edge of the band; the outermost row may be
+    # only partly inked (the band is a pixel too wide, or the face steps where a thinner window
+    # or wall joins), so skip up to two weak edge rows instead of stopping at the first one
+    top, lw_top = _peel_outline(frac)
+    end, lw_bot = _peel_outline(frac[::-1])
+    bot = max(top, rows - end)
+    face_lw = (lw_top + lw_bot) / 2.0
     top, bot = top + 1, bot - 1
     if bot - top < 2:
         return ["E"] * cols, face_lw
@@ -403,8 +420,25 @@ def snap_junctions(walls: list[Run], tol_px: float) -> None:
                 else:
                     w.a1 = p.c
                 w.meta[f"snap{end}"] = True
+                w.meta[f"snap_to{end}"] = p
                 # extend the perpendicular wall if it stops short of this centreline
                 if w.c < p.a0 and p.a0 - w.c <= w.th / 2 + tol_px:
                     p.a0 = w.c
                 elif w.c > p.a1 and w.c - p.a1 <= w.th / 2 + tol_px:
                     p.a1 = w.c
+
+
+def drop_face_bumps(walls: list[Run], min_len_px: float) -> list[Run]:
+    """Drop walls with one end on a perpendicular wall that stick out of that wall's face by less
+    than ``min_len_px``: a bump on the face (text or a symbol touching the outline) that only
+    survived the line opening together with the wall body it sits on."""
+    out = []
+    for w in walls:
+        s0, s1 = w.meta.get("snap_to0"), w.meta.get("snap_to1")
+        if (s0 is None) != (s1 is None):
+            p = s0 if s0 is not None else s1
+            free = w.a1 - (p.c + p.th / 2) if s0 is not None else (p.c - p.th / 2) - w.a0
+            if free < min_len_px:
+                continue
+        out.append(w)
+    return out
