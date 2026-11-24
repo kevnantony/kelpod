@@ -42,3 +42,37 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
   `KELPOD_SEG_CHECKPOINT`). The default stays `classical`. Making `learned` the default is a
   separate experiment (`exp/<name>` branch, second training seed), promoted only via
   `docs/EVAL_PROTOCOL.md`.
+
+## learned-v1 (2026-11-24, branch exp/learned-v1)
+
+- **Hypothesis:** the learned backend (U-Net r34; val-synth correct-closed 0.980 vs classical
+  0.720, dev numbers) generalises much better to unseen drawing styles (test-synth's held-out
+  style) and to real scans if it is trained with strong style and degradation randomisation; with
+  that it can replace classical as the default segmentation backend.
+- **Change:** training-only renderer/degrader `training/kelpod_train/{style_v1,render_v1,degrade_v1}.py`:
+  hatching variants (45° at 1.3-3.0 mm, 30°, 60°, 0°, double 45°, dashed 45°, stipple, none),
+  wall outline on/off, per-element line weights (scale 0.85-1.35), door symbols (arc, leaf only,
+  double, sliding, rectangle leaf, dashed arc, gap), window symbols (1-4 lines, frame, sill),
+  13 train fonts, clutter (furniture, stairs, axis grid, notes, stamps, title block, north
+  arrow), own damage profiles (pencil, ink bleed, bleed-through, paper texture, letterpress),
+  selected Augraphy effects (MIT), scan geometry (wobble, page curl, perspective), scan dpi
+  150-600, JPEG Q 20-95. **Held out and never sampled:** every option flagged held-out in
+  `kelpod.evaluation.synth.styles` (fonts URW Gothic, Nimbus Sans Narrow, Nimbus Mono, Hershey
+  duplex/complex; hatching 135° dense 1.0 mm, cross, solid; line weights 0.7 and 1.6; damage
+  diazo, photocopy, faded), plus their families/look-alikes (see `style_v1` docstring);
+  enforced by `check_not_heldout` at sampling time and by `tests/training/test_style_v1.py`.
+  Pipeline: `learned` becomes the default backend (checkpoint from `kelpod-run.toml`, ONNX via
+  onnxruntime, no torch in the main env), failing clearly if no checkpoint is available.
+- **Data:** existing r34 sources (synth default style 4000, Swiss 1859, ResPlan 2000,
+  CubiCasa5k 4200) plus style-randomised re-renders: synth geometry seeds 1,100,000-1,105,999
+  (6000), Swiss Dwellings train sites (up to 3000 floors, same site hold-out), ResPlan train
+  (3000). Dev-val: synth_v1 seeds 910,000-910,059, Swiss val sites re-rendered (47). Data is
+  CPU-built (this node + pascal CPU jobs, no GPU requested).
+- **GPU jobs (planned):**
+  - `kseg-v1-s1`, `kseg-v1-s2` (ampere, 1 GPU each, ResNet-34 U-Net, 40k iterations x batch 16
+    at 512 px, seeds 1 and 2): expected ~2 GPU-h each (r34: 24k iterations = 1.01 GPU-h, plus
+    5 val sets every 2000 iterations), time limit 6 h, checkpoint + resume every 2000
+    iterations. Justification: rule 5 requires two training seeds; one model of the size that
+    already runs on the CPU in the pipeline. Total expected ~4 GPU-h.
+- **Selection:** val only (dev-val sets above, frozen val-synth via `kelpod_train.val_synth`).
+  test-synth / test-ood / sealed data are not looked at.

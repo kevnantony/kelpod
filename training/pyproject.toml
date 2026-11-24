@@ -14,6 +14,8 @@ dependencies = [
     "svgpathtools>=1.6",                  # MIT (CubiCasa5k SVG parsing)
     "pandas>=2.2",                        # BSD-3-Clause
     "tqdm>=4.66",
+    "augraphy>=8.2",                      # MIT (training-only degradations, see style_v1)
+    "onnx>=1.16",                         # Apache-2.0 (ONNX export for the main env)
     "pytest>=8.3",
 ]
 
