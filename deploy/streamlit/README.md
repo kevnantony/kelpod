@@ -11,7 +11,9 @@ Free hosting with uploads, no card. Deploy once:
    - Advanced settings → Python **3.12**
 3. Deploy. The first build takes a few minutes.
 
-The app installs Kelpod from GitHub at the commit pinned in `requirements.txt`; bump it to update.
+The app imports Kelpod from the repo checkout it is deployed from (`src/` on `sys.path`, also for
+the worker via `PYTHONPATH`); `requirements.txt` lists only third-party packages. Deploy the app
+from `main`: every push to `main` then redeploys the sandbox.
 System libraries for OpenCV come from `packages.txt` at the repo root (Streamlit Cloud only reads it
 there).
 
