@@ -320,3 +320,20 @@ def test_filter_needs_two_directions():
         d.line([50, y, 850, y], fill="black", width=3)  # horizontal only
     ok, _, reason = cp.plan_filter(im)
     assert not ok and reason.startswith("not_two_orthogonal")
+
+
+def test_circuit_breaker_skips_failing_source(tmp_path):
+    calls = {"bad": 0, "good": 0}
+
+    def bad(h, q, p):
+        calls["bad"] += 1
+        raise urllib.error.HTTPError("u", 504, "gateway", {}, None)
+
+    def good(h, q, p):
+        calls["good"] += 1
+        return []
+    logs = []
+    col = cp.Collector(out=tmp_path, http=FakeHttp(), max_new=5, log=logs.append)
+    col.run({"bad": bad, "good": good}, ["a", "b", "c"], max_pages=2, breaker_n=3)
+    assert calls["bad"] == 3 and calls["good"] == 6
+    assert any("circuit breaker" in l for l in logs)

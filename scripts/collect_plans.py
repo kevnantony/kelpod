@@ -52,8 +52,9 @@ USER_AGENT = "kelpod-collector/0.1 (research; contact via GitHub repo)"
 
 # ---- politeness / limits
 MIN_INTERVAL_S = 1.0  # between requests per host
-TIMEOUT_S = 30
-RETRIES = 3
+TIMEOUT_S = 15
+RETRIES = 3  # attempts, i.e. at most 2 retries
+BREAKER_N = 3  # consecutive failed API calls before a source is skipped for the rest of the run
 BACKOFF_S = 2.0
 MAX_BYTES = 20 * 1024 * 1024
 MAX_PIXELS = 60_000_000
@@ -168,7 +169,7 @@ class Http:
                 if e.code not in (429, 500, 502, 503, 504):
                     raise
                 ra = e.headers.get("Retry-After") if e.headers else None
-                delay = min(float(ra), 30) if ra and ra.isdigit() else BACKOFF_S * 2 ** attempt
+                delay = min(float(ra), 15) if ra and ra.isdigit() else BACKOFF_S * 2 ** attempt
             except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
                 last_err = e
                 delay = BACKOFF_S * 2 ** attempt
@@ -567,8 +568,10 @@ class Collector:
         self.rejected[c.source] = self.rejected.get(c.source, 0) + 1
         return "rejected"
 
-    def run(self, fetchers: dict, queries: list[str], max_pages: int = MAX_PAGES) -> None:
+    def run(self, fetchers: dict, queries: list[str], max_pages: int = MAX_PAGES,
+            breaker_n: int = BREAKER_N) -> None:
         dead: set[str] = set()
+        fails: dict[str, int] = {}
         for page in range(1, max_pages + 1):
             for q in queries:
                 for name, fetch in fetchers.items():
@@ -583,8 +586,14 @@ class Collector:
                         dead.add(name)
                         continue
                     except Exception as e:
+                        fails[name] = fails.get(name, 0) + 1
                         self.log(f"[{name}] query failed ({q!r} p{page}): {e}")
+                        if fails[name] >= breaker_n:
+                            self.log(f"[{name}] circuit breaker: {breaker_n} consecutive failures, "
+                                     "skipping this source for the rest of the run")
+                            dead.add(name)
                         continue
+                    fails[name] = 0
                     self.log(f"[{name}] {q!r} p{page}: {len(cands)} candidates")
                     for c in cands:
                         if self.done:
