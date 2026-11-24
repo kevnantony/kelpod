@@ -1,0 +1,4 @@
+# Streamlit Community Cloud installs this (it sits next to the entry point). Choose Python 3.12
+# under "Advanced settings". Bump the commit to deploy a newer Kelpod.
+streamlit>=1.40
+kelpod @ git+https://github.com/kevnantony/kelpod@0f72163

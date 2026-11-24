@@ -9,28 +9,32 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-24 12:55 CET. All numbers are from synthetic or re-rendered plans; nothing has been tested on real scans yet._
+_Last updated: 2026-11-24 14:10 CET. Numbers are synthetic unless marked "real"._
 
 **Done**
-- MVP finished and promoted to `main` as **`baseline-v0`**. It contains the pipeline (clean,
-  classical segmentation, OCR, geometry, IFC4 / IFC2X3 export), the API (`kelpod serve`) and
-  evaluation protocol v1. Report: [docs/MVP_REPORT.md](docs/MVP_REPORT.md).
-- Baseline on the frozen val-synth split (200 synthetic plans): correct-closed 72 %, room IoU 0.94.
-- Learned segmentation (fine-tuned U-Net, 1 GPU hour) is available as an option. On val-synth it
-  reaches correct-closed 98 % (vs. 72 %) and edit cost 0.45 (vs. 4.1) edits per plan. These are
-  synthetic dev numbers; it is not the default yet.
+- MVP promoted to `main` as **`baseline-v0`**: pipeline, API, evaluation protocol v1
+  ([docs/MVP_REPORT.md](docs/MVP_REPORT.md)). Baseline on the frozen val-synth split (200 synthetic
+  plans): correct-closed 72 %.
+- The locked evaluation can now score learned models (declared checkpoints, checked by hash, 2
+  training seeds). Merged into `main`.
+- Learned segmentation (fine-tuned U-Net) is available as an option. On val-synth: correct-closed
+  98 % vs. 72 % (synthetic).
 
-**Doing now** (one branch and worktree each)
-- `exp/learned-v1`: retrain the learned segmenter with drawing-style randomisation, 2 training
-  seeds, and make it the default.
-- `exp/ocr-chainsum`: read dimension chains jointly (chain sums, pixel spans, n-best).
-- `eval/learned-runner`: let the locked evaluation score learned models (declared checkpoints,
-  checked by hash).
-- Collecting openly licensed real floor-plan scans for a real dev set and a sealed test set.
+**Doing now: real historic plans (top priority)**
+- Your 3 historic plans, real, measured 2026-11-24: **none works yet**, with either segmenter.
+  - Villa Garten/Vorhof: classical gives 9 rooms but 19 loose wall ends.
+  - Villa Gundel: 1 room.
+  - Bauernhäuser Tafel 71 (7 plans on one sheet): 2 rooms.
+  - The learned model does no better on any of them, and the scale is always guessed.
+- `exp/historic-plans`: hand labels for the 3 plans, scale from scale bars and dimensions written
+  inside rooms, splitting sheets with several plans, solid black walls, exterior spaces.
+- `exp/learned-v1`: retrain the learned segmenter with a historic drawing style (solid walls, low
+  resolution, scale bars, clutter) plus randomised styles, 2 seeds.
+- Collecting more openly licensed historic German plans for a real dev set.
 
 **Next**
-- Promote whatever passes `scripts/promotion_check.sh`, then pick the next bet from
-  [docs/research/V2_RESEARCH.md](docs/research/V2_RESEARCH.md).
+- Report per plan which of the 3 work after each change; then promote what passes the protocol.
+- Paused: `exp/ocr-chainsum` (joint reading of dimension chains), work in progress on its branch.
 <!-- status:end -->
 
 ```bash
