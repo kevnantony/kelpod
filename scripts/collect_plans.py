@@ -52,6 +52,7 @@ USER_AGENT = "kelpod-collector/0.1 (research; contact via GitHub repo)"
 
 # ---- politeness / limits
 MIN_INTERVAL_S = 1.0  # between requests per host
+HOST_INTERVAL_S = {"upload.wikimedia.org": 4.0}  # Wikimedia answers 429 to faster original-file downloads
 TIMEOUT_S = 15
 RETRIES = 3  # attempts, i.e. at most 2 retries
 BREAKER_N = 3  # consecutive failed API calls before a source is skipped for the rest of the run
@@ -140,7 +141,7 @@ class Http:
 
     def _throttle(self, url: str) -> None:
         host = urllib.parse.urlsplit(url).netloc
-        wait = self._last.get(host, -1e9) + self.min_interval - self._clock()
+        wait = self._last.get(host, -1e9) + max(self.min_interval, HOST_INTERVAL_S.get(host, 0)) - self._clock()
         if wait > 0:
             self._sleep(wait)
         self._last[host] = self._clock()
@@ -169,7 +170,7 @@ class Http:
                 if e.code not in (429, 500, 502, 503, 504):
                     raise
                 ra = e.headers.get("Retry-After") if e.headers else None
-                delay = min(float(ra), 15) if ra and ra.isdigit() else BACKOFF_S * 2 ** attempt
+                delay = min(float(ra), 15) if ra and ra.isdigit() else max(BACKOFF_S * 2 ** attempt, 10.0 if e.code == 429 else 0)
             except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
                 last_err = e
                 delay = BACKOFF_S * 2 ** attempt
