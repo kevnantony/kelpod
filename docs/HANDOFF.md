@@ -139,6 +139,13 @@ paid version could not use). Research and ranked bets: `docs/research/V2_RESEARC
 
 ## Compute
 
+**Resource audit (2026-11-24, 12:40 CET).** Measured over 14 h: the agent job held 16 CPUs / 48 GB
+but used ~1.1 CPUs on average and 17.5 GB at peak, so it now asks for 8 CPUs / 24 GB (it switches
+itself to the new size at its next usage-limit pause). Cancelled: `kelpod-real` (held 4 CPUs / 8 GB
+for 13.5 h only waiting for `sources.csv`; submit `~/kelpod-jobs/real-scans.sbatch` once real/dev
+exists, it no longer waits) and the `kelpod-cockroach` watchdog job (2 CPUs idle; the cron entry
+covers it). Rule in `CLAUDE.md` ("Cluster resources").
+
 The MVP runs on CPU. If a step needs a GPU (e.g. fine-tuning or running a learned segmenter, a
 heavier OCR model), use the cluster's GPUs through Slurm from the login host; never run GPU jobs on
 the login node itself. Partitions seen on 2026-11-23: `pascal` (GTX 1080 Ti), `volta` (V100),
