@@ -2,11 +2,34 @@
 
 from __future__ import annotations
 
+import math
 import time
 from pathlib import Path
 
 from kelpod import clean, export, geometry, ocr, segment
 from kelpod.contracts import IfcSchema, PipelineResult, StepTiming
+
+
+def _score(graph) -> tuple[int, int, int]:
+    """Ordering of candidate graphs: some rooms, then few dangling ends / loose groups."""
+    r = graph.report
+    if r is None:
+        return (0, 0, 0)
+    return (
+        int(r.n_rooms > 0),
+        -(len(r.dangling_nodes) + 2 * max(0, r.n_components - 1)),
+        r.n_rooms,
+    )
+
+
+def _try_pairs(seg, graph) -> bool:
+    """Not closed and not drawn with hatched / solid walls (those are the classical path's)."""
+    r = graph.report
+    if r is not None and r.is_closed and r.n_rooms > 0:
+        return False
+    total = sum(math.dist(w.p0, w.p1) for w in seg.walls) or 1.0
+    hatched = sum(math.dist(w.p0, w.p1) for w in seg.walls if w.confidence > 0.8)
+    return hatched / total < 0.5
 
 
 def convert(
@@ -35,6 +58,12 @@ def convert(
     seg = timed("segment", segment.run, page, backend=segment_backend)
     ann = timed("ocr", ocr.run, page, backend=ocr_backend)
     graph = timed("geometry", geometry.run, page, seg, ann)
+    if segment_backend == "classical" and _try_pairs(seg, graph):
+        # thin-line (two parallel faces, no hatching) plan that did not close: try line pairs
+        alt = timed("segment", segment.run, page, backend="pairs")
+        alt_graph = timed("geometry", geometry.run, page, alt, ann)
+        if _score(alt_graph) > _score(graph):
+            seg, graph = alt, alt_graph
     model = timed(
         "model", export.build_model, graph, storey_height_m=storey_height_m, name=Path(source).stem
     )

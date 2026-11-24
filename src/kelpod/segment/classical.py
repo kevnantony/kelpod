@@ -151,7 +151,7 @@ def segment_classical(page: RasterPage, p: ClassicalParams | None = None) -> Seg
         fp = _footprint(
             walls, window_runs, gaps, ink.shape, face_lw, px(1.0) ** 2 * p.min_room_m2, m_per_px
         )
-        if fp is not None:
+        if fp is not None and not _footprint_partial(fp, walls):
             n_w, n_r = len(walls), len(window_runs)
             walls = [w for w in walls if _inside(fp, w)]
             window_runs = [r for r in window_runs if _inside(fp, r)]
@@ -358,6 +358,16 @@ def _footprint(walls, window_runs, gaps, shape, face_lw, min_hole_px, mpp) -> np
     hit[np.unique(blab[rooms[lab]])] = True
     hit[0] = False
     return hit[blab]
+
+
+def _footprint_partial(fp: np.ndarray, walls) -> bool:
+    """True if the enclosed footprint touches under 65 % (by length) of the wall network: an
+    incomplete outline (hatched walls with open ends) must not delete the walls outside it."""
+    total = sum(w.length for w in walls)
+    if total <= 0:
+        return False
+    frac = sum(w.length for w in walls if _inside(fp, w)) / total
+    return frac < 0.65
 
 
 def _inside(interior: np.ndarray, r) -> bool:

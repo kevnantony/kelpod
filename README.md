@@ -9,9 +9,12 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-24 19:10 CET. Numbers are synthetic unless marked "real"._
+_Last updated: 2026-11-24 20:00 CET. Numbers are synthetic unless marked "real"._
 
 **Done**
+- Branch `exp/din-web-plans` (not promoted): low-resolution web plans are upscaled instead of shrunk,
+  a thin-line ("double line") wall detector exists as a fallback. Real, 2 web plans: 0 -> 5 rooms each,
+  but neither closes (see docs/EXPERIMENTS.md `din-web-plans`). Synthetic benchmark unchanged.
 - MVP promoted to `main` as **`baseline-v0`**: pipeline, API, evaluation protocol v1
   ([docs/MVP_REPORT.md](docs/MVP_REPORT.md)). Baseline on val-synth (200 synthetic plans):
   correct-closed 72 %.
