@@ -109,3 +109,35 @@ python -m kelpod.evaluation.splits pending                       # (re)write pen
 Results go to `~/kelpod-runs/locked/<UTC time>_<branch>/` (`comparison.md`, `results.json`).
 Runs whose kind is `smoke` or `val` are logged with `(<kind>)` after the branch name, so they do
 not use up the 2-run budget (rule 6).
+
+## Implementation choices and known limits (v1)
+
+- **Runtime reference.** Each pipeline run gets one dedicated physical core (both hyperthreads),
+  8 runs in parallel on a 16-CPU allocation of a pascal node. Candidate and baseline runs of the
+  same plan are interleaved, so the paired Δ is fair, but the absolute numbers depend on the node's
+  load (pascal-node02 is shared): about 24 s median per plan under full load, against about 6 s
+  for one plan alone with all cores. The p95 < 180 s check uses these loaded numbers.
+- **Runtime noise.** In the smoke run with identical code on both sides, the runtime median Δ was
+  +4.2% [-2.1%, +10.8%] (val-synth, 200 plans). That is inside the +25% tolerance, but runtime is the
+  noisiest metric.
+- **Headline.** "Closed" = `closure_metrics(pred).is_closed`. Room IoU >= 0.85 for every GT room
+  after Hungarian matching, equal room count, total floor-area error <= 3%.
+- **Errors** are relative and capped at 1.0 per plan. A crashed or rejected plan scores 0 on rates,
+  IoU and F1, 1.0 on errors, and the edit cost of building the GT from nothing.
+- **Thickness class.** Exterior = `WallKind.EXTERIOR`, or `UNKNOWN` with thickness >= 0.30 m.
+  Everything else is interior. Accuracy is length-weighted over GT centreline that a parallel
+  predicted wall covers within 10 cm.
+- **Edit cost** = node, wall-edge and opening insertions and deletions, plus opening kind changes,
+  after 1:1 node matching within 20 cm. Moving a matched node costs nothing, so this is a lower
+  bound on correction effort.
+- **Envelope.** Exterior wall centreline length; window area (width x height, a missing height
+  counts as 1 m) per N/E/S/W facade, summed as absolute error over GT total; gross volume as gross
+  footprint (walls + rooms, holes filled) x storey height, which is the footprint error for one
+  storey.
+- **IFC.** Re-opened by the evaluator with ifcopenshell (at least one `IfcWall` and one
+  `IfcSpace`), independent of the pipeline's own `reopened_ok`.
+- **Not measured yet:** the OCR panel (dimension-value P/R, dimension-to-wall linking).
+  `PipelineResult` exposes no OCR annotations, and the runner may only call the public
+  `kelpod.pipeline.convert`.
+- **Primary split.** Until test-ood is frozen, the primary split is fresh alone, and rule 4 needs
+  a gain on both test-synth and fresh.

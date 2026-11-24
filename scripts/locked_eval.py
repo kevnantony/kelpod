@@ -626,7 +626,8 @@ def main(argv: list[str] | None = None) -> int:
     append_log(
         args.log,
         f"| {date} | {kind} | {branch_cell} | {commits['cand0'][:10]} | {commits['base'][:10]} "
-        f"| {split_list} | {head} | {short} | {args.job_id} ({out}) |",
+        f"| {split_list} | {head} | {short} | {args.job_id} "
+        f"({str(out).replace(str(Path.home()), '~')}) |",
     )
     print(f"results: {out}; log: {args.log}")
     if rejected:
