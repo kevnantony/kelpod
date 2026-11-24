@@ -59,8 +59,19 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   `out/demo/seed_{0000,0001,0002}/viewer.html` (git-ignored; regenerate with scripts/demo.py).
   Fixed: ONNX Runtime affinity-error spam under Slurm (rapidocr ignores per-module thread keys).
   Synthetic only.
+- [x] Closure fixes in classical segment (2026-11-24, commit after a270ff2): held-out synth seeds
+  100-129 (not tuned on), before -> after: degrade 0.5 closed 0.733 -> 0.800, room IoU 0.936 ->
+  0.962; degrade 1.0 closed 0.067 -> 0.533, room IoU 0.774 -> 0.869 (docs/results/closurefix_*.md).
+  Synthetic only; dev numbers, not a locked evaluation.
 - [ ] Fine-tune a state-of-the-art segmentation model (brief "finetune" in docs/AGENT_BRIEFS.md;
   approved 2026-11-23). Starts after integration; GPUs via Slurm.
+  In progress (uncommitted in the main checkout: `training/`, `src/kelpod/segment/learned.py`,
+  `tests/segment/test_segment.py`, `docs/EXPERIMENTS.md`): ResNet-34 U-Net (smp) 5-class masks +
+  deterministic vectoriser (oracle check: wall recall >= 0.995, room IoU 0.98); CubiCasa5k released
+  model as zero-shot baseline; converters for Swiss Dwellings / ResPlan / CubiCasa5k; 4000 synth
+  train pages built. No training run finished yet, no comparison numbers yet.
+- [ ] (step 0, parallel) `eval/protocol-v1` in worktree ~/kelpod-wt/protocol-v1: held-out generator
+  style WIP, uncommitted; splits, manifests and locked_eval.py not done yet.
 - [x] Minimal FastAPI endpoint (`kelpod.api`): `GET /health`, `POST /convert` (multipart upload,
   extension + magic-byte check, 415/413/422, pipeline in a worker thread), `GET /jobs/{id}` and
   `GET /jobs/{id}/model.ifc`; jobs keep-last-N + TTL, temp dir removed on shutdown. Run with

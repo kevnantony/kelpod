@@ -9,28 +9,26 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-23 22:05 CET. All numbers are from synthetic plans; nothing has been tested on real scans yet._
+_Last updated: 2026-11-24 02:30 CET. All numbers are from synthetic plans; nothing has been tested on real scans yet._
 
 **Done**
-- Pipeline steps built and tested: clean (deskew, folds, stains), classical segmentation (walls,
-  doors, windows, rooms), OCR (RapidOCR; dimension chains, BRH, room stamps), geometry (fit to
-  dimensions, closed graph), IFC4 / IFC2X3 export.
-- End to end: `kelpod convert` writes IFC that re-opens. 10-plan synthetic benchmark (degrade 0.5):
-  8/10 fully closed, room IoU 0.92, wall F1 0.997, ~4.7 s per plan
-  ([report](docs/results/benchmark_synth10_degrade05.md)).
+- Pipeline steps built and tested: clean, classical segmentation, OCR (RapidOCR), geometry
+  (fit to dimensions, closed graph), IFC4 / IFC2X3 export; `kelpod convert` writes IFC that re-opens.
+- Closure fixes in segmentation. Held-out synthetic seeds 100-129, before -> after: degrade 0.5
+  fully closed 73 % -> 80 %, room IoU 0.94 -> 0.96; degrade 1.0 closed 7 % -> 53 %, room IoU
+  0.77 -> 0.87 (synthetic, dev numbers).
 - FastAPI endpoint (`kelpod serve`): `/health`, `/convert`, `/jobs/{id}`. No auth yet.
-- Open-source survey ([docs/research/OPEN_SOURCE_SURVEY.md](docs/research/OPEN_SOURCE_SURVEY.md)).
 
 **Doing now**
-- Fixing the closure failures on synthetic seeds 2 and 9 (segmentation).
-- Setting up fine-tuning of a learned segmentation model on the cluster GPUs (CubiCasa5k and Swiss
-  Dwellings downloaded).
-- Researching what would make the next version much better on real scans.
+- Paused for a usage limit until about 02:20 CET; the loop resumes the work.
+- Fine-tuning a learned segmentation model (U-Net, CubiCasa5k zero-shot baseline); training data
+  built, no training results yet.
+- Evaluation protocol v1 (frozen splits, locked evaluation) on branch `eval/protocol-v1`.
 
 **Next**
-- Compare the learned model with the classical baseline on a fixed test split.
-- Write `docs/MVP_REPORT.md` (what works, what does not, what needs real plans).
-- Then: next-version work picked from the research, and first real *Bestandspläne* from the pilot.
+- Compare the learned model with the classical baseline; write `docs/MVP_REPORT.md`.
+- Merge MVP + eval protocol into `main` as `baseline-v0`; then experiments on `exp/*` branches,
+  scored on real dev scans as well.
 <!-- status:end -->
 
 ```bash
