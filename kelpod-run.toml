@@ -2,6 +2,7 @@
 # Final: the two learned-v1 seeds (U-Net ResNet-34, ONNX), run with whole-page inference at 0.65 scale
 # (LearnedSegmenter defaults), see docs/EXPERIMENTS.md "learned-fast". Training manifests: every
 # training/manifests/*.json (checked by scripts/locked_eval.py --verify-manifests).
+version = 1
 segment_backend = "learned"
 ocr_backend = "rapidocr"
 python_project = "."
