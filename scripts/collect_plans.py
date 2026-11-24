@@ -27,6 +27,7 @@ Plan filter (cheap heuristics, thresholds are the constants below):
      and the dark fraction is within [MIN_DARK_FRAC, MAX_DARK_FRAC].
 Resume-safe: image URLs, sha256 and dHashes already in the manifests are skipped.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -52,7 +53,9 @@ USER_AGENT = "kelpod-collector/0.1 (research; contact via GitHub repo)"
 
 # ---- politeness / limits
 MIN_INTERVAL_S = 1.0  # between requests per host
-HOST_INTERVAL_S = {"upload.wikimedia.org": 4.0}  # Wikimedia answers 429 to faster original-file downloads
+HOST_INTERVAL_S = {
+    "upload.wikimedia.org": 4.0
+}  # Wikimedia answers 429 to faster original-file downloads
 TIMEOUT_S = 15
 RETRIES = 3  # attempts, i.e. at most 2 retries
 BREAKER_N = 3  # consecutive failed API calls before a source is skipped for the rest of the run
@@ -76,7 +79,14 @@ MAX_DARK_FRAC = 0.30
 DHASH_MAX_DIST = 4
 MIN_DIR_FRAC = 0.25  # each of horizontal / vertical must hold this share of the line pixels
 
-ALLOWED_EXT = {"jpeg": "jpg", "jpg": "jpg", "png": "png", "gif": "gif", "webp": "webp", "bmp": "bmp"}
+ALLOWED_EXT = {
+    "jpeg": "jpg",
+    "jpg": "jpg",
+    "png": "png",
+    "gif": "gif",
+    "webp": "webp",
+    "bmp": "bmp",
+}
 
 DEFAULT_QUERIES = [
     "Grundriss Erdgeschoss Bemaßung",
@@ -95,6 +105,7 @@ DEFAULT_QUERIES = [
 
 # ---------------------------------------------------------------- licences
 
+
 def classify_licence(lic: str) -> str:
     """'ok' (CC0 / PD / CC BY / CC BY-SA), 'nc' (has NC or ND), 'unverified' or 'no'."""
     t = lic.lower().strip()
@@ -111,6 +122,7 @@ def classify_licence(lic: str) -> str:
 
 
 # ---------------------------------------------------------------- data
+
 
 @dataclass
 class Candidate:
@@ -130,10 +142,13 @@ class Candidate:
 
 # ---------------------------------------------------------------- HTTP
 
-class Http:
-    """Polite urllib client: UA, timeouts, retries with backoff, >= 1 s between requests per host."""
 
-    def __init__(self, min_interval: float = MIN_INTERVAL_S, sleep=time.sleep, clock=time.monotonic):
+class Http:
+    """Polite urllib client: UA, timeouts, retries with backoff, >=1 s per host."""
+
+    def __init__(
+        self, min_interval: float = MIN_INTERVAL_S, sleep=time.sleep, clock=time.monotonic
+    ):
         self.min_interval = min_interval
         self._sleep, self._clock = sleep, clock
         self._last: dict[str, float] = {}
@@ -141,13 +156,22 @@ class Http:
 
     def _throttle(self, url: str) -> None:
         host = urllib.parse.urlsplit(url).netloc
-        wait = self._last.get(host, -1e9) + max(self.min_interval, HOST_INTERVAL_S.get(host, 0)) - self._clock()
+        wait = (
+            self._last.get(host, -1e9)
+            + max(self.min_interval, HOST_INTERVAL_S.get(host, 0))
+            - self._clock()
+        )
         if wait > 0:
             self._sleep(wait)
         self._last[host] = self._clock()
 
-    def get(self, url: str, params: dict | None = None, max_bytes: int | None = None,
-            headers: dict | None = None) -> bytes:
+    def get(
+        self,
+        url: str,
+        params: dict | None = None,
+        max_bytes: int | None = None,
+        headers: dict | None = None,
+    ) -> bytes:
         if params:
             url = url + ("&" if "?" in url else "?") + urllib.parse.urlencode(params)
         last_err: Exception | None = None
@@ -170,10 +194,14 @@ class Http:
                 if e.code not in (429, 500, 502, 503, 504):
                     raise
                 ra = e.headers.get("Retry-After") if e.headers else None
-                delay = min(float(ra), 15) if ra and ra.isdigit() else max(BACKOFF_S * 2 ** attempt, 10.0 if e.code == 429 else 0)
+                delay = (
+                    min(float(ra), 15)
+                    if ra and ra.isdigit()
+                    else max(BACKOFF_S * 2**attempt, 10.0 if e.code == 429 else 0)
+                )
             except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
                 last_err = e
-                delay = BACKOFF_S * 2 ** attempt
+                delay = BACKOFF_S * 2**attempt
             if attempt < RETRIES - 1:
                 self._sleep(delay)
         assert last_err is not None
@@ -188,10 +216,16 @@ class Http:
         if base not in self._robots:
             rp = urllib.robotparser.RobotFileParser()
             try:
-                rp.parse(self.get(base + "/robots.txt", max_bytes=1_000_000).decode("utf-8", "replace").splitlines())
+                rp.parse(
+                    self.get(base + "/robots.txt", max_bytes=1_000_000)
+                    .decode("utf-8", "replace")
+                    .splitlines()
+                )
                 self._robots[base] = rp
             except urllib.error.HTTPError as e:
-                self._robots[base] = None if e.code < 500 else _DENY  # 4xx: no robots.txt -> allowed
+                self._robots[base] = (
+                    None if e.code < 500 else _DENY
+                )  # 4xx: no robots.txt -> allowed
             except Exception:
                 self._robots[base] = _DENY  # unreachable robots.txt: be conservative
         rp = self._robots[base]
@@ -208,6 +242,7 @@ _DENY = urllib.robotparser.RobotFileParser()  # sentinel
 
 
 # ---------------------------------------------------------------- source parsers
+
 
 def _int(v) -> int:
     try:
@@ -242,13 +277,22 @@ def parse_openverse(data: dict, query: str) -> list[Candidate]:
             continue
         lic = r.get("license") or ""
         ver = r.get("license_version") or ""
-        out.append(Candidate(
-            source="openverse", query=query, image_url=url,
-            page_url=r.get("foreign_landing_url") or "", title=r.get("title") or "",
-            licence=(f"{lic} {ver}".strip() or "unknown"), licence_url=r.get("license_url") or "",
-            author=r.get("creator") or "", width=_int(r.get("width")), height=_int(r.get("height")),
-            size=_int(r.get("filesize")), mime=(r.get("filetype") and "image/" + r["filetype"]) or "",
-        ))
+        out.append(
+            Candidate(
+                source="openverse",
+                query=query,
+                image_url=url,
+                page_url=r.get("foreign_landing_url") or "",
+                title=r.get("title") or "",
+                licence=(f"{lic} {ver}".strip() or "unknown"),
+                licence_url=r.get("license_url") or "",
+                author=r.get("creator") or "",
+                width=_int(r.get("width")),
+                height=_int(r.get("height")),
+                size=_int(r.get("filesize")),
+                mime=(r.get("filetype") and "image/" + r["filetype"]) or "",
+            )
+        )
     return [c for c in out if _ext_ok(c.mime, c.image_url)]
 
 
@@ -262,16 +306,23 @@ def parse_commons(data: dict, query: str) -> list[Candidate]:
         ii = infos[0]
         meta = ii.get("extmetadata") or {}
 
-        def mv(k):
+        def mv(k, meta=meta):
             return _strip_html((meta.get(k) or {}).get("value", ""))
 
         c = Candidate(
-            source="commons", query=query,
-            image_url=ii.get("thumburl") or ii.get("url", ""),  # cached thumbnail (Wikimedia asks for these)
-            page_url=ii.get("descriptionurl", ""), title=p.get("title", "").removeprefix("File:"),
-            licence=mv("LicenseShortName") or mv("License") or "unknown", licence_url=mv("LicenseUrl"),
-            author=mv("Artist"), width=_int(ii.get("width")), height=_int(ii.get("height")),
-            size=_int(ii.get("size")), mime=ii.get("mime", ""),
+            source="commons",
+            query=query,
+            image_url=ii.get("thumburl")
+            or ii.get("url", ""),  # cached thumbnail (Wikimedia asks for these)
+            page_url=ii.get("descriptionurl", ""),
+            title=p.get("title", "").removeprefix("File:"),
+            licence=mv("LicenseShortName") or mv("License") or "unknown",
+            licence_url=mv("LicenseUrl"),
+            author=mv("Artist"),
+            width=_int(ii.get("width")),
+            height=_int(ii.get("height")),
+            size=_int(ii.get("size")),
+            mime=ii.get("mime", ""),
         )
         if c.image_url and _ext_ok(c.mime, c.image_url):
             out.append(c)
@@ -286,10 +337,16 @@ def parse_google(data: dict, query: str) -> list[Candidate]:
         if not url:
             continue
         c = Candidate(
-            source="google", query=query, image_url=url, page_url=img.get("contextLink", ""),
+            source="google",
+            query=query,
+            image_url=url,
+            page_url=img.get("contextLink", ""),
             title=it.get("title", ""),
-            licence="unverified (Google rights filter: cc_publicdomain|cc_attribute|cc_sharealike)", width=_int(img.get("width")),
-            height=_int(img.get("height")), size=_int(img.get("byteSize")), mime=it.get("mime", ""),
+            licence="unverified (Google rights filter: cc_publicdomain|cc_attribute|cc_sharealike)",
+            width=_int(img.get("width")),
+            height=_int(img.get("height")),
+            size=_int(img.get("byteSize")),
+            mime=it.get("mime", ""),
         )
         if _ext_ok(c.mime, url):
             out.append(c)
@@ -310,9 +367,16 @@ def fetch_openverse(http, query: str, page: int) -> list[Candidate]:
 
 def fetch_commons(http, query: str, page: int) -> list[Candidate]:
     params = {
-        "action": "query", "format": "json", "generator": "search", "gsrnamespace": 6,
-        "gsrsearch": query, "gsrlimit": 20, "gsroffset": 20 * (page - 1),
-        "prop": "imageinfo", "iiprop": "url|size|mime|extmetadata", "iiurlwidth": 2000,
+        "action": "query",
+        "format": "json",
+        "generator": "search",
+        "gsrnamespace": 6,
+        "gsrsearch": query,
+        "gsrlimit": 20,
+        "gsroffset": 20 * (page - 1),
+        "prop": "imageinfo",
+        "iiprop": "url|size|mime|extmetadata",
+        "iiurlwidth": 2000,
     }
     return parse_commons(http.get_json(COMMONS_URL, params), query)
 
@@ -322,7 +386,7 @@ class GoogleQuota:
 
     def __init__(self, path: Path, limit: int = GOOGLE_DAILY_QUOTA, today=None):
         self.path, self.limit = path, limit
-        self.today = today or (lambda: dt.datetime.now(dt.timezone.utc).date().isoformat())
+        self.today = today or (lambda: dt.datetime.now(dt.UTC).date().isoformat())
         self.count = 0
         try:
             d = json.loads(path.read_text())
@@ -347,10 +411,18 @@ def make_google_fetcher(key: str, cx: str, quota: GoogleQuota):
     def fetch(http, query: str, page: int) -> list[Candidate]:
         if not quota.use():
             raise QuotaExhausted()
-        params = {"key": key, "cx": cx, "q": query, "searchType": "image", "num": 10,
-                  "start": 1 + 10 * (page - 1), "lr": "lang_de",
-                  "rights": "cc_publicdomain,cc_attribute,cc_sharealike"}
+        params = {
+            "key": key,
+            "cx": cx,
+            "q": query,
+            "searchType": "image",
+            "num": 10,
+            "start": 1 + 10 * (page - 1),
+            "lr": "lang_de",
+            "rights": "cc_publicdomain,cc_attribute,cc_sharealike",
+        }
         return parse_google(http.get_json(GOOGLE_URL, params), query)
+
     return fetch
 
 
@@ -359,6 +431,7 @@ class QuotaExhausted(Exception):
 
 
 # ---------------------------------------------------------------- image analysis
+
 
 def dhash(img: Image.Image) -> int:
     g = np.asarray(img.convert("L").resize((9, 8), Image.LANCZOS), dtype=np.int16)
@@ -379,7 +452,7 @@ def _long_runs(b: np.ndarray, k: int) -> np.ndarray:
     starts = (c[:, k:] - c[:, :-k]) == k  # (h, w-k+1)
     d = np.zeros((h, w + 1), np.int32)
     d[:, : w - k + 1] += starts
-    d[:, k: w + 1] -= starts
+    d[:, k : w + 1] -= starts
     return np.cumsum(d, axis=1)[:, :w] > 0
 
 
@@ -410,9 +483,13 @@ def plan_scores(img: Image.Image) -> dict:
         dir_balance = min(n_h, n_v) / tot
     else:
         line_ratio = dir_balance = 0.0
-    return {"white_frac": round(white, 4), "mean_sat": round(sat, 4),
-            "dark_frac": round(dark_frac, 4), "line_ratio": round(line_ratio, 4),
-            "dir_balance": round(dir_balance, 4)}
+    return {
+        "white_frac": round(white, 4),
+        "mean_sat": round(sat, 4),
+        "dark_frac": round(dark_frac, 4),
+        "line_ratio": round(line_ratio, 4),
+        "dir_balance": round(dir_balance, 4),
+    }
 
 
 def plan_filter(img: Image.Image) -> tuple[bool, dict, str]:
@@ -430,12 +507,17 @@ def plan_filter(img: Image.Image) -> tuple[bool, dict, str]:
     if scores["line_ratio"] < MIN_LINE_RATIO:
         return False, scores, f"few_straight_lines({scores['line_ratio']} < {MIN_LINE_RATIO})"
     if scores["dir_balance"] < MIN_DIR_FRAC:
-        return False, scores, f"not_two_orthogonal_directions({scores['dir_balance']} < {MIN_DIR_FRAC})"
+        return (
+            False,
+            scores,
+            f"not_two_orthogonal_directions({scores['dir_balance']} < {MIN_DIR_FRAC})",
+        )
     scores["filter_score"] = round(min(1.0, scores["line_ratio"]) * 0.5 + scores["dir_balance"], 4)
     return True, scores, ""
 
 
 # ---------------------------------------------------------------- collector
+
 
 @dataclass
 class Collector:
@@ -476,7 +558,9 @@ class Collector:
                 self.seen_urls.add(r.get("image_url"))
                 self.seen_sha.add(r.get("sha256"))
                 if is_acc and r.get("dhash") is not None:
-                    self.hashes.append(int(r["dhash"], 16) if isinstance(r["dhash"], str) else r["dhash"])
+                    self.hashes.append(
+                        int(r["dhash"], 16) if isinstance(r["dhash"], str) else r["dhash"]
+                    )
                 if is_acc:
                     self.total_accepted += 1
 
@@ -553,11 +637,21 @@ class Collector:
             return "dup_dhash"
         ok, scores, reason = plan_filter(img)
         rec = {
-            "source": c.source, "query": c.query, "image_url": c.image_url, "page_url": c.page_url,
-            "title": c.title, "licence": c.licence, "licence_url": c.licence_url, "author": c.author,
-            "width": img.size[0], "height": img.size[1], "sha256": sha, "dhash": f"{dh:016x}",
-            "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-            "filter": scores, "filter_score": scores.get("filter_score"),
+            "source": c.source,
+            "query": c.query,
+            "image_url": c.image_url,
+            "page_url": c.page_url,
+            "title": c.title,
+            "licence": c.licence,
+            "licence_url": c.licence_url,
+            "author": c.author,
+            "width": img.size[0],
+            "height": img.size[1],
+            "sha256": sha,
+            "dhash": f"{dh:016x}",
+            "fetched_at": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
+            "filter": scores,
+            "filter_score": scores.get("filter_score"),
             "licence_class": cls,
         }
         name = f"{sha[:16]}.{ext}"
@@ -578,8 +672,13 @@ class Collector:
         self.rejected[c.source] = self.rejected.get(c.source, 0) + 1
         return "rejected"
 
-    def run(self, fetchers: dict, queries: list[str], max_pages: int = MAX_PAGES,
-            breaker_n: int = BREAKER_N) -> None:
+    def run(
+        self,
+        fetchers: dict,
+        queries: list[str],
+        max_pages: int = MAX_PAGES,
+        breaker_n: int = BREAKER_N,
+    ) -> None:
         dead: set[str] = set()
         fails: dict[str, int] = {}
         for page in range(1, max_pages + 1):
@@ -599,8 +698,10 @@ class Collector:
                         fails[name] = fails.get(name, 0) + 1
                         self.log(f"[{name}] query failed ({q!r} p{page}): {e}")
                         if fails[name] >= breaker_n:
-                            self.log(f"[{name}] circuit breaker: {breaker_n} consecutive failures, "
-                                     "skipping this source for the rest of the run")
+                            self.log(
+                                f"[{name}] circuit breaker: {breaker_n} consecutive failures, "
+                                "skipping this source for the rest of the run"
+                            )
                             dead.add(name)
                         continue
                     fails[name] = 0
@@ -609,7 +710,10 @@ class Collector:
                         if self.done:
                             return
                         key = (name, q)
-                        if self.max_per_query and self.query_count.get(key, 0) >= self.max_per_query:
+                        if (
+                            self.max_per_query
+                            and self.query_count.get(key, 0) >= self.max_per_query
+                        ):
                             break
                         if self.process(c) == "accepted":
                             self.query_count[key] = self.query_count.get(key, 0) + 1
@@ -619,10 +723,11 @@ class Collector:
 
 # ---------------------------------------------------------------- CLI
 
+
 def load_queries(path: str | None) -> list[str]:
     if not path:
         return list(DEFAULT_QUERIES)
-    qs = [l.strip() for l in Path(path).read_text(encoding="utf-8").splitlines()]
+    qs = [ln.strip() for ln in Path(path).read_text(encoding="utf-8").splitlines()]
     return [q for q in qs if q and not q.startswith("#")]
 
 
@@ -647,12 +752,22 @@ def build_fetchers(sources: list[str], out: Path, env=os.environ) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--out", default=str(Path.home() / "kelpod-data" / "web"))
-    ap.add_argument("--max", type=int, default=10**9, help="stop after N new accepted plan images in total")
-    ap.add_argument("--max-per-query", type=int, default=50, help="accepted images per (source, query)")
-    ap.add_argument("--allow-nc", action="store_true",
-                    help="also keep NC/ND licences (educational repo only; marked licence_class=nc)")
-    ap.add_argument("--ref-dirs", default=str(Path.home() / "kelpod-data/real"),
-                    help="comma-separated dirs whose images count as already collected")
+    ap.add_argument(
+        "--max", type=int, default=10**9, help="stop after N new accepted plan images in total"
+    )
+    ap.add_argument(
+        "--max-per-query", type=int, default=50, help="accepted images per (source, query)"
+    )
+    ap.add_argument(
+        "--allow-nc",
+        action="store_true",
+        help="also keep NC/ND licences (educational repo only; marked licence_class=nc)",
+    )
+    ap.add_argument(
+        "--ref-dirs",
+        default=str(Path.home() / "kelpod-data/real"),
+        help="comma-separated dirs whose images count as already collected",
+    )
     ap.add_argument("--sources", default="openverse,commons,google")
     ap.add_argument("--queries", help="text file, one query per line")
     a = ap.parse_args(argv)
@@ -666,14 +781,21 @@ def main(argv=None) -> int:
     if not fetchers:
         print("no usable sources", file=sys.stderr)
         return 1
-    col = Collector(out=out, http=Http(), max_new=a.max, allow_nc=a.allow_nc,
-                    max_per_query=a.max_per_query,
-                    ref_dirs=tuple(d for d in a.ref_dirs.split(",") if d))
+    col = Collector(
+        out=out,
+        http=Http(),
+        max_new=a.max,
+        allow_nc=a.allow_nc,
+        max_per_query=a.max_per_query,
+        ref_dirs=tuple(d for d in a.ref_dirs.split(",") if d),
+    )
     col.run(fetchers, load_queries(a.queries))
     print("\n== summary ==")
     for s in fetchers:
-        print(f"{s}: downloaded {col.fetched.get(s, 0)}, accepted {col.accepted.get(s, 0)}, "
-              f"rejected by filter {col.rejected.get(s, 0)}")
+        print(
+            f"{s}: downloaded {col.fetched.get(s, 0)}, accepted {col.accepted.get(s, 0)}, "
+            f"rejected by filter {col.rejected.get(s, 0)}"
+        )
     print(f"skipped by licence: {col.licence_skipped}")
     print(f"accepted this run: {sum(col.accepted.values())} (total in {out}: {col.total_accepted})")
     return 0
