@@ -88,7 +88,11 @@ re-opens, the closure metric and runtime are reported honestly, and `uv run pyte
   `uv run --extra api kelpod serve` or `python -m kelpod.api`. 12 tests (1 slow). No auth yet;
   the size limit is checked while reading, so a reverse proxy should also cap request size.
 - [x] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans (2026-11-24).
+- [x] baseline-v0 on main (40546a9, 2026-11-24): MVP + eval protocol v1 merged, tagged, pushed.
 - [ ] Continuous improvement (approved 2026-11-23; never checked, runs until a person stops the loop):
+  running 2026-11-24 12:50: exp/learned-v1 (style-randomised U-Net, 2 seeds, learned default),
+  exp/ocr-chainsum (joint Maßketten decoding), eval/learned-runner (locked_eval for learned
+  checkpoints), real-scan collection (~/kelpod-data/real, not yet written). Worktrees ~/kelpod-wt/.
   see "Continuous improvement" below.
 
 ## Continuous improvement (after the MVP items)
