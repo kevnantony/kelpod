@@ -86,6 +86,11 @@ def _pil_font(path: str, size: int):
     return ImageFont.truetype(path, size)
 
 
+@lru_cache(maxsize=8)
+def _hershey_digit_px(face: int) -> float:
+    return float(cv2.getTextSize("0", face, 1.0, 1)[0][1])
+
+
 _HERSHEY_MAP = str.maketrans(
     {"ä": "ae", "ö": "oe", "ü": "ue", "Ä": "Ae", "Ö": "Oe", "Ü": "Ue", "ß": "ss"}
 )
@@ -122,18 +127,41 @@ def _crop(img: np.ndarray, pad: int = 1) -> np.ndarray:
     ]
 
 
-def render_text(text: str, digit_height_px: float) -> tuple[np.ndarray, str]:
+@lru_cache(maxsize=32)
+def _digit_em(path: str) -> float:
+    """Digit height of a font as a fraction of its size (0.73 for DejaVu Sans)."""
+    f = _pil_font(path, 200)
+    _, top, _, bottom = f.getbbox("0123456789", anchor="ls")
+    return (bottom - top) / 200
+
+
+def _resolve_font(font: str | None) -> tuple[str | None, int]:
+    """(TrueType path or None for Hershey, Hershey face) for a style font spec."""
+    if font is None:
+        return font_path(), cv2.FONT_HERSHEY_SIMPLEX
+    if font.startswith("hershey:"):
+        return None, int(font.split(":", 1)[1])
+    if not Path(font).is_file():
+        raise FileNotFoundError(f"style font {font} is not installed")
+    return font, cv2.FONT_HERSHEY_SIMPLEX
+
+
+def render_text(
+    text: str, digit_height_px: float, font: str | None = None
+) -> tuple[np.ndarray, str]:
     """Render ``text`` into an alpha mask (float32, 1 = ink), cropped to the ink plus 1 px.
 
     Superscript digits (``36⁵``, ``m²``) are drawn as smaller, raised normal digits. Returns the
     mask and the text as drawn: the input text, except that Hershey spells out umlauts.
+    ``font`` is a style font spec (see :mod:`kelpod.evaluation.synth.styles`); ``None`` = default.
     """
     runs = _runs(text)
-    path = font_path()
+    path, face = _resolve_font(font)
     if path is not None:
         from PIL import Image, ImageDraw
 
-        size = max(6, int(round(digit_height_px / _DIGIT_EM)))
+        em = _DIGIT_EM if font is None else _digit_em(path)
+        size = max(6, int(round(digit_height_px / em)))
         sup_size = max(5, int(round(size * SUP_SCALE)))
         fonts = {False: _pil_font(path, size), True: _pil_font(path, sup_size)}
         width = sum(int(np.ceil(fonts[sup].getlength(r))) + 2 for r, sup in runs) + 8
@@ -148,8 +176,9 @@ def render_text(text: str, digit_height_px: float) -> tuple[np.ndarray, str]:
             x += fonts[sup].getlength(r)
         return _crop(np.asarray(img, np.float32) / 255.0), text
     drawn = text.translate(_HERSHEY_MAP)
-    face = cv2.FONT_HERSHEY_SIMPLEX
-    scale = digit_height_px / 22.0  # simplex digits are ~22 px high at scale 1
+    # simplex digits are ~22 px high at scale 1; other faces are measured
+    ref = 22.0 if face == cv2.FONT_HERSHEY_SIMPLEX else _hershey_digit_px(face)
+    scale = digit_height_px / ref
     thick = max(1, int(round(scale * 2)))
     sup_scale = scale * SUP_SCALE
     sup_thick = max(1, int(round(sup_scale * 2)))

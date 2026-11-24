@@ -59,6 +59,13 @@ class DrawnText:
 class Style:
     length: LengthStyle = "cm"
     sill: SillStyle = "m"
+    font: str | None = None
+    """Font spec (``kelpod.evaluation.synth.styles``); None = the generator default."""
+    hatch: str = "diag45"
+    """``diag45`` (default), ``diag135``, ``cross`` or ``solid``."""
+    hatch_spacing_mm: float = HATCH_SPACING_MM
+    line_scale: float = 1.0
+    """Multiplies every line width."""
 
 
 class _Canvas:
@@ -66,18 +73,21 @@ class _Canvas:
 
     SHIFT = 4
 
-    def __init__(self, width: int, height: int, dpi: float, m_per_px: float) -> None:
+    def __init__(
+        self, width: int, height: int, dpi: float, m_per_px: float, style: Style | None = None
+    ) -> None:
         self.img = np.full((height, width), 255, np.uint8)
         self.h = height
         self.dpi = dpi
         self.m_per_px = m_per_px
+        self.style = style or Style()
         self.boxes: list[tuple[float, float, float, float]] = []  # placed text boxes (px)
 
     def mm(self, mm: float) -> float:
         return mm * self.dpi / 25.4
 
     def lw(self, mm: float) -> int:
-        return max(1, int(round(self.mm(mm))))
+        return max(1, int(round(self.mm(mm * self.style.line_scale))))
 
     def px(self, p: Point) -> Point:
         return m_to_px(p, self.m_per_px, self.h)
@@ -119,19 +129,38 @@ class _Canvas:
                 self.polyline(list(ring.coords)[:-1], width_mm, closed=True)
 
     def hatch(self, mask: np.ndarray) -> None:
-        """45° hatching clipped to ``mask``."""
+        """Hatching (45° by default, see ``Style.hatch``) clipped to ``mask``."""
         ys, xs = np.nonzero(mask)
         if not len(xs):
             return
         x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
+        pattern = self.style.hatch
+        if pattern == "solid":
+            self.img[mask] = 0
+            return
         layer = np.full((y1 - y0, x1 - x0), 255, np.uint8)
-        spacing = self.mm(HATCH_SPACING_MM)
+        spacing = self.mm(self.style.hatch_spacing_mm)
         h, w = layer.shape
+        f = 1 << self.SHIFT
+        width = self.lw(HATCH_LINE_MM)
+        if pattern in ("diag135", "cross"):
+            # lines x - y = C (falling to the right on screen), continuous across walls
+            c = float(-(x0 - y0) % spacing) - math.ceil(h / spacing) * spacing
+            while c < w:
+                p0 = (int(round(c * f)), 0)
+                p1 = (int(round((c + h) * f)), h * f)
+                cv2.line(layer, p0, p1, 0, width, cv2.LINE_AA, self.SHIFT)
+                c += spacing
+        if pattern == "diag135":
+            crop = self.img[y0:y1, x0:x1]
+            sub = mask[y0:y1, x0:x1]
+            crop[sub] = np.minimum(crop[sub], layer[sub])
+            return
+        if pattern not in ("diag45", "cross"):
+            raise ValueError(f"unknown hatch pattern {pattern!r}")
         # lines x + y = C (rising to the right on screen), C a multiple of the spacing in page
         # coordinates so the pattern is continuous across walls; c is C in crop coordinates
         c = float(-(x0 + y0) % spacing)
-        f = 1 << self.SHIFT
-        width = self.lw(HATCH_LINE_MM)
         while c < w + h:
             p0 = (int(round(c * f)), 0)
             p1 = (int(round((c - h) * f)), h * f)
@@ -151,7 +180,7 @@ class _Canvas:
         draw: bool = True,
     ) -> tuple[list[Point], str, tuple[float, float, float, float]]:
         """Draw text centred at a px point; returns quad (clockwise from top-left as read)."""
-        alpha, drawn = render_text(text, self.mm(digit_mm))
+        alpha, drawn = render_text(text, self.mm(digit_mm), self.style.font)
         if angle_deg == 90.0:
             alpha = np.rot90(alpha, 1)  # counter-clockwise: reads bottom-to-top
         h, w = alpha.shape
@@ -174,7 +203,7 @@ class _Canvas:
         return quad, drawn, bbox
 
     def text_size(self, text: str, digit_mm: float, angle_deg: float = 0.0) -> tuple[int, int]:
-        alpha, _ = render_text(text, self.mm(digit_mm))
+        alpha, _ = render_text(text, self.mm(digit_mm), self.style.font)
         h, w = alpha.shape
         return (h, w) if angle_deg == 90.0 else (w, h)
 
@@ -460,7 +489,7 @@ def render(
     layout: Layout, size: tuple[int, int], dpi: float, style: Style, m_per_px: float
 ) -> tuple[np.ndarray, np.ndarray, list[DrawnText]]:
     """Draw the plan. Returns the grayscale image, the wall mask and the drawn texts."""
-    cv = _Canvas(size[0], size[1], dpi, m_per_px)
+    cv = _Canvas(size[0], size[1], dpi, m_per_px, style)
     hatched, plain = _wall_regions(layout)
     hmask = cv.poly_mask(hatched)
     pmask = cv.poly_mask(plain)

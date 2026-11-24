@@ -22,6 +22,7 @@ into the degraded image.
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from typing import Literal
 
@@ -29,14 +30,30 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
 
 from kelpod.contracts import PlanGraph, Point
-from kelpod.evaluation.synth.degrade import Degradation
+from kelpod.evaluation.synth.degrade import Degradation, apply_damage
 from kelpod.evaluation.synth.degrade import degrade as _degrade
 from kelpod.evaluation.synth.layout import make_layout
 from kelpod.evaluation.synth.render import Style, render
-from kelpod.evaluation.synth.text import format_area, format_length, format_sill, render_text
+from kelpod.evaluation.synth.styles import (
+    FONTS,
+    HATCHES,
+    LINE_WEIGHTS,
+    StyleChoice,
+    StyleSplit,
+    heldout_font_files,
+    sample_style,
+)
+from kelpod.evaluation.synth.text import (
+    font_path,
+    format_area,
+    format_length,
+    format_sill,
+    render_text,
+)
 
 __all__ = [
     "Degradation",
+    "StyleChoice",
     "SyntheticPlan",
     "TextAnnotation",
     "format_area",
@@ -49,6 +66,8 @@ __all__ = [
 ]
 
 GENERATOR_VERSION = "1"
+PDF_DATE = time.gmtime(946684800)  # 2000-01-01 00:00 UTC
+"""Creation and modification date written into every ``plan.pdf`` (reproducible hashes)."""
 MARGIN_M = 4.0
 """Paper margin around the outer wall faces (plan metres); holds the dimension chains and title."""
 
@@ -100,6 +119,9 @@ class SyntheticPlan(BaseModel):
     length_style: str = "cm"
     sill_style: str = "m"
     generator_version: str = GENERATOR_VERSION
+    style: StyleChoice | None = Field(default=None, exclude=True, repr=False)
+    """Drawing style options (train or held-out). Excluded from ``ground_truth.json`` so the
+    default output stays byte-identical; :func:`save` writes ``style.json`` for held-out plans."""
 
     @property
     def m_per_px(self) -> float:
@@ -118,20 +140,40 @@ def generate(
     *,
     dpi: float = 300.0,
     n_rooms: int | None = None,
+    style: StyleSplit = "train",
 ) -> SyntheticPlan:
     """Generate one plan. Same ``seed`` (and arguments) -> identical output.
 
-    ``degrade`` in [0, 1] scales the scan degradation (0 = clean drawing); ``n_rooms`` defaults to a
-    random 3-8.
+    ``degrade`` in [0, 1.2] scales the scan degradation (0 = clean drawing); ``n_rooms`` defaults
+    to a random 3-8. ``style="train"`` (default) draws only training-style options; ``"heldout"``
+    draws fonts, hatching, line weights and scan damage that are reserved for the test-synth and
+    fresh splits (``docs/EVAL_PROTOCOL.md`` §2). Never train on ``"heldout"``.
     """
     plan_scale = 100.0
     m_per_px = 0.0254 / dpi * plan_scale
     rng = np.random.default_rng([int(seed), 0x6B656C70])  # layout stream
     layout, size = make_layout(rng, margin_m=MARGIN_M, m_per_px=m_per_px, n_rooms=n_rooms)
-    style = Style(length=str(rng.choice(["cm", "sup", "m"])), sill=str(rng.choice(["m", "cm"])))
-    clean, wall_mask, drawn = render(layout, size, dpi, style, m_per_px)
+    # own stream for the style options, so the layout is the same in every style
+    choice = sample_style(style, np.random.default_rng([int(seed), 0x7374796C]))
+    font = FONTS[choice.font].spec
+    if style == "train" and font is None and font_path() in heldout_font_files():
+        raise ValueError(f"default font {font_path()} is a held-out font (KELPOD_SYNTH_FONT)")
+    hatch = HATCHES[choice.hatch]
+    render_style = Style(
+        length=str(rng.choice(["cm", "sup", "m"])),
+        sill=str(rng.choice(["m", "cm"])),
+        font=font,
+        hatch=hatch.pattern,
+        hatch_spacing_mm=hatch.spacing_mm,
+        line_scale=LINE_WEIGHTS[choice.line_weight].scale,
+    )
+    clean, wall_mask, drawn = render(layout, size, dpi, render_style, m_per_px)
     # a separate stream for the degradation, so the layout does not change with ``degrade``
     image, info = _degrade(clean, float(degrade), np.random.default_rng([int(seed), 0x64656772]))
+    if choice.damage != "scan":
+        image = apply_damage(
+            image, choice.damage, float(degrade), np.random.default_rng([int(seed), 0x646D6767])
+        )
     annotations = [
         TextAnnotation(
             text=d.text,
@@ -159,8 +201,9 @@ def generate(
         graph=graph,
         annotations=annotations,
         degradation=info,
-        length_style=style.length,
-        sill_style=style.sill,
+        length_style=render_style.length,
+        sill_style=render_style.sill,
+        style=choice,
     )
 
 
@@ -174,7 +217,10 @@ def save(plan: SyntheticPlan, directory: str | Path, *, clean: bool = False) -> 
     out.mkdir(parents=True, exist_ok=True)
     img = Image.fromarray(plan.image, mode="L")
     img.save(out / "plan.png", dpi=(plan.dpi, plan.dpi))
-    img.save(out / "plan.pdf", resolution=plan.dpi, quality=95)
+    # fixed dates: PIL otherwise stamps the wall-clock time, and the file hash changes every run
+    img.save(
+        out / "plan.pdf", resolution=plan.dpi, quality=95, creationDate=PDF_DATE, modDate=PDF_DATE
+    )
     if clean:
         Image.fromarray(plan.clean_image, mode="L").save(
             out / "plan_clean.png", dpi=(plan.dpi, plan.dpi)
@@ -183,6 +229,8 @@ def save(plan: SyntheticPlan, directory: str | Path, *, clean: bool = False) -> 
             out / "wall_mask.png"
         )
     (out / "ground_truth.json").write_text(plan.model_dump_json(indent=1), encoding="utf-8")
+    if plan.style is not None and plan.style.split != "train":
+        (out / "style.json").write_text(json.dumps(plan.style.to_dict(), indent=1))
     return out
 
 
@@ -197,6 +245,8 @@ class GroundTruth(BaseModel):
     graph: PlanGraph
     annotations: list[TextAnnotation]
     degradation: Degradation
+    style: dict | None = None
+    """Contents of ``style.json`` (held-out plans), else None (train style)."""
     image: np.ndarray | None = Field(default=None, exclude=True, repr=False)
 
 
@@ -212,6 +262,8 @@ def load(directory: str | Path, *, image: bool = False) -> GroundTruth:
         annotations=[TextAnnotation.model_validate(a) for a in data["annotations"]],
         degradation=Degradation.model_validate(data["degradation"]),
     )
+    if (d / "style.json").is_file():
+        gt.style = json.loads((d / "style.json").read_text())
     if image:
         from PIL import Image
 

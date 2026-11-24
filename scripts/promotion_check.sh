@@ -62,5 +62,13 @@ if [ $fail -eq 0 ] && [ "$MODE" != "--no-eval" ]; then
 fi
 
 git worktree remove --force "$WT"; git worktree remove --force "$WB"
+
+# The run log is append-only and counts the locked-run budget: commit and push the new line at once,
+# otherwise a fresh checkout would silently reset the budget (protocol §4.6, §5).
+if [ "$MODE" != "--no-eval" ] && ! git -C "$REPO" diff --quiet -- eval/TEST_LOG.md 2>/dev/null; then
+  git -C "$REPO" add eval/TEST_LOG.md
+  git -C "$REPO" commit -q -m "eval: locked run of $CAND (TEST_LOG)" -- eval/TEST_LOG.md \
+    && git -C "$REPO" push -q origin HEAD || echo "WARNING: could not commit/push eval/TEST_LOG.md; do it by hand"
+fi
 [ $fail -eq 0 ] && echo "PASS: $CAND may be promoted" || echo "NOT PROMOTABLE: $CAND"
 exit $fail
