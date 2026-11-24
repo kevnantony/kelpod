@@ -31,6 +31,7 @@ import math
 import re
 from dataclasses import dataclass, field
 
+import networkx as nx
 import numpy as np
 
 from kelpod.contracts import DimensionLabel, Point, TextItem
@@ -70,6 +71,9 @@ class ChainParams:
     superscript_cost_blind: float = 2.5
     min_prob: float = 1e-3
     confident_prob: float = 0.8
+    robust_margin: float = 1.0
+    """Corrected / inferred values are only emitted if every unchecked label they depend on
+    would cost at least this much more to read differently."""
     tail_prob: float = 0.3
     """Probability factor for reading a 4th decimal as a tick stub and dropping it."""
     max_options: int = 12
@@ -473,24 +477,42 @@ def decode(
     xnode = {n: next(u for u, bv in xb[n].items() if solver.Value(bv)) for n in xb}
     xval = {k: xnode[root[k]] for k in keys}
 
-    # 4. which ticks are tied together by chosen equalities (exact differences)
-    tie = {n: n for n in xnode}
-
-    def tfind(a):
-        while tie[a] != a:
-            tie[a] = tie[tie[a]]
-            a = tie[a]
-        return a
-
+    # 4. which ticks are tied together by chosen equalities (exact differences), and how firmly
     chosen: dict[int, _Option] = {}
+    g = nx.Graph()
+    g.add_nodes_from(xnode)
     for oi, o in enumerate(opts):
         if solver.Value(b_opt[oi]):
             chosen[o.cand] = o
             a, b, _ = edges[oi]
-            tie[tfind(a)] = tfind(b)
+            if g.has_edge(a, b):
+                g[a][b]["labels"].append(o.cand)
+            else:
+                g.add_edge(a, b, labels=[o.cand])
+    bridges = {frozenset(e) for e in nx.bridges(g)} if g.number_of_edges() else set()
+
+    def margin(k: int) -> float:
+        """Extra cost of the cheapest other value for label ``k``."""
+        o = chosen[k]
+        alts = [opts[oi].cost for oi in by_cand.get(k, [])
+                if abs(opts[oi].value_m - o.value_m) > 1e-6]
+        return min(alts, default=math.inf) - o.cost
+
+    def weak(a, b) -> bool:
+        """An equality that nothing else checks (a bridge, one label) and that a cheap
+        alternative reading would shift."""
+        labs = g[a][b]["labels"]
+        return frozenset((a, b)) in bridges and len(labs) == 1 and margin(labs[0]) < p.robust_margin
 
     def tied(k1, k2) -> bool:
-        return tfind(root[k1]) == tfind(root[k2])
+        """The difference of the two ticks follows from the chosen labels, and robustly so."""
+        a, b = root[k1], root[k2]
+        if a == b:
+            return True
+        if not nx.has_path(g, a, b):
+            return False
+        path = nx.shortest_path(g, a, b)
+        return not any(weak(u, v) for u, v in zip(path[:-1], path[1:], strict=True))
 
     import os
     if os.environ.get("KELPOD_CHAIN_DEBUG"):
