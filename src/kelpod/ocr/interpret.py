@@ -10,6 +10,8 @@ from kelpod.contracts import DimensionLabel, OcrAnnotations, RoomStamp, SillHeig
 from kelpod.ocr.chains import Candidate, decode, reading_values
 from kelpod.ocr.dimlines import DimensionLineFinder, pick_span
 from kelpod.ocr.engines import quad_size
+from kelpod.ocr.interior import interior_span
+from kelpod.ocr.names import join_hyphenated, match_historic_name
 from kelpod.ocr.parse import (
     is_brh_keyword,
     is_opening_label,
@@ -75,7 +77,7 @@ def interpret(
 ) -> tuple[list[DimensionLabel], list[SillHeight], list[RoomStamp], list[str]]:
     """Classify items. ``ink`` (bool mask) enables the dimension-line / tick search.
     ``decode="chain"`` decodes the dimension labels jointly over their chains."""
-    items = split_merged_items(items)
+    items = split_merged_items(join_hyphenated(items))
     notes: list[str] = []
     used: set[int] = set()
     sills: list[SillHeight] = []
@@ -125,7 +127,7 @@ def interpret(
             else:
                 areas.append((i, area))
             continue
-        name = match_room_name(it.text)
+        name = match_room_name(it.text) or match_historic_name(it.text)
         if name is not None:
             names.append((i, name))
 
@@ -277,6 +279,24 @@ def _link_lines(cands, finder: DimensionLineFinder, found, notes: list[str]):
     return out, r
 
 
+def _interior_lines(dims, items, ink, notes):
+    """Give dimension values without a tick chain the span of the dotted line they sit on
+    (values written inside rooms, historic plans). Only for labels without a line."""
+    out, n = [], 0
+    for d in dims:
+        if d.line is None and d.value_m >= 0.6:
+            it = next((i for i in items if i.text.strip().lstrip("- ") == d.text.strip().lstrip("- ")
+                       and _dist(i.center, d.anchor) < 2.0), None)
+            span = interior_span(ink, it.quad, it.angle_deg) if it is not None else None
+            if span is not None:
+                d = d.model_copy(update={"line": span})
+                n += 1
+        out.append(d)
+    if n:
+        notes.append(f"{n} dimension(s) linked to a dotted interior dimension line")
+    return out
+
+
 def annotate(
     items: list[TextItem], ink: np.ndarray | None, backend: str, *, decode: str = "chain"
 ) -> OcrAnnotations:
@@ -284,5 +304,7 @@ def annotate(
     (:mod:`kelpod.ocr.chains`); ``"greedy"`` keeps one independent reading per label (v0)."""
     items = split_merged_items(items)
     dims, sills, stamps, notes = interpret(items, ink, decode=decode)
+    if ink is not None:
+        dims = _interior_lines(dims, items, ink, notes)
     return OcrAnnotations(items=items, dimensions=dims, sill_heights=sills, room_stamps=stamps,
                           backend=backend, notes=notes)

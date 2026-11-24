@@ -100,7 +100,7 @@ def build_model(
 
     spaces: list[Space] = []
     for i, r in enumerate(graph.rooms, start=1):
-        if len(r.polygon) < 3:
+        if len(r.polygon) < 3 or r.exterior:  # exterior spaces (Garten, Vorhof ...) are no rooms
             continue
         poly = Polygon(r.polygon)
         pts = list(r.polygon)

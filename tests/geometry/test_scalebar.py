@@ -76,3 +76,18 @@ def test_bar_scale_sources():
     r = bar_scale(ink, [], 7.0)
     assert r is not None and r[1] == "scale_bar_assumed" and abs(r[0] - 1 / 18) < 0.003
     assert bar_scale(np.zeros((50, 50), bool), [], 7.0) is None
+
+
+def test_scale_from_loosely_agreeing_interior_dimensions():
+    from kelpod.contracts import DimensionLabel, RasterPage
+    from kelpod.geometry.params import GeometryParams
+    from kelpod.geometry.scale import estimate_scale
+
+    page = RasterPage(image=np.full((50, 50), 255, np.uint8), ink=np.zeros((50, 50), bool), dpi=200.0, source="x")
+    # spans of 78 / 76 / 86 px for 3.0 / 3.0 / 3.3 m (+-7 %) and one misread value
+    spans = [(3.0, 78), (3.0, 70), (3.3, 86), (8.0, 42)]
+    dims = [
+        DimensionLabel(value_m=v, text=str(v), anchor=(0, 0), line=((0, 0), (px, 0))) for v, px in spans
+    ]
+    m, src, _ = estimate_scale(page, dims, GeometryParams())
+    assert src == "dimensions" and abs(m - 0.0385) < 0.004

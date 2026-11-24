@@ -44,6 +44,28 @@ def _peaks(profile: np.ndarray, thr: float) -> list[float]:
     return [(s + e - 1) / 2.0 for s, e in zip(starts, ends, strict=True)]
 
 
+def _regular_run(col: np.ndarray, base: float, min_ticks: int) -> list[float] | None:
+    """Longest run of >= ``min_ticks`` equally spaced tick peaks (gaps within 15 % of the run's
+    median). Bars next to numbers or with unequal major/minor ticks still give their regular part."""
+    best: list[float] | None = None
+    for extra in (max(1.5, 0.5 * base), max(0.9, 0.2 * base)):
+        pk = _peaks(col, base + extra)
+        i = 0
+        while i < len(pk) - 1:
+            j = i + 1
+            while j < len(pk):
+                run = pk[i : j + 1]
+                med = float(np.median(np.diff(run)))
+                if med < 3 or abs((pk[j] - pk[j - 1]) - med) > 0.15 * med:
+                    break
+                j += 1
+            run = pk[i:j]
+            if len(run) >= min_ticks and (best is None or len(run) > len(best)):
+                best = run
+            i = max(j - 1, i + 1)
+    return best
+
+
 def detect_scale_bar(
     ink: np.ndarray, *, min_ticks: int = 6, min_len_frac: float = 0.05, max_len_frac: float = 0.6
 ) -> ScaleBar | None:
@@ -56,18 +78,15 @@ def detect_scale_bar(
         x, y, cw, ch, _ = (int(v) for v in st[i])
         if cw < min_len_frac * w or cw > max_len_frac * w or ch > 0.04 * h or cw < 12 * ch:
             continue
-        comp = _component_mask(m, x, y, cw, ch)
+        comp = m[y : y + ch, x : x + cw]
         col = comp.sum(axis=0).astype(float)
         base = float(np.median(col[col > 0]))
         if base < 1:
             continue
-        ticks = _peaks(col, base + max(1.5, 0.5 * base))
-        if len(ticks) < min_ticks:
+        ticks = _regular_run(col, base, min_ticks)
+        if ticks is None:
             continue
-        gaps = np.diff(ticks)
-        med = float(np.median(gaps))
-        if med < 3 or np.mean(np.abs(gaps - med) <= 0.2 * med) < 0.8:
-            continue
+        med = float(np.median(np.diff(ticks)))
         rows = comp.sum(axis=1)
         cand = ScaleBar(
             y=y + float(np.argmax(rows)),
@@ -80,16 +99,6 @@ def detect_scale_bar(
         if best is None or len(cand.ticks_x) > len(best.ticks_x):
             best = cand
     return best
-
-
-def _component_mask(m: np.ndarray, x: int, y: int, cw: int, ch: int) -> np.ndarray:
-    """Ink of the connected component that fills the given bbox (re-labelled locally)."""
-    sub = m[y : y + ch, x : x + cw]
-    n, lab, st, _ = cv2.connectedComponentsWithStats(sub, connectivity=8)
-    if n <= 1:
-        return sub
-    k = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
-    return (lab == k).astype(np.uint8)
 
 
 _INT = re.compile(r"^\d{1,3}$")

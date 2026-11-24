@@ -13,6 +13,7 @@ from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 from kelpod.contracts import Node, Opening, OpeningKind, Point, Room, RoomStamp, Wall, WallKind
+from kelpod.roomnames import is_exterior
 
 from .lines import OpeningM
 from .params import GeometryParams
@@ -332,6 +333,7 @@ def label_rooms(
         chosen[hit] = (score, st)
     for i, (_, st) in chosen.items():
         rooms[i].name = st.name
+        rooms[i].exterior = is_exterior(st.name)
         rooms[i].stamp_area_m2 = st.area_m2
     if lost:
         issues.append(

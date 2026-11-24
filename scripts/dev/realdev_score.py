@@ -167,7 +167,7 @@ def main(argv=None) -> None:
     ap.add_argument("--data", type=Path, default=DATA)
     ap.add_argument("--only")
     ap.add_argument("--tol", type=float, default=0.3)
-    ap.add_argument("--all-plans", action="store_true")
+    ap.add_argument("--largest-only", action="store_true", help="sheets: convert only the largest plan")
     ap.add_argument("--json", type=Path)
     a = ap.parse_args(argv)
     rows = {}
@@ -175,7 +175,7 @@ def main(argv=None) -> None:
         if a.only and a.only not in lp.stem:
             continue
         lab = json.loads(lp.read_text())
-        graphs = run_pipeline(a.data / lab["image"], a.all_plans)
+        graphs = run_pipeline(a.data / lab["image"], not a.largest_only)
         plans = [p["n"] for p in lab["plans"] if p.get("labelled")] or [None]
         for pl in plans:
             best = None

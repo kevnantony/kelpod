@@ -257,6 +257,9 @@ class Room(_Model):
     polygon: list[Point]
     """Closed boundary (inner faces of walls), plan space, counter-clockwise, not repeated."""
     name: str | None = None
+    exterior: bool = False
+    """Garden, courtyard (Vorhof), Altan, terrace, balcony, loggia: enclosed by walls on the plan
+    but not a room. Kept in the graph, left out of the IFC model."""
     area_m2: float
     stamp_area_m2: float | None = None
     """Area written on the room stamp, if any (for cross-checking)."""
