@@ -93,3 +93,38 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
     already runs on the CPU in the pipeline. Total expected ~4 GPU-h.
 - **Selection:** val only (dev-val sets above, frozen val-synth via `kelpod_train.val_synth`).
   test-synth / test-ood / sealed data are not looked at.
+
+## learned-fast (2026-11-25, branch exp/learned-fast = exp/learned-v1 + main)
+
+- **Hypothesis:** the learned-v1 pipeline fails the +25 % runtime rule (EVAL_PROTOCOL §3) only
+  because of how the network is run; whole-page inference and a lower inference resolution bring it
+  under the rule without retraining and without losing correct-closed.
+- **Change (`src/kelpod/segment/learned.py`):** `LearnedSegmenter` runs the whole page in one pass
+  (`tile=2048`, was 1024 px tiles with 128 px overlap = about 2.3x the page area at 1300x1400 px)
+  and shrinks the page by `infer_scale=0.65` (INTER_AREA) before the network, bilinear logits back
+  to page size. Same weights (v1-s1, v1-s2 ONNX), no retraining: **0 GPU-h**, no Slurm job.
+  Final `kelpod-run.toml` lists both seeds (sha256, all `training/manifests/*.json`);
+  `locked_eval.py --verify-manifests`: 7 manifests, 0 overlaps.
+- **Network only, 1 core (4 pages, fp32 ONNX, IoU vs fp32 full scale, wall/window/door/room):**
+  whole page 1.0: 6.8 s; 0.75: 4.5 s (0.991/0.970/0.961/0.997); 0.65: 3.1 s (0.980/0.951/0.938/
+  0.996); 0.5: 1.9 s (0.927/0.918/0.874/0.988). 1024 px tiles at 1.0: 35 s on the same loaded node.
+  Dynamic int8 quantisation (`quantize_dynamic`): no result after more than 10 minutes on 1 page
+  set, killed (ORT's int8 convolutions are far slower on this CPU); static int8 not tried.
+- **Per-step runtime, 1 core, 5 val-synth plans, mean s/plan (node load was 14-20, so absolute
+  numbers vary 2x between sessions; compare only within one session):** classical total 13.1
+  (clean 0.4, segment 0.5, OCR 11.5, export 0.7); learned before (tiles 1024, 1.0, earlier loaded
+  session) segment 28.0 of 58.4 total vs classical 23.9; learned whole page 1.0: segment 7.4, total
+  20.7 (1.58x classical). OCR was **not** slower in the learned pipeline: 12.2 s vs 11.5 s in the
+  same session; the earlier 27.9 vs 21.2 s came from the node load (jobs run concurrently).
+- **Dev val-synth, first 40 plans, eval-branch panel via `kelpod_train.val_synth` (8 workers x 1
+  thread, synthetic):** correct-closed 1.000 for v1-s1 and v1-s2 at both 0.75 and 0.65.
+- **Smoke run (`locked_eval.py --splits val-synth --smoke --limit 40`, 8 workers x 1 core, run
+  `20261124-233408_exp-learned-fast`, synthetic):** correct-closed baseline 0.900, cand0 (seed 1)
+  0.950, cand1 (seed 2) 0.950 (one failed plan s200001, 4 of 5 rooms; the dev panel scored it
+  correct, a difference between the two panels not yet explained); median runtime baseline 42.7 s,
+  cand0 50.1 s (+17.3 %), cand1 51.1 s (+19.6 %, CI +9.9 to +36.4 %); p95 59.3 s vs 66.7 / 67.2 s.
+  Smoke has no promotion decision. The +25 % rule is met on the point estimate with ~6 pp margin
+  only; the 200-plan val number for both seeds at scale 0.65 was **not** run (40 plans only).
+- **Decision:** keep scale 0.65. Next: val-synth 200 plans for both seeds at 0.65 before the lead's
+  locked run. A lighter encoder (ResNet-18) was not trained; it is the fallback if the real
+  locked-run runtime exceeds +25 %.
