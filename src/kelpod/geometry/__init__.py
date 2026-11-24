@@ -82,7 +82,7 @@ def run(
 
 def _scale_from_bar(page, seg, ocr, m_per_px, scale_source, issues):
     """Graphic scale bar as the scale when no dimensions fixed it (see :mod:`.scalebar`)."""
-    from .scalebar import bar_scale
+    from .scalebar import bar_scale, typical_wall_px
 
     if page.scale_hint is not None:  # the sheet's bar, found outside this plan's crop
         issues.append(
@@ -90,10 +90,13 @@ def _scale_from_bar(page, seg, ocr, m_per_px, scale_source, issues):
             "check the scale."
         )
         return page.scale_hint
-    ths = sorted(
-        (w.thickness_px for w in (seg.walls if seg is not None else []) if _finite(w.thickness_px)),
+    th = typical_wall_px(
+        [
+            (math.dist(w.p0, w.p1), w.thickness_px)
+            for w in (seg.walls if seg is not None else [])
+            if _finite(*w.p0, *w.p1, w.thickness_px)
+        ]
     )
-    th = ths[int(0.75 * len(ths))] if ths else None  # exterior walls: upper quartile
     try:
         found = bar_scale(page.ink, ocr.items, th)
     except Exception:  # never let the optional bar break the step
@@ -102,6 +105,8 @@ def _scale_from_bar(page, seg, ocr, m_per_px, scale_source, issues):
     if found is None:
         return m_per_px, scale_source
     m, src, bar = found
+    if src == "scale_bar_assumed" and str(page.source).lower().endswith(".pdf"):
+        return m_per_px, scale_source  # a PDF's page size is real: do not override with a guess
     issues.append(
         f"Scale from the graphic scale bar ({len(bar.ticks_x)} ticks of {bar.tick_px:.1f} px): "
         + (

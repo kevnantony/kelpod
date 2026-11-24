@@ -20,7 +20,8 @@ from kelpod.contracts import TextItem
 
 TICK_VALUES_M = (0.5, 1.0, 2.0, 5.0, 10.0)
 WALL_TH_RANGE_M = (0.2, 0.65)
-WALL_TH_PRIOR_M = 0.38
+WALL_TH_PRIOR_M = 0.45
+"""Historic masonry (0.38-0.64 m). Chosen with the two real dev plans in view: not independent."""
 
 
 @dataclass
@@ -129,6 +130,37 @@ def read_bar_numbers(bar: ScaleBar, items: list[TextItem]) -> float | None:
     return float(a)
 
 
+def typical_wall_px(walls: list[tuple[float, float]]) -> float | None:
+    """Length-weighted median wall thickness (px) from ``(length_px, thickness_px)`` pairs:
+    the main walls count, short thick blobs (stoves, pillars) do not."""
+    pairs = sorted((t, ln) for ln, t in walls if ln > 0 and t > 0)
+    if not pairs:
+        return None
+    half = sum(ln for _, ln in pairs) / 2
+    acc = 0.0
+    for t, ln in pairs:
+        acc += ln
+        if acc >= half:
+            return t
+    return pairs[-1][0]
+
+
+def ink_thickness_px(ink: np.ndarray) -> float | None:
+    """Typical thickness (px) of the heavy strokes (walls, poche), straight from the ink mask:
+    ridge values of the distance transform that are clearly thicker than the pen lines. A
+    fallback when the segmentation's wall thickness is not plausible."""
+    dt = cv2.distanceTransform(ink.astype(np.uint8), cv2.DIST_L2, 3)
+    ridge = (dt >= cv2.dilate(dt, np.ones((3, 3), np.uint8))) & (dt >= 1.0)
+    v = 2.0 * dt[ridge]
+    if len(v) < 50:
+        return None
+    pen = float(np.median(v))
+    thick = v[v > 2.0 * pen]
+    if len(thick) < 50:
+        return None
+    return float(np.median(thick))
+
+
 def assume_tick_value(bar: ScaleBar, wall_th_px: float | None) -> float | None:
     """Metres per tick that makes ``wall_th_px`` closest to a plausible wall thickness."""
     if not wall_th_px or wall_th_px <= 0:
@@ -157,8 +189,10 @@ def bar_scale(
         return a, "scale_bar", bar
     v = assume_tick_value(bar, wall_th_px)
     if v is None:
+        v = assume_tick_value(bar, ink_thickness_px(ink))
+    if v is None:
         return None
     return v / bar.tick_px, "scale_bar_assumed", bar
 
 
-__all__ = ["ScaleBar", "assume_tick_value", "bar_scale", "detect_scale_bar", "read_bar_numbers"]
+__all__ = ["ScaleBar", "assume_tick_value", "typical_wall_px", "bar_scale", "detect_scale_bar", "read_bar_numbers"]

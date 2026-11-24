@@ -91,3 +91,22 @@ def test_scale_from_loosely_agreeing_interior_dimensions():
     ]
     m, src, _ = estimate_scale(page, dims, GeometryParams())
     assert src == "dimensions" and abs(m - 0.0385) < 0.004
+
+
+def test_typical_wall_is_length_weighted():
+    from kelpod.geometry.scalebar import typical_wall_px
+
+    assert typical_wall_px([(100, 7.0), (90, 7.0), (5, 30.0), (4, 28.0)]) == 7.0
+    assert typical_wall_px([]) is None
+
+
+def test_ink_thickness_ignores_pen_lines():
+    from kelpod.geometry.scalebar import ink_thickness_px
+
+    ink = np.zeros((300, 300), np.uint8)
+    cv2.rectangle(ink, (20, 20), (280, 280), 1, 12)  # poche walls, 12 px
+    for y in range(40, 260, 5):
+        cv2.line(ink, (40, y), (260, y), 1, 2)  # thin pen lines
+    t = ink_thickness_px(ink.astype(bool))
+    assert t is not None and 9 <= t <= 14
+    assert ink_thickness_px(np.zeros((50, 50), bool)) is None

@@ -45,12 +45,13 @@ def _plan_pages(page, all_plans: bool):
 def _sheet_scale_hint(sheet, seg) -> tuple[float, str] | None:
     """Scale bar of a sheet (it sits outside the plan crops); tick value guessed from the plan's
     wall thickness if its numbers cannot be read."""
-    from kelpod.geometry.scalebar import bar_scale
+    from kelpod.geometry.scalebar import bar_scale, typical_wall_px
 
-    ths = sorted(w.thickness_px for w in seg.walls)
-    th = ths[int(0.75 * len(ths))] if ths else None
+    th = typical_wall_px([(math.dist(w.p0, w.p1), w.thickness_px) for w in seg.walls])
     found = bar_scale(sheet.ink, [], th)
-    return None if found is None else (found[0], found[1])
+    if found is None or (found[1] == "scale_bar_assumed" and str(sheet.source).lower().endswith(".pdf")):
+        return None
+    return found[0], found[1]
 
 
 def _convert_page(
