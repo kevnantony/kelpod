@@ -151,10 +151,16 @@ def segment_classical(page: RasterPage, p: ClassicalParams | None = None) -> Seg
         fp = _footprint(
             walls, window_runs, gaps, ink.shape, face_lw, px(1.0) ** 2 * p.min_room_m2, m_per_px
         )
-        if fp is not None and not _footprint_partial(fp, walls):
+        if fp is not None:
             n_w, n_r = len(walls), len(window_runs)
-            walls = [w for w in walls if _inside(fp, w)]
-            window_runs = [r for r in window_runs if _inside(fp, r)]
+            if _footprint_partial(fp, walls):
+                # incomplete outline: keep what is wired to the footprint, drop loose pieces
+                walls, window_runs = _connected_to_footprint(
+                    fp, walls, window_runs, min_len=px(3.0)
+                )
+            else:
+                walls = [w for w in walls if _inside(fp, w)]
+                window_runs = [r for r in window_runs if _inside(fp, r)]
             if len(walls) != n_w or len(window_runs) != n_r:
                 notes.append(
                     f"dropped {n_w - len(walls)} walls and {n_r - len(window_runs)} "
@@ -368,6 +374,46 @@ def _footprint_partial(fp: np.ndarray, walls) -> bool:
         return False
     frac = sum(w.length for w in walls if _inside(fp, w)) / total
     return frac < 0.65
+
+
+def _seg_dist(a, b) -> float:
+    """Distance between two axis-aligned runs (centre lines)."""
+    (ax0, ay0), (ax1, ay1) = a.p0(), a.p1()
+    (bx0, by0), (bx1, by1) = b.p0(), b.p1()
+    dx = max(bx0 - ax1, ax0 - bx1, 0.0)
+    dy = max(by0 - ay1, ay0 - by1, 0.0)
+    return float(np.hypot(dx, dy))
+
+
+def _connected_to_footprint(fp: np.ndarray, walls, window_runs, min_len: float):
+    """Walls and windows in networks (pieces touching within a few px) that border the
+    footprint and are at least ``min_len`` long in total. Loose pieces - dimension ticks and
+    extension lines, furniture - are dropped."""
+    items = list(walls) + list(window_runs)
+    n = len(items)
+    parent = list(range(n))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if _seg_dist(items[i], items[j]) <= 6.0:
+                parent[find(i)] = find(j)
+    total: dict[int, float] = {}
+    seeded: set[int] = set()
+    for i, r in enumerate(items):
+        g = find(i)
+        total[g] = total.get(g, 0.0) + r.length
+        if _inside(fp, r):
+            seeded.add(g)
+    keep = {i for i in range(n) if find(i) in seeded and total[find(i)] >= min_len}
+    k = len(walls)
+    return ([w for i, w in enumerate(walls) if i in keep],
+            [r for i, r in enumerate(window_runs) if i + k in keep])
 
 
 def _inside(interior: np.ndarray, r) -> bool:
