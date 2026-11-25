@@ -9,7 +9,7 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-25 16:30 CET. Numbers are synthetic unless marked "real"._
+_Last updated: 2026-11-25 14:30 CET. Numbers are synthetic unless marked "real"._
 
 **Done**
 - **`baseline-v1` on `main`: the learned segmenter is the default.** On the held-out synthetic test
