@@ -116,6 +116,9 @@ except Exception as exc:  # noqa: BLE001 - show any pipeline failure to the user
     st.stop()
 
 s = out["stats"]
+if out.get("segmenter") == "classical":
+    st.info("This sandbox uses the classical segmenter: the learned model's weights are not "
+            "deployed here yet, so results are below what Kelpod's main branch reaches.")
 if out["closed"]:
     st.success(f"**Closed model.** {s['rooms']} rooms, {s['walls']} walls, {s['doors']} doors and "
                f"{s['windows']} windows; every wall end meets another wall.")
