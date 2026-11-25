@@ -1,15 +1,29 @@
 {
  "manifest_version": 1,
  "split": "test-ood-swiss",
- "status": "pending",
+ "status": "frozen",
  "kind": "dataset",
  "family": "test-ood",
- "created_utc": "2026-11-24 01:34",
- "note": "needs a committed DIN-style renderer for vector plans that also writes a PlanGraph ground truth (the finetune agent's training/kelpod_train/render.py is uncommitted and writes class maps only). Held out by site (all buildings of a site). Rule: crc32(str(site_id)) % 10: 0 = test, 1 = val, else train (as the training converter).",
+ "created_utc": "2026-11-25 09:51",
+ "data_dir": "~/kelpod-data/eval/test-ood-swiss",
+ "input_file": "plan.pdf",
+ "gt_file": "ground_truth.json",
+ "scoring": "metric",
+ "generator": {
+  "module": "kelpod.evaluation.vectorplans",
+  "commit": "72ea33e6fce69bf1b1ed71e00c1524a8692caac2",
+  "version": "1",
+  "style": "train",
+  "dpi": 300.0
+ },
  "source": {
   "dataset": "Swiss Dwellings v3.0.0",
   "file": "~/kelpod-data/swiss-dwellings/swiss-dwellings-v3.0.0/geometries.csv",
   "sha256": "7fa5e6c81102e997c82e2c5355949ccd75f3ff223c10f397b76b136e4a6d0f8f"
+ },
+ "params": {
+  "candidates": "sorted by sha256('kelpod-eval/test-ood-swiss/<id>'), first 150 that render (265 tried)",
+  "degrade": "uniform (0.0, 1.2), per candidate index, from sha256('kelpod-eval/test-ood-swiss') (not for CubiCasa: real scans, no degradation)"
  },
  "heldout_ids": {
   "swiss_site_id": [
@@ -1646,6 +1660,3907 @@
    51640
   ]
  },
- "n_items": 0,
- "items": []
+ "n_items": 150,
+ "items": [
+  {
+   "id": "swiss_3944",
+   "seed": 1848373924,
+   "degrade": 0.931,
+   "n_rooms": 18,
+   "stats": {
+    "rotation_deg": -29.31,
+    "extent_m": 26.3,
+    "wall_area_m2": 46.45,
+    "unsupported_wall_share": 0.0005,
+    "n_openings_dropped": 1,
+    "n_walls": 100,
+    "n_openings": 47,
+    "n_rooms": 18,
+    "degradation": {
+     "strength": 0.931,
+     "rotation_deg": -2.437
+    }
+   },
+   "phash": "af609c609f33cc87",
+   "files": {
+    "ground_truth.json": "4644b92c3824d2a43fef79d19c5e60107809a5bdc557d2b7ccf0173b8fdb3ffb",
+    "plan.pdf": "285327d59298779000dd969f1dc815f842a5aab6201fcef2b6a2123ec3485a54",
+    "plan.png": "41dce96a9605ade01446a83c71d86746f378edea26ef74c1236ecd9d2985ed79"
+   }
+  },
+  {
+   "id": "swiss_14883",
+   "seed": 849436985,
+   "degrade": 1.046,
+   "n_rooms": 38,
+   "stats": {
+    "rotation_deg": -8.055,
+    "extent_m": 37.9,
+    "wall_area_m2": 70.65,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 181,
+    "n_openings": 68,
+    "n_rooms": 38,
+    "degradation": {
+     "strength": 1.046,
+     "rotation_deg": 3.082
+    }
+   },
+   "phash": "aa83916c94ccf99e",
+   "files": {
+    "ground_truth.json": "7e40c9d4a2d52a8730d468904b93c711554f9f6a84d87e18b64bbdb6ea7ef946",
+    "plan.pdf": "55b9fea0cd768288f7d30bec94a26bb1575aac62908fcc3e1c9b176154746ded",
+    "plan.png": "e628761c67c6b8fd19958a88d91b620795f4cd9f5967fb004015ec9f5777765b"
+   }
+  },
+  {
+   "id": "swiss_48080",
+   "seed": 866288376,
+   "degrade": 0.682,
+   "n_rooms": 24,
+   "stats": {
+    "rotation_deg": -3.59,
+    "extent_m": 25.9,
+    "wall_area_m2": 40.96,
+    "unsupported_wall_share": 0.004,
+    "n_openings_dropped": 0,
+    "n_walls": 114,
+    "n_openings": 44,
+    "n_rooms": 24,
+    "degradation": {
+     "strength": 0.682,
+     "rotation_deg": 1.745
+    }
+   },
+   "phash": "fa34c14bb9c19c66",
+   "files": {
+    "ground_truth.json": "cec30302a7af2d8e0b735309c75ba93020267a09a237a0adb4cc2fb017240037",
+    "plan.pdf": "f03dfcd1c32edd30e97aa15da8ddf1ac59aa12d99259bbb98ac07a6d75710c24",
+    "plan.png": "c0ddde03427a2480e9c0cd09ae6235960c84914fe4aeaf2f5b6aab37a9d291ca"
+   }
+  },
+  {
+   "id": "swiss_15020",
+   "seed": 130443499,
+   "degrade": 0.464,
+   "n_rooms": 19,
+   "stats": {
+    "rotation_deg": 4.659,
+    "extent_m": 26.9,
+    "wall_area_m2": 55.48,
+    "unsupported_wall_share": 0.0005,
+    "n_openings_dropped": 0,
+    "n_walls": 135,
+    "n_openings": 36,
+    "n_rooms": 19,
+    "degradation": {
+     "strength": 0.464,
+     "rotation_deg": 0.916
+    }
+   },
+   "phash": "fc62936c8c938e69",
+   "files": {
+    "ground_truth.json": "d8147d1e2d37b18c0af259b67cbba2a7eddc6eaabab9931eab7accbe582a20b5",
+    "plan.pdf": "a459b913919c9af7e73c2da420ae12358383746215d6c84cd02c817c7426f38a",
+    "plan.png": "fd7502525bc77abb61daf59872abd5b4c6b2507bb1603edf8a57661c38371abb"
+   }
+  },
+  {
+   "id": "swiss_14881",
+   "seed": 3940974833,
+   "degrade": 0.546,
+   "n_rooms": 19,
+   "stats": {
+    "rotation_deg": -8.381,
+    "extent_m": 19.2,
+    "wall_area_m2": 38.32,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 90,
+    "n_openings": 36,
+    "n_rooms": 19,
+    "degradation": {
+     "strength": 0.546,
+     "rotation_deg": 1.593
+    }
+   },
+   "phash": "ba099566cc6d91da",
+   "files": {
+    "ground_truth.json": "3a83ec7dc24e8e733e01196d1e1bf4bd349810071c7c2294c9bdefa3ced75545",
+    "plan.pdf": "1ddcda35b37c052be50a0ae7b5eda6b94832fc2d0db41d610f302d380dfa3d47",
+    "plan.png": "fb0fc846ad6d3b857b5699fd29e7bc05a0ae34701338057fd87c3aefcea66901"
+   }
+  },
+  {
+   "id": "swiss_2323",
+   "seed": 956142498,
+   "degrade": 0.54,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": 28.5,
+    "extent_m": 16.2,
+    "wall_area_m2": 25.21,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 80,
+    "n_openings": 30,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.54,
+     "rotation_deg": 1.007
+    }
+   },
+   "phash": "bf6991578049d4e3",
+   "files": {
+    "ground_truth.json": "295136ff73e46de01dec268a875b453dbab5f04c5c022f6b29cff48f56608f00",
+    "plan.pdf": "9cebe575d2a3615fdb0dd32671e972514f02f66bc2a2d748351ca99db236f123",
+    "plan.png": "526f10156c0de455d42ca16a324808d723eee131d1b84cafbc394c9fa5068dc5"
+   }
+  },
+  {
+   "id": "swiss_14734",
+   "seed": 1979764746,
+   "degrade": 1.091,
+   "n_rooms": 19,
+   "stats": {
+    "rotation_deg": -2.452,
+    "extent_m": 30.5,
+    "wall_area_m2": 60.06,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 91,
+    "n_openings": 37,
+    "n_rooms": 19,
+    "degradation": {
+     "strength": 1.091,
+     "rotation_deg": -2.103
+    }
+   },
+   "phash": "efb494c31b909c8d",
+   "files": {
+    "ground_truth.json": "2a5d758171954d1ac0cbf72026c8e9b3bd42c7bdb1ea87e0870ab122f64c445f",
+    "plan.pdf": "fe6ea8a92941699fa972ed78ac22b6e3fd7e2fc83780f61406632c4df3f498ac",
+    "plan.png": "9c99e238003e6e232ee150a5da2745a1616f74354f78e4826baafc944a933c1a"
+   }
+  },
+  {
+   "id": "swiss_1968",
+   "seed": 3137249392,
+   "degrade": 0.914,
+   "n_rooms": 19,
+   "stats": {
+    "rotation_deg": -41.748,
+    "extent_m": 28.8,
+    "wall_area_m2": 65.08,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 87,
+    "n_openings": 34,
+    "n_rooms": 19,
+    "degradation": {
+     "strength": 0.914,
+     "rotation_deg": -2.014
+    }
+   },
+   "phash": "f30e9970ce38858f",
+   "files": {
+    "ground_truth.json": "98c3d9be4f2b2f2acb355c9bf77f2e892a06ae2dcb547c99a155dd552cdd8f14",
+    "plan.pdf": "4097e52fe3a9244ae74eda57bf2eac447ec47e5aea1540c21edf6290a295b112",
+    "plan.png": "fa4b305633bf288a73af27f74d311b80d5efafbeaec02d6dbb40eea218a32206"
+   }
+  },
+  {
+   "id": "swiss_8294",
+   "seed": 3247912626,
+   "degrade": 0.082,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": 33.396,
+    "extent_m": 21.0,
+    "wall_area_m2": 43.75,
+    "unsupported_wall_share": 0.0006,
+    "n_openings_dropped": 0,
+    "n_walls": 94,
+    "n_openings": 28,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 0.082,
+     "rotation_deg": 0.238
+    }
+   },
+   "phash": "ba688c97cb9eb043",
+   "files": {
+    "ground_truth.json": "5862f3b24b16992aae28af63131c5384d5d3708a253ad9d37eaefd37054911a3",
+    "plan.pdf": "a254c15c1118dff72d643362e08aff69166cbe8964228ce3a58c95b203c5992a",
+    "plan.png": "f891889ca752c4dfa17db2b5fe2af2285b4015bff76118c0c71678538617b577"
+   }
+  },
+  {
+   "id": "swiss_6815",
+   "seed": 3081126293,
+   "degrade": 1.074,
+   "n_rooms": 23,
+   "stats": {
+    "rotation_deg": -24.555,
+    "extent_m": 32.0,
+    "wall_area_m2": 49.65,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 136,
+    "n_openings": 37,
+    "n_rooms": 23,
+    "degradation": {
+     "strength": 1.074,
+     "rotation_deg": 2.028
+    }
+   },
+   "phash": "ae89b4c29cb593cc",
+   "files": {
+    "ground_truth.json": "9bbc8605470ab7dfff09d70adf7c191504d38d65388dfe7687737262cd4a264f",
+    "plan.pdf": "94b914b36b1913109b0c87b8c58dea16e57d0e824e5e0c3a00e7f8e31c48a7ed",
+    "plan.png": "f318695d01ffd31f1ec6823b73e22a7c3d06dd21620eca3f41f5878a7e0e2051"
+   }
+  },
+  {
+   "id": "swiss_3941",
+   "seed": 1014249326,
+   "degrade": 0.949,
+   "n_rooms": 36,
+   "stats": {
+    "rotation_deg": -29.658,
+    "extent_m": 26.5,
+    "wall_area_m2": 62.34,
+    "unsupported_wall_share": 0.0007,
+    "n_openings_dropped": 0,
+    "n_walls": 201,
+    "n_openings": 63,
+    "n_rooms": 36,
+    "degradation": {
+     "strength": 0.949,
+     "rotation_deg": -1.789
+    }
+   },
+   "phash": "aa038c52b92bd7ea",
+   "files": {
+    "ground_truth.json": "401a2c3470d4cd3dddae6edf22f21c2129efe8032f877b794a3d1b21dcd25947",
+    "plan.pdf": "00f048dd63f4125eb251258b4e1adb4d6ffc8112bfa89f6e9a9f9d14aaf529fd",
+    "plan.png": "450844f2f3185e72ba54bb83b185a304b84074b6e1336b051267894d9f2e59a2"
+   }
+  },
+  {
+   "id": "swiss_14259",
+   "seed": 1791494519,
+   "degrade": 1.009,
+   "n_rooms": 26,
+   "stats": {
+    "rotation_deg": -4.154,
+    "extent_m": 20.9,
+    "wall_area_m2": 79.99,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 151,
+    "n_openings": 46,
+    "n_rooms": 26,
+    "degradation": {
+     "strength": 1.009,
+     "rotation_deg": 2.798
+    }
+   },
+   "phash": "ae499d23917cccc3",
+   "files": {
+    "ground_truth.json": "53170b872000e2769593557f88c1d623f4286c445c38346f60fad104550b64a8",
+    "plan.pdf": "0aeb3c5b731a363ac89694b2e2b3c6f3527987c9f5e539dea209ddbc13cbb6c8",
+    "plan.png": "e59a5fe62f45f26ccc255d1a4a98e97f1c61852376d232189bb3ec1af551b8cc"
+   }
+  },
+  {
+   "id": "swiss_45024",
+   "seed": 2600645676,
+   "degrade": 1.094,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": -33.547,
+    "extent_m": 17.1,
+    "wall_area_m2": 28.06,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 47,
+    "n_openings": 25,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 1.094,
+     "rotation_deg": 2.736
+    }
+   },
+   "phash": "afe085d0957287b5",
+   "files": {
+    "ground_truth.json": "5dbb038f6e5aeb5bd667e8b8bab8587a1ec4105f2efc7c2c8e39c54843a5f370",
+    "plan.pdf": "63b87f795a677dc049cc901a70bf470203ad977626f4f607be537b048f677dcd",
+    "plan.png": "d46d369605d06c5a6c02c45fec2cb732442930cfd64c22b55a1d8d0d1dd822f5"
+   }
+  },
+  {
+   "id": "swiss_46488",
+   "seed": 3108913025,
+   "degrade": 0.285,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": -15.857,
+    "extent_m": 22.3,
+    "wall_area_m2": 34.45,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 89,
+    "n_openings": 34,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 0.285,
+     "rotation_deg": -0.627
+    }
+   },
+   "phash": "bb43d43cc6cac11b",
+   "files": {
+    "ground_truth.json": "9050fc808d1d12de9fbbdc637bb595d2a85ef9bf49c65d899e050398ae1b3e9c",
+    "plan.pdf": "083219afeafd9a4b119489b747bc788ae2caf24eec223f98ebb3f533ab2eab2d",
+    "plan.png": "893ff75e7af8e96baeb2820d9ed52aca6ae20ab7bb46e7614c5f55972a1cc43d"
+   }
+  },
+  {
+   "id": "swiss_8284",
+   "seed": 1285238470,
+   "degrade": 0.712,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": 34.146,
+    "extent_m": 21.3,
+    "wall_area_m2": 43.79,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 78,
+    "n_openings": 33,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 0.712,
+     "rotation_deg": 1.3
+    }
+   },
+   "phash": "af35d8c296cbe418",
+   "files": {
+    "ground_truth.json": "b0377ae5e7f99a601a201db05432d8b54b3690cc74bf8879db78dc4fb2351c78",
+    "plan.pdf": "c4a12749b510b2274851697bebb6562da8519c808d8bd2e561861100c21194d9",
+    "plan.png": "3c36f5da0a149d0edc4858fe7a0729e0d003808c364c1e06aebb9ed5ba42af59"
+   }
+  },
+  {
+   "id": "swiss_11514",
+   "seed": 1705232471,
+   "degrade": 1.131,
+   "n_rooms": 35,
+   "stats": {
+    "rotation_deg": 32.213,
+    "extent_m": 40.4,
+    "wall_area_m2": 65.69,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 195,
+    "n_openings": 61,
+    "n_rooms": 35,
+    "degradation": {
+     "strength": 1.131,
+     "rotation_deg": 3.153
+    }
+   },
+   "phash": "f54b5a93183c3c95",
+   "files": {
+    "ground_truth.json": "c7f340bda97894f332cce3707631977615792d85f64a228b1ab9f679bbd0e34c",
+    "plan.pdf": "c17e48754fe4c71b0da9a62ae3309f43c8f1b58fe3e0209f2a137ffbb981fd30",
+    "plan.png": "6e4bc67475ae9458fe274c6ec79e08dd3701df63bbef17f33ccbcb3a7010afa1"
+   }
+  },
+  {
+   "id": "swiss_13785",
+   "seed": 3542520065,
+   "degrade": 0.369,
+   "n_rooms": 28,
+   "stats": {
+    "rotation_deg": -31.92,
+    "extent_m": 34.2,
+    "wall_area_m2": 71.64,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 122,
+    "n_openings": 47,
+    "n_rooms": 28,
+    "degradation": {
+     "strength": 0.369,
+     "rotation_deg": 0.735
+    }
+   },
+   "phash": "ce4896f3b561c598",
+   "files": {
+    "ground_truth.json": "c55c2afc8784de589cf8a234a33c1b05c42ab444b3c4f93f1e6ef5f42515fb52",
+    "plan.pdf": "977996c304ead91fcb9edc3976d389e1d16b426faa7efb1c7349c6ec32e9b457",
+    "plan.png": "17ed059360fa707745ac6ca38170adb88a9f06e1c25b92e501931e2b31aea913"
+   }
+  },
+  {
+   "id": "swiss_14202",
+   "seed": 2536580169,
+   "degrade": 0.69,
+   "n_rooms": 38,
+   "stats": {
+    "rotation_deg": 32.133,
+    "extent_m": 39.5,
+    "wall_area_m2": 67.9,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 5,
+    "n_walls": 187,
+    "n_openings": 63,
+    "n_rooms": 38,
+    "degradation": {
+     "strength": 0.69,
+     "rotation_deg": 1.283
+    }
+   },
+   "phash": "fbc898b7a4c9d806",
+   "files": {
+    "ground_truth.json": "723f3a4defb430a893b353f37eec8fb3c999b86df2c681613ce6330ca1e0f5f1",
+    "plan.pdf": "1fe32a091b0412ace1c75526f91fd7e7241d8ae765cad4253d4fa23d3639c27f",
+    "plan.png": "e614445410d9f5c5d35ba236e228a45fa38674908377ad2027fd6a90f2c9e632"
+   }
+  },
+  {
+   "id": "swiss_3970",
+   "seed": 1521613261,
+   "degrade": 0.828,
+   "n_rooms": 31,
+   "stats": {
+    "rotation_deg": -29.001,
+    "extent_m": 24.8,
+    "wall_area_m2": 62.56,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 185,
+    "n_openings": 55,
+    "n_rooms": 31,
+    "degradation": {
+     "strength": 0.828,
+     "rotation_deg": -2.356
+    }
+   },
+   "phash": "eecf94f09190071f",
+   "files": {
+    "ground_truth.json": "4d9c4fe25ce6633f6b2d019f97d1d8360cea21e1cd88f13c2599b6df5f47ad24",
+    "plan.pdf": "e24f785bd5c6aa28140a51eb872ad05dedcd2a65c4830535cdf91b80eee08f34",
+    "plan.png": "49503e6f614577c6ce4cc1a7be9bed242329e7c4c3d771c05f845edff8cd5eba"
+   }
+  },
+  {
+   "id": "swiss_3936",
+   "seed": 2457788096,
+   "degrade": 0.847,
+   "n_rooms": 33,
+   "stats": {
+    "rotation_deg": -29.715,
+    "extent_m": 26.5,
+    "wall_area_m2": 61.75,
+    "unsupported_wall_share": 0.0003,
+    "n_openings_dropped": 0,
+    "n_walls": 193,
+    "n_openings": 58,
+    "n_rooms": 33,
+    "degradation": {
+     "strength": 0.847,
+     "rotation_deg": -2.027
+    }
+   },
+   "phash": "aa03cf7ff9438118",
+   "files": {
+    "ground_truth.json": "27b49979523a5a731d370f2445eebc30e0c9c0ad75e35b5b7c515fa1cfc95d43",
+    "plan.pdf": "aac7fe00817a917252cb6ad1f3cadecc8bd3d3df632d0d8fd704dbe914831736",
+    "plan.png": "2e3c72dfab53245588a9a5886b585c1c8a6314fd6a3b3ef12d2967b16b89d016"
+   }
+  },
+  {
+   "id": "swiss_8004",
+   "seed": 1484199337,
+   "degrade": 1.094,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": -22.852,
+    "extent_m": 18.4,
+    "wall_area_m2": 32.51,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 64,
+    "n_openings": 27,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 1.094,
+     "rotation_deg": -3.145
+    }
+   },
+   "phash": "eadbb5a694a4811e",
+   "files": {
+    "ground_truth.json": "80a49f199e30e34ba178d57f74d560753a911001ce787726bf44acc5527373ca",
+    "plan.pdf": "8816f3eb294cc515aec8e7a80e58438db131ffd83d70981e97324c9edd12fd22",
+    "plan.png": "bfc591ab83cd235e8effda13920f0e3bda459fedef423c010282a108eb98bc9d"
+   }
+  },
+  {
+   "id": "swiss_3060",
+   "seed": 1001234963,
+   "degrade": 0.514,
+   "n_rooms": 13,
+   "stats": {
+    "rotation_deg": -27.064,
+    "extent_m": 15.6,
+    "wall_area_m2": 24.13,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 47,
+    "n_openings": 16,
+    "n_rooms": 13,
+    "degradation": {
+     "strength": 0.514,
+     "rotation_deg": -1.291
+    }
+   },
+   "phash": "aa05d9fe942089ef",
+   "files": {
+    "ground_truth.json": "2a238ae9ec41af8feae7a946f88325bd2747339e0011ab405084617b3853fef9",
+    "plan.pdf": "267fddfca2cd6e2807c72af6c2a63eb0b8ddf15dca3aa44917d138b2991c74fc",
+    "plan.png": "650624f60d4cd44512dd8daf1a2d8e72afa91c23d2bcb9b3ccc0635804f31784"
+   }
+  },
+  {
+   "id": "swiss_51036",
+   "seed": 2200298373,
+   "degrade": 1.135,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": -42.282,
+    "extent_m": 40.8,
+    "wall_area_m2": 63.77,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 74,
+    "n_openings": 54,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 1.135,
+     "rotation_deg": -2.497
+    }
+   },
+   "phash": "ae36b5c3b01ae85a",
+   "files": {
+    "ground_truth.json": "a9120fead0218ee800a65f18010cd2fa00d351e3a32fd3ab4ea1a6cfbe33e6cd",
+    "plan.pdf": "1eb0745bb478cc6bb25af73d591961c2719aa1f0510fd04a5d8878d2b10810a0",
+    "plan.png": "718b2b3638e3bb4018cfa24941e9881af8784b50164e48a4d9fb316b8c5449cc"
+   }
+  },
+  {
+   "id": "swiss_185",
+   "seed": 2041904991,
+   "degrade": 1.148,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": 31.182,
+    "extent_m": 18.1,
+    "wall_area_m2": 28.96,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 73,
+    "n_openings": 21,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 1.148,
+     "rotation_deg": -2.254
+    }
+   },
+   "phash": "bb848c3bcde186cc",
+   "files": {
+    "ground_truth.json": "e0cd9ed1c4c030e347527793a282e09e073f76b635fe2292e80c2412fabc336b",
+    "plan.pdf": "ce0b5cc27906de155c715c447130a1d9565ef85f127f49d98e7d7f97fa04dd7d",
+    "plan.png": "4de6f052f93e489cf503051e7916d275bd2f3e33caf04ef38c892926a0b0e105"
+   }
+  },
+  {
+   "id": "swiss_50636",
+   "seed": 1712243284,
+   "degrade": 1.091,
+   "n_rooms": 25,
+   "stats": {
+    "rotation_deg": -37.03,
+    "extent_m": 31.3,
+    "wall_area_m2": 50.58,
+    "unsupported_wall_share": 0.0189,
+    "n_openings_dropped": 0,
+    "n_walls": 131,
+    "n_openings": 42,
+    "n_rooms": 25,
+    "degradation": {
+     "strength": 1.091,
+     "rotation_deg": -2.812
+    }
+   },
+   "phash": "ab7c911fe402b726",
+   "files": {
+    "ground_truth.json": "d0266da3690c295fe91d5dfce82738fe3cafc6b17afbe9d2d9aeafba5dbcac88",
+    "plan.pdf": "8ad31d5da3a65963e26de63a63e3749f6f7e1c54eccbfc0136467e8c2c958a5a",
+    "plan.png": "ba89bf45f9bd7a7e6ace1d5059a0c2a6ea5df65ec834230e7a64f7e12136a13b"
+   }
+  },
+  {
+   "id": "swiss_15025",
+   "seed": 1672481592,
+   "degrade": 1.103,
+   "n_rooms": 20,
+   "stats": {
+    "rotation_deg": -0.334,
+    "extent_m": 27.1,
+    "wall_area_m2": 55.17,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 146,
+    "n_openings": 39,
+    "n_rooms": 20,
+    "degradation": {
+     "strength": 1.103,
+     "rotation_deg": -2.395
+    }
+   },
+   "phash": "abe415b1c6c63336",
+   "files": {
+    "ground_truth.json": "e0b92d0de3837ec022239d9378cfa2743ae34b1be1a1aeeb8b7572a5ee27a97d",
+    "plan.pdf": "6fcb35940d594e1b5dc1a9b3ecb8e7b59c1b6f3eb3bd4ea81aaf27d4f7427338",
+    "plan.png": "52a8d4f9a9d0b97c7ae316d1c77054bbc7cce8b009b1acb05a89f471380cccc6"
+   }
+  },
+  {
+   "id": "swiss_10016",
+   "seed": 3465941794,
+   "degrade": 0.879,
+   "n_rooms": 23,
+   "stats": {
+    "rotation_deg": -38.181,
+    "extent_m": 20.8,
+    "wall_area_m2": 56.22,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 156,
+    "n_openings": 41,
+    "n_rooms": 23,
+    "degradation": {
+     "strength": 0.879,
+     "rotation_deg": -1.652
+    }
+   },
+   "phash": "ab15986ba54a9c6b",
+   "files": {
+    "ground_truth.json": "43abd066ab658e0e44285fd299ec52d4efba4797f173338e8f557458c66a5222",
+    "plan.pdf": "2b2dec933502c3856077c672b629e975b5372d88cd2ec48f24be064e71a97053",
+    "plan.png": "89149a41fecc5951e2e5bd3e91898ebed504a1a2bfade04f20f7c1a60cdf0d21"
+   }
+  },
+  {
+   "id": "swiss_8305",
+   "seed": 3230144079,
+   "degrade": 1.065,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": 33.455,
+    "extent_m": 21.0,
+    "wall_area_m2": 43.71,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 64,
+    "n_openings": 29,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 1.065,
+     "rotation_deg": 2.199
+    }
+   },
+   "phash": "ba4982d685379d1b",
+   "files": {
+    "ground_truth.json": "cf1e61ebc1d88342c9202f350e16bbfe8c98f4509e4742a1f27df327c41e70ee",
+    "plan.pdf": "56a0d816c2dfc1feb9f7428062d844c1c4097b4e6e52b390abf884e765e1fba3",
+    "plan.png": "f1f9db5d2578c690683a015b54514c0086f93cd27aa2868ff2755384d56f2f27"
+   }
+  },
+  {
+   "id": "swiss_48787",
+   "seed": 2606575306,
+   "degrade": 1.125,
+   "n_rooms": 9,
+   "stats": {
+    "rotation_deg": 26.535,
+    "extent_m": 37.4,
+    "wall_area_m2": 65.71,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 63,
+    "n_openings": 18,
+    "n_rooms": 9,
+    "degradation": {
+     "strength": 1.125,
+     "rotation_deg": 1.9
+    }
+   },
+   "phash": "a405373c1bd29adb",
+   "files": {
+    "ground_truth.json": "836f391d79d49268b2cbe5db6780a32bc586fc7c6d999356e2c44592269f235e",
+    "plan.pdf": "3dd51be235ba6bf60b08aa498993f8d4488b7329d19bf590d33a010f3db3f45a",
+    "plan.png": "43e17ccf29c0098f74ac7101495fafd1cbf3a1e05f0575ada063a0211f9fda51"
+   }
+  },
+  {
+   "id": "swiss_8290",
+   "seed": 1455460515,
+   "degrade": 0.55,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 33.729,
+    "extent_m": 21.4,
+    "wall_area_m2": 48.18,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 94,
+    "n_openings": 33,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.55,
+     "rotation_deg": -1.531
+    }
+   },
+   "phash": "bb2db8c296cbe02a",
+   "files": {
+    "ground_truth.json": "d489b1a01eb7953835b7c4b5e3be81d9498288d8ab4770b149b7727a3896c945",
+    "plan.pdf": "f24a110f100b8d01308d322766b7342c6c0a245cca3056800138411d9960a4d8",
+    "plan.png": "ab930bd4e53853d2c8afd60ff5843a88704952b385656bf68009be2a9c611960"
+   }
+  },
+  {
+   "id": "swiss_4951",
+   "seed": 3982335775,
+   "degrade": 0.904,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": -34.933,
+    "extent_m": 19.9,
+    "wall_area_m2": 46.63,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 102,
+    "n_openings": 33,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 0.904,
+     "rotation_deg": 2.105
+    }
+   },
+   "phash": "aae3b4d09469d595",
+   "files": {
+    "ground_truth.json": "3adbbed1cc268b87511faf07f2f2f00b11dd4e8d81693a5e9ccd62b57be992f9",
+    "plan.pdf": "97518594c87032e1ea0b00be137b7fb026073bba86b089f5b1dc3d5a624cca84",
+    "plan.png": "bb16de4e104ea3a39db179bd07624d74d7082674450d4a429a7f26f05f010334"
+   }
+  },
+  {
+   "id": "swiss_13600",
+   "seed": 1009423236,
+   "degrade": 0.836,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": 43.445,
+    "extent_m": 21.0,
+    "wall_area_m2": 36.69,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 77,
+    "n_openings": 25,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 0.836,
+     "rotation_deg": -1.501
+    }
+   },
+   "phash": "bfe490966dc9c033",
+   "files": {
+    "ground_truth.json": "f479340db4d6e26b7c7e31269ac29d246d8e12e52779f24402e17052d5b7c2b9",
+    "plan.pdf": "4ac18a5e94869366dd8d09581822aa1cf156e661c11b9dbbfa316b95ab2ba3ac",
+    "plan.png": "ed7cd68c3d4f8b84155536b1c43967c5c7455cd728fbc4f7906dd286787480a3"
+   }
+  },
+  {
+   "id": "swiss_9464",
+   "seed": 273490935,
+   "degrade": 0.274,
+   "n_rooms": 18,
+   "stats": {
+    "rotation_deg": -1.404,
+    "extent_m": 20.0,
+    "wall_area_m2": 49.09,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 82,
+    "n_openings": 33,
+    "n_rooms": 18,
+    "degradation": {
+     "strength": 0.274,
+     "rotation_deg": 0.433
+    }
+   },
+   "phash": "eb1d94e2986991e6",
+   "files": {
+    "ground_truth.json": "d320a3786bf9eb7bd4a9534a1aafd5c1d2cc18f4d1538c448f8b95ffb05156e9",
+    "plan.pdf": "5168c8f2cc2b5a641faa87edc7e5945e851332a069b3120002453d52d8272c10",
+    "plan.png": "27596a2780d6356aa8ccdfea05fcb0e233261e1b6d4dba289484c8581618a0b7"
+   }
+  },
+  {
+   "id": "swiss_26002",
+   "seed": 1434720380,
+   "degrade": 0.67,
+   "n_rooms": 13,
+   "stats": {
+    "rotation_deg": 39.27,
+    "extent_m": 16.7,
+    "wall_area_m2": 25.91,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 60,
+    "n_openings": 24,
+    "n_rooms": 13,
+    "degradation": {
+     "strength": 0.67,
+     "rotation_deg": -1.129
+    }
+   },
+   "phash": "fb4f870e9c1e9a04",
+   "files": {
+    "ground_truth.json": "fca7c1bc29c26a418985c4a6b5ee80314daec00cc69f9228ba86a160d38f3c69",
+    "plan.pdf": "1fd4251d2600b98eb7f799ffbe3edb27ac332acc844f81e4431e4751091ab3fb",
+    "plan.png": "3e58a586816a56b68d2a41191e84b6edbe258392583f7a2e856b62028db79aad"
+   }
+  },
+  {
+   "id": "swiss_14665",
+   "seed": 489736620,
+   "degrade": 0.139,
+   "n_rooms": 24,
+   "stats": {
+    "rotation_deg": -2.963,
+    "extent_m": 38.4,
+    "wall_area_m2": 56.86,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 130,
+    "n_openings": 42,
+    "n_rooms": 24,
+    "degradation": {
+     "strength": 0.139,
+     "rotation_deg": 0.21
+    }
+   },
+   "phash": "afa5306d90cae9c3",
+   "files": {
+    "ground_truth.json": "b508959c8f6829413a3418250bc7232611a4623cfdf7c83482834c162f195770",
+    "plan.pdf": "08fd7543b4211366a3d0e75ca7e8d4132e84a91db5ed9ec1c32037501052e90f",
+    "plan.png": "84a70eb7283ed66314df3c6561af270a2758db270bbc5fdda4f8ecbd3f01fd9a"
+   }
+  },
+  {
+   "id": "swiss_8277",
+   "seed": 2575165146,
+   "degrade": 0.122,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 33.405,
+    "extent_m": 21.1,
+    "wall_area_m2": 45.17,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 96,
+    "n_openings": 32,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.122,
+     "rotation_deg": 0.36
+    }
+   },
+   "phash": "be49c306cd269c3b",
+   "files": {
+    "ground_truth.json": "88e7683da9fc8987799145574862ba5cf29811a9924289722dc9d35ecf29ff80",
+    "plan.pdf": "fa019c8b397e73dfd66f74756922dfb4762982aff281d7e9c5e07d95638afebd",
+    "plan.png": "d6f16ef111b04677734cda9a21bbb751b7fcdfd2e27626f8a83a2b3376918c35"
+   }
+  },
+  {
+   "id": "swiss_46494",
+   "seed": 1593931541,
+   "degrade": 1.145,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": -17.275,
+    "extent_m": 22.3,
+    "wall_area_m2": 34.16,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 66,
+    "n_openings": 34,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 1.145,
+     "rotation_deg": -2.658
+    }
+   },
+   "phash": "eec9918693a5949d",
+   "files": {
+    "ground_truth.json": "cc6707e2baff2060df55c67104845b892fe9f14a0f2c16f2b06767093da4f599",
+    "plan.pdf": "b55b9bea7c54b143147d5eaf4f334567558230fc54f90debbd4eb114002a1942",
+    "plan.png": "195bd0bc992226b92b8e61b34edb41763a19ba263354526e5bb9cca8601f416b"
+   }
+  },
+  {
+   "id": "swiss_45022",
+   "seed": 2416245579,
+   "degrade": 1.069,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": -34.338,
+    "extent_m": 17.1,
+    "wall_area_m2": 28.36,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 69,
+    "n_openings": 27,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 1.069,
+     "rotation_deg": -2.78
+    }
+   },
+   "phash": "ff55d161801e96e8",
+   "files": {
+    "ground_truth.json": "7bdc530cc3ceb7c0f16860e9e4c9ec8255c71d100847a36607dc8ae83aa375c9",
+    "plan.pdf": "abb21b46308acd24b28ea604a61a2fea10b6953d51cdf6cf9ca92dc4465e30b2",
+    "plan.png": "255d7713dc1aeec7dbe6fa7aaff42e18677be9c92f954d89155ba0ea022e32ef"
+   }
+  },
+  {
+   "id": "swiss_23753",
+   "seed": 2989933033,
+   "degrade": 1.055,
+   "n_rooms": 11,
+   "stats": {
+    "rotation_deg": 35.194,
+    "extent_m": 15.7,
+    "wall_area_m2": 23.56,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 37,
+    "n_openings": 20,
+    "n_rooms": 11,
+    "degradation": {
+     "strength": 1.055,
+     "rotation_deg": 1.648
+    }
+   },
+   "phash": "fd45c63898c7c139",
+   "files": {
+    "ground_truth.json": "0de90280bb4109729de475bca51e85c8953bf35d9a27b4e4565cce67028a9bcc",
+    "plan.pdf": "551ef77436c469c2482b44a6a8501b7a42a324d74706f471e4f109c03a23c30f",
+    "plan.png": "2d53cae312f5ea7b6f9dc718e957716ef84a090558440df4e30d2aa5ccf3b9a4"
+   }
+  },
+  {
+   "id": "swiss_13754",
+   "seed": 2406370864,
+   "degrade": 1.099,
+   "n_rooms": 40,
+   "stats": {
+    "rotation_deg": -15.294,
+    "extent_m": 36.1,
+    "wall_area_m2": 87.33,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 144,
+    "n_openings": 65,
+    "n_rooms": 40,
+    "degradation": {
+     "strength": 1.099,
+     "rotation_deg": -2.003
+    }
+   },
+   "phash": "a2c38ebc989ab9b4",
+   "files": {
+    "ground_truth.json": "77bac00fcdff51339a96485104f283e95fe1acc1488e348881afaddf41e369cb",
+    "plan.pdf": "fc5111a8c11fe8aa2cea59a84835e75f09e829494618846847caa796a16a0b24",
+    "plan.png": "f957a49041b4d6d7702892524a609c6b68aa21cd8b76688501980f503b580a49"
+   }
+  },
+  {
+   "id": "swiss_115",
+   "seed": 1654097951,
+   "degrade": 1.145,
+   "n_rooms": 47,
+   "stats": {
+    "rotation_deg": 24.191,
+    "extent_m": 43.8,
+    "wall_area_m2": 112.62,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 320,
+    "n_openings": 77,
+    "n_rooms": 47,
+    "degradation": {
+     "strength": 1.145,
+     "rotation_deg": 3.213
+    }
+   },
+   "phash": "d19e4ce0b2e45be8",
+   "files": {
+    "ground_truth.json": "256c962c387c112f08f378deb6aa4c01c1f4ee480043506862f7276e844ad909",
+    "plan.pdf": "5e1746d2fa80158d96e69568ccafda1721488948171f43e65fa1b01a852df3e6",
+    "plan.png": "bd97d9c8cee81a2d8b172794381551f94b5eeb94967b4a9e06b6f0deb558971e"
+   }
+  },
+  {
+   "id": "swiss_2326",
+   "seed": 1885803128,
+   "degrade": 0.091,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 28.5,
+    "extent_m": 16.6,
+    "wall_area_m2": 22.36,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 110,
+    "n_openings": 23,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.091,
+     "rotation_deg": 0.257
+    }
+   },
+   "phash": "aac895e7914991e7",
+   "files": {
+    "ground_truth.json": "435a4ed4877b2ceb7f54325890a6dfae93ff0e8bfb567e98209501ec4f0e4ab0",
+    "plan.pdf": "f70e7fae1d6cf0a6a2ca9d15e2326c021588e69f10bfcc8b211a28934257bf45",
+    "plan.png": "10340a8fa9672962c117a01205f8b0dcb11b4cb29897fc3dcfb55397fb79a659"
+   }
+  },
+  {
+   "id": "swiss_9465",
+   "seed": 113662434,
+   "degrade": 1.154,
+   "n_rooms": 19,
+   "stats": {
+    "rotation_deg": -0.987,
+    "extent_m": 20.5,
+    "wall_area_m2": 48.5,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 96,
+    "n_openings": 32,
+    "n_rooms": 19,
+    "degradation": {
+     "strength": 1.154,
+     "rotation_deg": 2.331
+    }
+   },
+   "phash": "ab1b95c2986c91e7",
+   "files": {
+    "ground_truth.json": "8445c9142b8374dbb2bee3df69735e1345da20ea29f3a461ec0cd71ce9da2dc4",
+    "plan.pdf": "b3f1478585997da6e999e6ef15f37421999aaaa484675423041443257a5e709c",
+    "plan.png": "0b52cec60516bb5024a8669666428990cde51556ccb1704328f714f9082b54b9"
+   }
+  },
+  {
+   "id": "swiss_14715",
+   "seed": 3599449784,
+   "degrade": 0.435,
+   "n_rooms": 48,
+   "stats": {
+    "rotation_deg": -2.36,
+    "extent_m": 50.8,
+    "wall_area_m2": 114.32,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 4,
+    "n_walls": 170,
+    "n_openings": 84,
+    "n_rooms": 48,
+    "degradation": {
+     "strength": 0.435,
+     "rotation_deg": -0.906
+    }
+   },
+   "phash": "e2b59ae0cd483dcc",
+   "files": {
+    "ground_truth.json": "7b59bc24d6b3a0a9044b8151d888f4f5d2729e0bc2da988e1256d0b9faa9252b",
+    "plan.pdf": "b47018050dce38e59c0516f608832f1ddd2a87926b5f2ddde24774ed6ab9fe85",
+    "plan.png": "033ecc02693dc4e8dc77093763653b1fbe7447a6bd634b0cf27df5d61cd87d7a"
+   }
+  },
+  {
+   "id": "swiss_42454",
+   "seed": 1067626308,
+   "degrade": 0.712,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": -1.439,
+    "extent_m": 13.8,
+    "wall_area_m2": 30.74,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 64,
+    "n_openings": 18,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 0.712,
+     "rotation_deg": -1.567
+    }
+   },
+   "phash": "ff4c91639427c698",
+   "files": {
+    "ground_truth.json": "aa88fab38c429e7628276850b74aa16d4ee313c12742b3c08fd239671a45b2c2",
+    "plan.pdf": "e8deeae790d1a0326329ea7d2500dfab8a1aa22d3c7b5159165859d722f33f4d",
+    "plan.png": "dc93f11dbca79c477153dc348207a68799d48224e3bd229f3354f9a252667b84"
+   }
+  },
+  {
+   "id": "swiss_362",
+   "seed": 3727420898,
+   "degrade": 0.125,
+   "n_rooms": 3,
+   "stats": {
+    "rotation_deg": -39.287,
+    "extent_m": 12.3,
+    "wall_area_m2": 18.7,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 36,
+    "n_openings": 8,
+    "n_rooms": 3,
+    "degradation": {
+     "strength": 0.125,
+     "rotation_deg": 0.249
+    }
+   },
+   "phash": "bb4694cbd0661e96",
+   "files": {
+    "ground_truth.json": "1718e754eae93ccbe9f51cf794aaf93ba6505e222904cbb1c9eda0965e116dd7",
+    "plan.pdf": "5b0d46af4e06054f554e5f898d9b4fb4b936a21b4d0dd21a6608ee35e43ed941",
+    "plan.png": "8888dbead573599ce737d0ec5ab6327089fecd91e9f21efc8b523c05702d6bf1"
+   }
+  },
+  {
+   "id": "swiss_3051",
+   "seed": 1965041779,
+   "degrade": 0.678,
+   "n_rooms": 13,
+   "stats": {
+    "rotation_deg": -28.77,
+    "extent_m": 16.1,
+    "wall_area_m2": 26.57,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 66,
+    "n_openings": 25,
+    "n_rooms": 13,
+    "degradation": {
+     "strength": 0.678,
+     "rotation_deg": -1.143
+    }
+   },
+   "phash": "ee4a90b59561cd4b",
+   "files": {
+    "ground_truth.json": "42f2f4dd82b7a6918f2509aba51e3f007149e70fa362f04bedb2500a669cb2ef",
+    "plan.pdf": "1604e3fda3b88763bb112c6ac98b359788b5af3eab6be7b015b138b9e1454432",
+    "plan.png": "ef7841e87995837131c65a22b08f7a5305c1b16b3070619e693566e9982ab9f5"
+   }
+  },
+  {
+   "id": "swiss_51037",
+   "seed": 3823696810,
+   "degrade": 1.181,
+   "n_rooms": 29,
+   "stats": {
+    "rotation_deg": -42.217,
+    "extent_m": 31.5,
+    "wall_area_m2": 43.26,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 115,
+    "n_openings": 46,
+    "n_rooms": 29,
+    "degradation": {
+     "strength": 1.181,
+     "rotation_deg": 2.279
+    }
+   },
+   "phash": "ef83a8e8d1d191a5",
+   "files": {
+    "ground_truth.json": "f4b3528f798c5ce983741737658d69cccb3d7de7f1f7d366cd140d40711cfc11",
+    "plan.pdf": "cbc9c261437198a493bede601e4d86565ca5f3b307862329084da9956ae5d601",
+    "plan.png": "ea6d8368d32b8a0ba2ce515522cbedd946754702aa5b286e20201bd78cb3d067"
+   }
+  },
+  {
+   "id": "swiss_26022",
+   "seed": 1883701130,
+   "degrade": 1.137,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": 31.459,
+    "extent_m": 22.9,
+    "wall_area_m2": 49.01,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 153,
+    "n_openings": 33,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 1.137,
+     "rotation_deg": -1.842
+    }
+   },
+   "phash": "ea4b5ae07369c8e4",
+   "files": {
+    "ground_truth.json": "d53e6a8237f1c97c291a6b729dfcf61cb024af63c82e29d811852aaa95630d68",
+    "plan.pdf": "788a7562395ee890c9825909e29177a5776ec5818b596021e3a1496b20aae881",
+    "plan.png": "59c6494229ff4c66e0a1094d63f04492d76a448cd844e257f8d05a8f3a6c79f3"
+   }
+  },
+  {
+   "id": "swiss_26706",
+   "seed": 163427880,
+   "degrade": 0.395,
+   "n_rooms": 6,
+   "stats": {
+    "rotation_deg": 1.494,
+    "extent_m": 17.8,
+    "wall_area_m2": 25.3,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 25,
+    "n_openings": 14,
+    "n_rooms": 6,
+    "degradation": {
+     "strength": 0.395,
+     "rotation_deg": 1.169
+    }
+   },
+   "phash": "fb6394c891333a9c",
+   "files": {
+    "ground_truth.json": "ab1a8d2a3cccae08c8fc0bf44786f376f96e9859b9294112cc99fdea7f30fb52",
+    "plan.pdf": "f6694e71f162f7d0a93134861d20d372e312fc7af25408ba7a5d9fa602d19a6c",
+    "plan.png": "770cb9a83ec08c17152747cba6901b305b62258a5f0a39ecd4bef01a64c8e95d"
+   }
+  },
+  {
+   "id": "swiss_8009",
+   "seed": 2323713781,
+   "degrade": 0.09,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": -22.843,
+    "extent_m": 18.4,
+    "wall_area_m2": 32.57,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 48,
+    "n_openings": 27,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.09,
+     "rotation_deg": -0.154
+    }
+   },
+   "phash": "eac495c3944b9dc3",
+   "files": {
+    "ground_truth.json": "039c50b5f7d0171fcd7c5f829f3237c1ce1ea7a4813d7f0abd9d96eb152acce5",
+    "plan.pdf": "6c8983efed1e1195174d46d656da03406437330e005d72efbe8c7ba06d9249d9",
+    "plan.png": "813b1d01cf3332a2eed7f12b3f604f0fc903bb931df4beeb07714a4df00ca916"
+   }
+  },
+  {
+   "id": "swiss_48036",
+   "seed": 3521338475,
+   "degrade": 0.147,
+   "n_rooms": 24,
+   "stats": {
+    "rotation_deg": -3.886,
+    "extent_m": 25.5,
+    "wall_area_m2": 39.97,
+    "unsupported_wall_share": 0.0039,
+    "n_openings_dropped": 0,
+    "n_walls": 89,
+    "n_openings": 45,
+    "n_rooms": 24,
+    "degradation": {
+     "strength": 0.147,
+     "rotation_deg": -0.232
+    }
+   },
+   "phash": "ea34cd4bb9c18c66",
+   "files": {
+    "ground_truth.json": "02c18075856f74ac96c4f70ae3964d96493e3efff1239893aec1e46756a39945",
+    "plan.pdf": "2705869b414c19b9470e5ad21af3e396b0a3f4f550458f00421325dd4b21b7f3",
+    "plan.png": "2bf457e782c66b6402265ceb7722a6b22a976496837d44c6f418e51949c65631"
+   }
+  },
+  {
+   "id": "swiss_2272",
+   "seed": 3397458914,
+   "degrade": 0.369,
+   "n_rooms": 25,
+   "stats": {
+    "rotation_deg": 39.5,
+    "extent_m": 19.0,
+    "wall_area_m2": 40.61,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 118,
+    "n_openings": 38,
+    "n_rooms": 25,
+    "degradation": {
+     "strength": 0.369,
+     "rotation_deg": 0.757
+    }
+   },
+   "phash": "bb4f9173c4f284c8",
+   "files": {
+    "ground_truth.json": "a460e821f43e1f1ba774d89ee9b0c280919467932a454d1e0f7377bb3368e8c2",
+    "plan.pdf": "abc6230c066ea386d213d3bd280736b29d7c57bb0144f2ba6196f5b6a99aa573",
+    "plan.png": "5e2e71069021648eff2c3dfecfd60ebf6d218802eba5aa1686410c300b55b489"
+   }
+  },
+  {
+   "id": "swiss_6675",
+   "seed": 1376794907,
+   "degrade": 0.556,
+   "n_rooms": 41,
+   "stats": {
+    "rotation_deg": -44.607,
+    "extent_m": 33.3,
+    "wall_area_m2": 68.19,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 187,
+    "n_openings": 71,
+    "n_rooms": 41,
+    "degradation": {
+     "strength": 0.556,
+     "rotation_deg": 1.267
+    }
+   },
+   "phash": "bbeaa79ce491c0d0",
+   "files": {
+    "ground_truth.json": "6e27c1eaf2da6b07b148b63c3417f6763ae66a12005c7877a93754299694d734",
+    "plan.pdf": "4dd2e2201df35422b20514ed65c4d29862f538053ab52a2101947c13afe92533",
+    "plan.png": "26f353e7f2f04da670bd7e1ce53ba6e674f2324b118f98a0a4f1bb12ad676e66"
+   }
+  },
+  {
+   "id": "swiss_2412",
+   "seed": 3281830154,
+   "degrade": 0.728,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": 20.5,
+    "extent_m": 16.4,
+    "wall_area_m2": 21.56,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 65,
+    "n_openings": 21,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 0.728,
+     "rotation_deg": -1.116
+    }
+   },
+   "phash": "ab6494c7ec4eb4c4",
+   "files": {
+    "ground_truth.json": "29f58ad8b69b5354f2aa4535bcd3ba5f14c7d0dc22c269faccce3a0ba1f73bf9",
+    "plan.pdf": "bf4d680c2157e8d225c83aef2ea64e17a920e30200383dac76a36c7b0b06c6d9",
+    "plan.png": "1047ca89934281f05f135628f95d63d91e3c67644c2f6e1a12e9a8302555fff4"
+   }
+  },
+  {
+   "id": "swiss_3040",
+   "seed": 1193297232,
+   "degrade": 1.028,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": -28.609,
+    "extent_m": 19.5,
+    "wall_area_m2": 30.67,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 89,
+    "n_openings": 29,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 1.028,
+     "rotation_deg": 2.531
+    }
+   },
+   "phash": "fe5091a5b12fc05e",
+   "files": {
+    "ground_truth.json": "ac391c805e3e5458e43e90fc5a50f4559add77f2fb81f586841291cf81ae268f",
+    "plan.pdf": "264daecd1f59ec506b0afe396000d2e16996a288426e58c1d7487d191a44ca02",
+    "plan.png": "ad739edb6929564c67f90c1db8baf11ef1dfceddd87c93d743528fa10e1b87a0"
+   }
+  },
+  {
+   "id": "swiss_2522",
+   "seed": 2673536866,
+   "degrade": 0.514,
+   "n_rooms": 29,
+   "stats": {
+    "rotation_deg": -6.051,
+    "extent_m": 20.0,
+    "wall_area_m2": 40.26,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 164,
+    "n_openings": 52,
+    "n_rooms": 29,
+    "degradation": {
+     "strength": 0.514,
+     "rotation_deg": -1.23
+    }
+   },
+   "phash": "fbcc90c39c92c6a6",
+   "files": {
+    "ground_truth.json": "568defa275f84394d2566d9fd1cb6c1b0e0f58f006f7eef0c1a72010815da1d8",
+    "plan.pdf": "25ec2dc7e70cce1ab7a32bf4b614854b6308191ee4c43b15c131c046cb839958",
+    "plan.png": "4243fcc05c2c084481b7a525f1819d476725e4433271ff61f5d43ce886ec5809"
+   }
+  },
+  {
+   "id": "swiss_42469",
+   "seed": 937918282,
+   "degrade": 0.366,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": -0.945,
+    "extent_m": 14.1,
+    "wall_area_m2": 36.3,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 52,
+    "n_openings": 22,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.366,
+     "rotation_deg": 0.883
+    }
+   },
+   "phash": "ffc0b0c391cd9436",
+   "files": {
+    "ground_truth.json": "1aaca48a7c154de741f83914099f79dedd66e4be2369a7c685663202e8488e3e",
+    "plan.pdf": "7e70ae89313efa9b3d076a60a86c93ac16166a409e6e8cfb5650ce4b898722e8",
+    "plan.png": "a2a2e8991c3c30fea3a2544514a41773381d64c0bb7e28a4659d33b85ebfb826"
+   }
+  },
+  {
+   "id": "swiss_49309",
+   "seed": 4289308056,
+   "degrade": 0.267,
+   "n_rooms": 34,
+   "stats": {
+    "rotation_deg": 42.453,
+    "extent_m": 40.8,
+    "wall_area_m2": 60.25,
+    "unsupported_wall_share": 0.0004,
+    "n_openings_dropped": 6,
+    "n_walls": 187,
+    "n_openings": 62,
+    "n_rooms": 34,
+    "degradation": {
+     "strength": 0.267,
+     "rotation_deg": 0.653
+    }
+   },
+   "phash": "aff88dc295699318",
+   "files": {
+    "ground_truth.json": "3cc45da487ada19906872db2454aafe7c16b5fc1e936a2605929cf79f174ebc0",
+    "plan.pdf": "a5014d3f3b5e5d5f0edcf5ad91105658ebacf05636e36a2437c2fa5c8bd1f4ee",
+    "plan.png": "f0a335347ba1884bee24ced967562b43d317bab8bd475387dea7177a170f5488"
+   }
+  },
+  {
+   "id": "swiss_49951",
+   "seed": 839551915,
+   "degrade": 0.178,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": 11.998,
+    "extent_m": 20.0,
+    "wall_area_m2": 28.28,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 66,
+    "n_openings": 30,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 0.178,
+     "rotation_deg": -0.355
+    }
+   },
+   "phash": "bbc19c868465d17b",
+   "files": {
+    "ground_truth.json": "a46afa7627758efbcf19bd9b53561913d699a1f44c6c95fab2da48da2fb9e845",
+    "plan.pdf": "afe35328b1219376698a3aa69e5ed69fd5448c01ddecd577cffdb442335abb49",
+    "plan.png": "4651ce4a226b88329968820d53371c4d928c0df748798b936e11a0ac22b940e4"
+   }
+  },
+  {
+   "id": "swiss_42450",
+   "seed": 3863407832,
+   "degrade": 0.498,
+   "n_rooms": 8,
+   "stats": {
+    "rotation_deg": -1.367,
+    "extent_m": 12.6,
+    "wall_area_m2": 21.46,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 49,
+    "n_openings": 11,
+    "n_rooms": 8,
+    "degradation": {
+     "strength": 0.498,
+     "rotation_deg": -1.231
+    }
+   },
+   "phash": "bb66c4c9940ec6b6",
+   "files": {
+    "ground_truth.json": "cff186edb782d0227bc4bc8ae34878c2211bc078f7729fc4e6c74f48b2c6f4e6",
+    "plan.pdf": "182dea295efd414ea9b33984154eb107c24eb452c2784b084f0250780200c325",
+    "plan.png": "dacee5b9c0d8be96e4fbbd2211ab9fcd9ea2bf30a74e19d2be7f76f13b2434d1"
+   }
+  },
+  {
+   "id": "swiss_46492",
+   "seed": 3774586875,
+   "degrade": 1.041,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": -17.275,
+    "extent_m": 22.3,
+    "wall_area_m2": 34.16,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 69,
+    "n_openings": 34,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 1.041,
+     "rotation_deg": -3.104
+    }
+   },
+   "phash": "efe891c49fa49095",
+   "files": {
+    "ground_truth.json": "07dc63293674b53c032ca099f40e562aa4078941cace87b4e8d3b645f4d232c0",
+    "plan.pdf": "30c90541ce28f118d47f60329ebf4c0cd48c80b38b24d2deb81e00f82dabf6d9",
+    "plan.png": "e463792b4daa6ffc0120d725456194fb92aa39f60a69c977af785b459deed767"
+   }
+  },
+  {
+   "id": "swiss_14676",
+   "seed": 2622889165,
+   "degrade": 0.17,
+   "n_rooms": 38,
+   "stats": {
+    "rotation_deg": -3.316,
+    "extent_m": 44.4,
+    "wall_area_m2": 86.06,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 4,
+    "n_walls": 137,
+    "n_openings": 64,
+    "n_rooms": 38,
+    "degradation": {
+     "strength": 0.17,
+     "rotation_deg": -0.331
+    }
+   },
+   "phash": "ee4990c89cc6f366",
+   "files": {
+    "ground_truth.json": "53a57215f8478ca4190ac9ed47fb819c236674e3773c979ead45d9e1bdfad59f",
+    "plan.pdf": "b2a511658d4b4ced7188b36132add43cf40f3c466f7258b5fa8954df855ac67d",
+    "plan.png": "8805f1ff0aecc2d1afb3b5218b87eeefa3d88a233ec9fee78d8f7d6324d670e2"
+   }
+  },
+  {
+   "id": "swiss_182",
+   "seed": 2596103801,
+   "degrade": 0.468,
+   "n_rooms": 13,
+   "stats": {
+    "rotation_deg": 31.096,
+    "extent_m": 18.5,
+    "wall_area_m2": 39.2,
+    "unsupported_wall_share": 0.0115,
+    "n_openings_dropped": 1,
+    "n_walls": 73,
+    "n_openings": 27,
+    "n_rooms": 13,
+    "degradation": {
+     "strength": 0.468,
+     "rotation_deg": -1.112
+    }
+   },
+   "phash": "be66c95bc12c94c3",
+   "files": {
+    "ground_truth.json": "c7bbc1ecf9bd0fb1ea25aa0e2664a3754076ecab2329ceb1a44397de611096f4",
+    "plan.pdf": "172d31bdef1c43b909a82592b0ac384fb77484d04fc0f15047dc28f12d65be1c",
+    "plan.png": "6ca4e81187d5930ef7a7c18cd5dc5a89296989ccb9f6b66cb61468c0b9843434"
+   }
+  },
+  {
+   "id": "swiss_14729",
+   "seed": 2431043778,
+   "degrade": 0.334,
+   "n_rooms": 48,
+   "stats": {
+    "rotation_deg": -3.377,
+    "extent_m": 50.8,
+    "wall_area_m2": 114.32,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 4,
+    "n_walls": 227,
+    "n_openings": 84,
+    "n_rooms": 48,
+    "degradation": {
+     "strength": 0.334,
+     "rotation_deg": -0.884
+    }
+   },
+   "phash": "e2359a60cd4a3dce",
+   "files": {
+    "ground_truth.json": "8ba3101172f88ee9496998ee707e442eabd33768e4d0c0cc46ae6814898d7188",
+    "plan.pdf": "cbbc5466e6efc73167dd775647d4057530a0fd366753af54cf48609c809ae2b6",
+    "plan.png": "b90fd72155fa29c4cfb3d8d94dfe08c0721e32ecf736f939095f8cda8f808816"
+   }
+  },
+  {
+   "id": "swiss_10701",
+   "seed": 2466962358,
+   "degrade": 1.004,
+   "n_rooms": 50,
+   "stats": {
+    "rotation_deg": -4.176,
+    "extent_m": 53.1,
+    "wall_area_m2": 80.19,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 253,
+    "n_openings": 100,
+    "n_rooms": 50,
+    "degradation": {
+     "strength": 1.004,
+     "rotation_deg": -1.592
+    }
+   },
+   "phash": "aa17936aecc09b63",
+   "files": {
+    "ground_truth.json": "0272b27600d7afd48c11200e9eca8412a4a66dd24734ae8fafc541df0037178f",
+    "plan.pdf": "4bb2ce877f17c50d64f9e5a14f2b49ea6c291cacf3742a47d91cb419563b279a",
+    "plan.png": "535222370f65cd5c523b9c374d9b45f9cdfb85ff04bd4729fe7d76d024e16597"
+   }
+  },
+  {
+   "id": "swiss_9431",
+   "seed": 587104818,
+   "degrade": 1.015,
+   "n_rooms": 26,
+   "stats": {
+    "rotation_deg": -31.607,
+    "extent_m": 33.6,
+    "wall_area_m2": 62.94,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 88,
+    "n_openings": 46,
+    "n_rooms": 26,
+    "degradation": {
+     "strength": 1.015,
+     "rotation_deg": 3.023
+    }
+   },
+   "phash": "ae03d96cc11ea5d6",
+   "files": {
+    "ground_truth.json": "8ff7df1dc58c4d36f4a6b0eaaf4e75169ceebee9c86cf8b34df2b830560da446",
+    "plan.pdf": "332c04fe2b57c2ea60a67d41e38013e8bb0502f03ca8137d687e7b1ca13cb6c8",
+    "plan.png": "b8c64e1c376d1b69660fecd537a9b7a54f26c1634375ff28405b12295ffa241f"
+   }
+  },
+  {
+   "id": "swiss_25769",
+   "seed": 2118332812,
+   "degrade": 0.236,
+   "n_rooms": 20,
+   "stats": {
+    "rotation_deg": 31.578,
+    "extent_m": 25.0,
+    "wall_area_m2": 49.02,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 62,
+    "n_openings": 30,
+    "n_rooms": 20,
+    "degradation": {
+     "strength": 0.236,
+     "rotation_deg": -0.577
+    }
+   },
+   "phash": "eebb9dc4911b90b0",
+   "files": {
+    "ground_truth.json": "e689c154c13e1c4ca5721662cde910599f459d140991710c858dcb087a52f8b9",
+    "plan.pdf": "6693df174ae9b0a0abaf4615917fabec9bf1c5e0661e117f98a2e57307bdd526",
+    "plan.png": "450fe00111d6663f4ff75f32295a0b9a9f87a806fbb5b589b0316a1e1daf7684"
+   }
+  },
+  {
+   "id": "swiss_2525",
+   "seed": 3774179053,
+   "degrade": 0.828,
+   "n_rooms": 29,
+   "stats": {
+    "rotation_deg": -6.051,
+    "extent_m": 20.0,
+    "wall_area_m2": 40.26,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 163,
+    "n_openings": 52,
+    "n_rooms": 29,
+    "degradation": {
+     "strength": 0.828,
+     "rotation_deg": 1.981
+    }
+   },
+   "phash": "ff68944299c3c6a6",
+   "files": {
+    "ground_truth.json": "7676cc761554baf52d7cacc18b91a5cdace26bbe1688017e030a6d1aecee26af",
+    "plan.pdf": "1b7638a581c1ec1be79fb9b3c341cb0f66eab19a513b01eb1308fe5519437ee4",
+    "plan.png": "0ee57fe3f6f38151f9b0e840af4337ce8e4b2b569b36db3272fe099fd5c29554"
+   }
+  },
+  {
+   "id": "swiss_42478",
+   "seed": 4134300890,
+   "degrade": 0.61,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": -4.881,
+    "extent_m": 13.3,
+    "wall_area_m2": 28.51,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 58,
+    "n_openings": 19,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 0.61,
+     "rotation_deg": 1.154
+    }
+   },
+   "phash": "ab07954691cb9667",
+   "files": {
+    "ground_truth.json": "eeabb879ca2d7980462ae866d89f563d8408461f91bffba2b8b4d37195d5b49b",
+    "plan.pdf": "5579926ab3dfb07652fe83cba1344f5b81ea5afb6186c9e9b2dd08a19b9513aa",
+    "plan.png": "e0e6e0af1545f3d25440e86f95817b41824aa8c0b741e11a5b995217ca0d5317"
+   }
+  },
+  {
+   "id": "swiss_24485",
+   "seed": 1382312745,
+   "degrade": 0.326,
+   "n_rooms": 6,
+   "stats": {
+    "rotation_deg": 1.888,
+    "extent_m": 13.7,
+    "wall_area_m2": 28.14,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 32,
+    "n_openings": 11,
+    "n_rooms": 6,
+    "degradation": {
+     "strength": 0.326,
+     "rotation_deg": 0.943
+    }
+   },
+   "phash": "bb47d068cec53c92",
+   "files": {
+    "ground_truth.json": "67b4f881873e612f41c8eee84411a04833285b3604650f4e646e78784797ba1f",
+    "plan.pdf": "d41dbb389acb9e41c30e3e99dd84404bda5fca830cec8dfa7814e859971f6851",
+    "plan.png": "3b1c605790a56628e820ee3a89e2968581efa15e427dc7144617c6beb6c9c84f"
+   }
+  },
+  {
+   "id": "swiss_13757",
+   "seed": 443314551,
+   "degrade": 0.891,
+   "n_rooms": 43,
+   "stats": {
+    "rotation_deg": -14.773,
+    "extent_m": 39.8,
+    "wall_area_m2": 99.31,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 221,
+    "n_openings": 74,
+    "n_rooms": 43,
+    "degradation": {
+     "strength": 0.891,
+     "rotation_deg": -2.662
+    }
+   },
+   "phash": "f368b93cb8318d07",
+   "files": {
+    "ground_truth.json": "7daad31361bfcff4c2775c5fe4b91cbfed8c3613a92ce0a0712e55a5ff9bbf95",
+    "plan.pdf": "dc75551f305dcba17255dec4de50fe6c50633fc3fcab3f462c48a2d73f0c4801",
+    "plan.png": "c2291e9b3c130543f49a499bdf0255e305c03999bfcedb0745738a3d74448669"
+   }
+  },
+  {
+   "id": "swiss_47656",
+   "seed": 840287200,
+   "degrade": 0.571,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": 30.697,
+    "extent_m": 28.1,
+    "wall_area_m2": 33.87,
+    "unsupported_wall_share": 0.0009,
+    "n_openings_dropped": 0,
+    "n_walls": 49,
+    "n_openings": 17,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 0.571,
+     "rotation_deg": 1.466
+    }
+   },
+   "phash": "e93994e73066b2c6",
+   "files": {
+    "ground_truth.json": "fcf9f56986e9d29a48f8c8c78131d18288abddf78f9f94711ea8e5322796ba9b",
+    "plan.pdf": "5387a1ad96bbc067538e88841b437b385ac31ed03e64965c4c65e63d581850ce",
+    "plan.png": "c387ebd0ec32b1b5a1ebb3c110f7b5e99759f7e7e33816eedb5d9d487c67b488"
+   }
+  },
+  {
+   "id": "swiss_24612",
+   "seed": 1850111437,
+   "degrade": 1.116,
+   "n_rooms": 22,
+   "stats": {
+    "rotation_deg": 37.471,
+    "extent_m": 24.4,
+    "wall_area_m2": 47.48,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 167,
+    "n_openings": 39,
+    "n_rooms": 22,
+    "degradation": {
+     "strength": 1.116,
+     "rotation_deg": 2.935
+    }
+   },
+   "phash": "af4a96b18c72d28d",
+   "files": {
+    "ground_truth.json": "df2153306f1273f9e00278e2529c11e4d833f68135adfc8de9ec7d2dfc74ca60",
+    "plan.pdf": "6b7a55e2c3b0779c19892efec9665b175ec5aa2ae7d19ba50621f0e71bfb1c7e",
+    "plan.png": "a8a435c7fbab897c6d6ac12e65854ae4ead5b098385ae950770fe1cecb29866a"
+   }
+  },
+  {
+   "id": "swiss_51033",
+   "seed": 3582928305,
+   "degrade": 0.875,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": -42.34,
+    "extent_m": 41.4,
+    "wall_area_m2": 69.65,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 89,
+    "n_openings": 32,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.875,
+     "rotation_deg": 2.493
+    }
+   },
+   "phash": "8fb93de021e6a1d8",
+   "files": {
+    "ground_truth.json": "e6148c6aecb8696c27c7a83212ce0c8d072d12410a9fff12f691dbbe44b5f057",
+    "plan.pdf": "730a01b12424c215612b745d2d9993695a79d2348ac1b47570399c74834d69b4",
+    "plan.png": "df86315b9d3e3a636c881c1318b7a09955021223c6cc69afe72a809418843ce9"
+   }
+  },
+  {
+   "id": "swiss_7513",
+   "seed": 618460289,
+   "degrade": 0.788,
+   "n_rooms": 20,
+   "stats": {
+    "rotation_deg": -21.1,
+    "extent_m": 22.5,
+    "wall_area_m2": 36.06,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 90,
+    "n_openings": 40,
+    "n_rooms": 20,
+    "degradation": {
+     "strength": 0.788,
+     "rotation_deg": -1.617
+    }
+   },
+   "phash": "aa4eb1ac9531c733",
+   "files": {
+    "ground_truth.json": "9ba8c708ce21c32844f02c0d82aecffb4d25973ca1aa801d506153d92305e6a3",
+    "plan.pdf": "24261f62705a0244184bbbe982a5f9e974bb3f1621ebd084c84b99f66a9e58b1",
+    "plan.png": "460d8f00d931f0f4e4d0c430967b0765f3fc1f2bdb352ab37350eec8fafdc965"
+   }
+  },
+  {
+   "id": "swiss_49323",
+   "seed": 3021919499,
+   "degrade": 0.807,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": -23.386,
+    "extent_m": 20.5,
+    "wall_area_m2": 32.31,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 4,
+    "n_walls": 71,
+    "n_openings": 34,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.807,
+     "rotation_deg": 1.895
+    }
+   },
+   "phash": "aa0bb0d6a7c3ce61",
+   "files": {
+    "ground_truth.json": "9c0d94f0f0c54c4190d5724df84b116c9c24c26e075a0ac7c62ac054a2ddfeef",
+    "plan.pdf": "a563017bc04ddd62397ebb99cf45bcec440d4ea95cfab34e5eb276f55ae36d8a",
+    "plan.png": "7d9615888421195d3b78ae54cf410d30fd8fbb2153818a69803efe6decca09bb"
+   }
+  },
+  {
+   "id": "swiss_7568",
+   "seed": 1069950837,
+   "degrade": 0.686,
+   "n_rooms": 11,
+   "stats": {
+    "rotation_deg": 33.042,
+    "extent_m": 13.1,
+    "wall_area_m2": 33.07,
+    "unsupported_wall_share": 0.0153,
+    "n_openings_dropped": 1,
+    "n_walls": 91,
+    "n_openings": 19,
+    "n_rooms": 11,
+    "degradation": {
+     "strength": 0.686,
+     "rotation_deg": -1.227
+    }
+   },
+   "phash": "ffe6908591a39662",
+   "files": {
+    "ground_truth.json": "17558f9c494f03e5182dd4967993e25426d41b2b18fdf943b61c94fd5fae1d9b",
+    "plan.pdf": "c053bc48d610ed87831610a1aa3d4cc6cf2f730b2e201f063d86625da038e83a",
+    "plan.png": "f5113a2ffe58b015e8ebcacc97f9bb3107f4e3ee7b467bf2029676bfec737f69"
+   }
+  },
+  {
+   "id": "swiss_26026",
+   "seed": 2616322728,
+   "degrade": 0.579,
+   "n_rooms": 24,
+   "stats": {
+    "rotation_deg": 30.658,
+    "extent_m": 23.1,
+    "wall_area_m2": 49.95,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 137,
+    "n_openings": 42,
+    "n_rooms": 24,
+    "degradation": {
+     "strength": 0.579,
+     "rotation_deg": 1.733
+    }
+   },
+   "phash": "beca9ce0b7618ce0",
+   "files": {
+    "ground_truth.json": "b3f6d91e21a25395a480f44b7757d549e52261d4ab675e122c4a32fbcde03a7a",
+    "plan.pdf": "d261315809da495f3cecf7ada229447743b16328a36a5d3ed8cc978debb4fdf5",
+    "plan.png": "2e52c84eb0e60df6dc8b66224e7c27990032cc15da8b32eefa6839a9f1dbbe3f"
+   }
+  },
+  {
+   "id": "swiss_25711",
+   "seed": 2232697975,
+   "degrade": 0.981,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": 22.705,
+    "extent_m": 15.3,
+    "wall_area_m2": 29.34,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 82,
+    "n_openings": 31,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.981,
+     "rotation_deg": -2.494
+    }
+   },
+   "phash": "faf2c1c9cc86c4c6",
+   "files": {
+    "ground_truth.json": "01a1b4e32b2428eb3dcafd49696298f543b863b09ec3e839da64ea01e4848df3",
+    "plan.pdf": "25c9bec2eb9351e344aca22ffef6f2c1a26fe0a1d42715cb096bf9a1e44c3188",
+    "plan.png": "c59bd3653b2d38b31b55e31fab6bc04a09affa8126d87f7b58991506af96d8fb"
+   }
+  },
+  {
+   "id": "swiss_2043",
+   "seed": 4069754398,
+   "degrade": 0.246,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": 39.5,
+    "extent_m": 21.7,
+    "wall_area_m2": 28.92,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 83,
+    "n_openings": 32,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.246,
+     "rotation_deg": 0.621
+    }
+   },
+   "phash": "bb6c94c386c195ec",
+   "files": {
+    "ground_truth.json": "131cf430c51054e5880554918a559adaa95edf59e3eab38d98f0832b71402e8e",
+    "plan.pdf": "2d2e5dcf26f08bcd32951f110c4d7a5c96b548d7cb535cfecbc1d959d41789f9",
+    "plan.png": "31e05338d8b1735898c3fb36d2a3f82ff0af476b614f0168bd4f54469661eb46"
+   }
+  },
+  {
+   "id": "swiss_47594",
+   "seed": 2419993975,
+   "degrade": 1.088,
+   "n_rooms": 29,
+   "stats": {
+    "rotation_deg": -6.81,
+    "extent_m": 29.2,
+    "wall_area_m2": 45.7,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 146,
+    "n_openings": 56,
+    "n_rooms": 29,
+    "degradation": {
+     "strength": 1.088,
+     "rotation_deg": -1.878
+    }
+   },
+   "phash": "eb69e4b6949891d1",
+   "files": {
+    "ground_truth.json": "26bfb88b74f7a7b6a1a78a36ec62422a072c052a7eecdb626f2b034a379177c0",
+    "plan.pdf": "b535359c37b2a3c50edd5b4645cf81d0626396e8bc8c0d9917a48a0756cffb11",
+    "plan.png": "269ac0123fe4873b4097d16970d284962e6d29cc02056aa27713658420f1daaf"
+   }
+  },
+  {
+   "id": "swiss_4596",
+   "seed": 1578922461,
+   "degrade": 0.979,
+   "n_rooms": 18,
+   "stats": {
+    "rotation_deg": -29.164,
+    "extent_m": 20.6,
+    "wall_area_m2": 40.1,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 135,
+    "n_openings": 40,
+    "n_rooms": 18,
+    "degradation": {
+     "strength": 0.979,
+     "rotation_deg": 1.794
+    }
+   },
+   "phash": "bac88df38cca918d",
+   "files": {
+    "ground_truth.json": "6dd625faaf354591cb80aa636ea1dc3dfe9eabb669f0b7d7f256408d6ad7fe36",
+    "plan.pdf": "632d0543cbf0e2fc5227f01f09341a3d6ed75a0bcf92beda326e7104e6a2a4b6",
+    "plan.png": "901941ef63a8e07f670748737370f34ed51dcb65d0d6e65ef8ea2308533e4a93"
+   }
+  },
+  {
+   "id": "swiss_5993",
+   "seed": 2145267707,
+   "degrade": 0.852,
+   "n_rooms": 47,
+   "stats": {
+    "rotation_deg": -22.385,
+    "extent_m": 40.0,
+    "wall_area_m2": 85.18,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 214,
+    "n_openings": 70,
+    "n_rooms": 47,
+    "degradation": {
+     "strength": 0.852,
+     "rotation_deg": 1.894
+    }
+   },
+   "phash": "afb1984ad207d8ec",
+   "files": {
+    "ground_truth.json": "601a2093e577226a3e7d134801d50db87052d478b7fef1f4a45dc6d636d3c4bc",
+    "plan.pdf": "17531ff3181bbe0893969ad21520344b636520a03b33c02c3cfadf417954843b",
+    "plan.png": "e455a115b202a7efe07a91ff64818f64d1d702050e164a4454340576ba57a135"
+   }
+  },
+  {
+   "id": "swiss_44429",
+   "seed": 1439787345,
+   "degrade": 0.323,
+   "n_rooms": 37,
+   "stats": {
+    "rotation_deg": 4.713,
+    "extent_m": 43.5,
+    "wall_area_m2": 92.5,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 248,
+    "n_openings": 59,
+    "n_rooms": 37,
+    "degradation": {
+     "strength": 0.323,
+     "rotation_deg": -0.727
+    }
+   },
+   "phash": "b694cb639de28d18",
+   "files": {
+    "ground_truth.json": "c7b7963eec888bc862b5e142040e029d5fd202d4e0f26aaad327d18b81c287bf",
+    "plan.pdf": "f2fb042a6cdc13ffd79d01dd19cfa022f01ef78edfa21b905aa79574a9c7606a",
+    "plan.png": "03a35b3b7ad6d2e52a261b81d2f9c8ef0c270d08d6d6df5d3d7739432b12f558"
+   }
+  },
+  {
+   "id": "swiss_484",
+   "seed": 1340092592,
+   "degrade": 0.289,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": 33.652,
+    "extent_m": 16.2,
+    "wall_area_m2": 31.16,
+    "unsupported_wall_share": 0.0005,
+    "n_openings_dropped": 2,
+    "n_walls": 152,
+    "n_openings": 29,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.289,
+     "rotation_deg": 0.851
+    }
+   },
+   "phash": "bac7c046b3e8c467",
+   "files": {
+    "ground_truth.json": "98ea82acfdc319ce8ac85675b39459752a583b2f3f4c2eeec2fe7852a797a6fb",
+    "plan.pdf": "06ee87cdef8b11f4d045bbe5ac66efff9d64de70e0c262805f65925571964587",
+    "plan.png": "57443048294f5bd54ad6247e675bce1e0024591064cab81c53c7480300cc89b9"
+   }
+  },
+  {
+   "id": "swiss_9089",
+   "seed": 3667587424,
+   "degrade": 0.194,
+   "n_rooms": 49,
+   "stats": {
+    "rotation_deg": -11.542,
+    "extent_m": 42.3,
+    "wall_area_m2": 89.27,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 237,
+    "n_openings": 76,
+    "n_rooms": 49,
+    "degradation": {
+     "strength": 0.194,
+     "rotation_deg": 0.486
+    }
+   },
+   "phash": "ee318566843eb14f",
+   "files": {
+    "ground_truth.json": "f8b4078167a976ea45439d97898d42bc83c7a27f7e7df75705f83267bf01357d",
+    "plan.pdf": "513f22ee0655a3f9b8efd1d357db01239dab909dcaed881f7c7fbf395e44e6af",
+    "plan.png": "d7c196e6e62f01cea7365fa3034720c2a761cfcc6fb05074b1576cd9910e6e0c"
+   }
+  },
+  {
+   "id": "swiss_51640",
+   "seed": 3463909894,
+   "degrade": 0.627,
+   "n_rooms": 25,
+   "stats": {
+    "rotation_deg": -2.401,
+    "extent_m": 39.7,
+    "wall_area_m2": 55.02,
+    "unsupported_wall_share": 0.0023,
+    "n_openings_dropped": 0,
+    "n_walls": 142,
+    "n_openings": 46,
+    "n_rooms": 25,
+    "degradation": {
+     "strength": 0.627,
+     "rotation_deg": 1.718
+    }
+   },
+   "phash": "aeb5d0cc93caa5c8",
+   "files": {
+    "ground_truth.json": "b73eea095b7c59a150b72192395ba9dfd6d58ddd2e17138226ea22b388a3fea1",
+    "plan.pdf": "00bf6c6ddebab1b671f1a91be3b93be9e7646a0c90c3727bd6bdaf48ba7b7099",
+    "plan.png": "caff7543034d42833bbad5513bfb7c117856cf3829fb3aa55897a9631e7149c6"
+   }
+  },
+  {
+   "id": "swiss_11512",
+   "seed": 851711720,
+   "degrade": 0.496,
+   "n_rooms": 28,
+   "stats": {
+    "rotation_deg": 30.104,
+    "extent_m": 32.4,
+    "wall_area_m2": 53.21,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 159,
+    "n_openings": 49,
+    "n_rooms": 28,
+    "degradation": {
+     "strength": 0.496,
+     "rotation_deg": 1.001
+    }
+   },
+   "phash": "f6618917889fd436",
+   "files": {
+    "ground_truth.json": "eb3ae7ba885763a21ee674055f7fabc8c8def8462e4505a60ccf992460c775fb",
+    "plan.pdf": "69b7264089e04d494870e7a5d7906ec17d20574b6e16a4b67651cfbc73a0415b",
+    "plan.png": "c07e1982c40cdcb7b5483ed7404844ad0c48d6d7f189ab7459df4bd1f80324e6"
+   }
+  },
+  {
+   "id": "swiss_8281",
+   "seed": 1874964243,
+   "degrade": 0.758,
+   "n_rooms": 16,
+   "stats": {
+    "rotation_deg": 33.486,
+    "extent_m": 23.1,
+    "wall_area_m2": 48.96,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 90,
+    "n_openings": 30,
+    "n_rooms": 16,
+    "degradation": {
+     "strength": 0.758,
+     "rotation_deg": -1.988
+    }
+   },
+   "phash": "fe87b9c49cc3e048",
+   "files": {
+    "ground_truth.json": "88c58a8cfe496b8383350de51b02b5fe9a57b405dc4970416e5dba93934b572e",
+    "plan.pdf": "645a8b4cc2fb4d7b3a8325c7d937569e85a81c8fd317267b6be555c20464bf59",
+    "plan.png": "d40d7f34cfa6a08ef72d8181b8d28265634bc724b65be6ce2b84901fe1a94f8c"
+   }
+  },
+  {
+   "id": "swiss_2281",
+   "seed": 4088923002,
+   "degrade": 0.906,
+   "n_rooms": 27,
+   "stats": {
+    "rotation_deg": 40.0,
+    "extent_m": 19.0,
+    "wall_area_m2": 44.21,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 127,
+    "n_openings": 32,
+    "n_rooms": 27,
+    "degradation": {
+     "strength": 0.906,
+     "rotation_deg": -1.841
+    }
+   },
+   "phash": "fb8d95b2e466c0c4",
+   "files": {
+    "ground_truth.json": "c3c8d8795be7dd30cccd8b729cd8332a9b65a5b12075ed20522af6d723b0a22a",
+    "plan.pdf": "5ef47753aa3251ab3db86a1c54bb3c31d0aa3ebb808a99977961f4b818752479",
+    "plan.png": "f634b353cea6954e279ef03b60af1979e675fc1d56d973d7948a44d67deea68c"
+   }
+  },
+  {
+   "id": "swiss_4601",
+   "seed": 1187173687,
+   "degrade": 0.258,
+   "n_rooms": 18,
+   "stats": {
+    "rotation_deg": -29.397,
+    "extent_m": 20.1,
+    "wall_area_m2": 41.44,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 142,
+    "n_openings": 41,
+    "n_rooms": 18,
+    "degradation": {
+     "strength": 0.258,
+     "rotation_deg": -0.546
+    }
+   },
+   "phash": "faa694c1b94394e3",
+   "files": {
+    "ground_truth.json": "fbd84c090ef3385b922bd5eb9ed02bbce2a4571051779200fbc5e8df67777833",
+    "plan.pdf": "6b5059f44672538c715c96621f2605f156e4763ed3888ccac7a33b473ee68386",
+    "plan.png": "ff66b14e853e151451dd6e529565e1249a94188431e619e6b8564ad5be24c38f"
+   }
+  },
+  {
+   "id": "swiss_42424",
+   "seed": 64562341,
+   "degrade": 0.215,
+   "n_rooms": 9,
+   "stats": {
+    "rotation_deg": 10.203,
+    "extent_m": 10.1,
+    "wall_area_m2": 16.87,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 47,
+    "n_openings": 14,
+    "n_rooms": 9,
+    "degradation": {
+     "strength": 0.215,
+     "rotation_deg": -0.604
+    }
+   },
+   "phash": "ef4b90949c66c639",
+   "files": {
+    "ground_truth.json": "c4cc9c8b9fcf71e37823e3643ca823b663986d349332f87b6e12f7a96490b507",
+    "plan.pdf": "16ad8ad5c61f45bb33bb2c662c828769c6f3a3c6162290e4270b08527ace7b20",
+    "plan.png": "9b61066a891b7ba69534dc2629422011a5defce9c551d67bf0ae2e875c1f56a2"
+   }
+  },
+  {
+   "id": "swiss_3050",
+   "seed": 731922055,
+   "degrade": 0.788,
+   "n_rooms": 13,
+   "stats": {
+    "rotation_deg": -28.77,
+    "extent_m": 16.1,
+    "wall_area_m2": 26.57,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 87,
+    "n_openings": 25,
+    "n_rooms": 13,
+    "degradation": {
+     "strength": 0.788,
+     "rotation_deg": -1.196
+    }
+   },
+   "phash": "ef0c90579661d5a3",
+   "files": {
+    "ground_truth.json": "e5134724a1ce887b95b8e6cacb7531a384ff8c7e48338348b0cab588bebc3e1d",
+    "plan.pdf": "e702f65beae594bded97a2189f707fbb315abc96db55ad8211538769512d81f9",
+    "plan.png": "809b673e0a4a26dacdd307a6787ef6a5e9dc7f06611ded4d49a83bba43a01688"
+   }
+  },
+  {
+   "id": "swiss_2429",
+   "seed": 3163301263,
+   "degrade": 0.127,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": 20.241,
+    "extent_m": 15.6,
+    "wall_area_m2": 24.28,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 56,
+    "n_openings": 24,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 0.127,
+     "rotation_deg": -0.254
+    }
+   },
+   "phash": "af6594c398ce91d1",
+   "files": {
+    "ground_truth.json": "d61d9d5af41d97aec0ed56210036892d0e644fc266b1cccc68f88af4772c0d77",
+    "plan.pdf": "aa9b6ae3d079d2af782f069fe1beedb8bbf4c15d62c45706757730b2ffedbb1e",
+    "plan.png": "bff5f9a465ddbc732f913bf2b2239525865b35ba78d32546779d423454d2d02e"
+   }
+  },
+  {
+   "id": "swiss_39679",
+   "seed": 3177173037,
+   "degrade": 1.101,
+   "n_rooms": 11,
+   "stats": {
+    "rotation_deg": 39.418,
+    "extent_m": 27.1,
+    "wall_area_m2": 57.53,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 123,
+    "n_openings": 43,
+    "n_rooms": 11,
+    "degradation": {
+     "strength": 1.101,
+     "rotation_deg": -2.024
+    }
+   },
+   "phash": "ab54b583b469cd38",
+   "files": {
+    "ground_truth.json": "6408ae06ec46277c3ed10e3b85787739b8afb29b6761a4702d611e7127d6d7af",
+    "plan.pdf": "82d4364e612410023d68a03900bc607bc47efb8f2424acb0c256f29f75ca77f7",
+    "plan.png": "ae1678616469cb99c444cd6010d69e6479e5fb613d757a7fa54ceabf2758856b"
+   }
+  },
+  {
+   "id": "swiss_25675",
+   "seed": 1014985466,
+   "degrade": 0.691,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": 14.143,
+    "extent_m": 15.5,
+    "wall_area_m2": 31.56,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 74,
+    "n_openings": 30,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.691,
+     "rotation_deg": -1.15
+    }
+   },
+   "phash": "ba46d96395cc944d",
+   "files": {
+    "ground_truth.json": "a730bf0c6a3142d85ff370b929d2c97ee4eccc92576730638592302bf179fc69",
+    "plan.pdf": "4b61312aae117c1c1fbc620c59edc070dd1027c60bcd037adeea3f91ef940403",
+    "plan.png": "4d9e9b287d86a0eb37016b9289956ebab672b3ee69fc5944e1a2077e2b586e4a"
+   }
+  },
+  {
+   "id": "swiss_26401",
+   "seed": 3410272645,
+   "degrade": 0.936,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 4.118,
+    "extent_m": 15.9,
+    "wall_area_m2": 31.86,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 148,
+    "n_openings": 27,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.936,
+     "rotation_deg": 2.466
+    }
+   },
+   "phash": "ee96e99691ca9149",
+   "files": {
+    "ground_truth.json": "4fef3faea2509c2848bbf1da7b91267b89a007813a200b0eaecd4a684c84af38",
+    "plan.pdf": "e61a2a39037982d05188fb379cee9093e2805e91fbae73f1cf8e300d83ac2677",
+    "plan.png": "9a364d01fb9df815ac39f4897cf8bc97b28a1dbf8aa51de0096bd3a3bca67126"
+   }
+  },
+  {
+   "id": "swiss_42459",
+   "seed": 3659692623,
+   "degrade": 0.602,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": -0.577,
+    "extent_m": 14.2,
+    "wall_area_m2": 38.7,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 71,
+    "n_openings": 23,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.602,
+     "rotation_deg": 1.106
+    }
+   },
+   "phash": "fbc294c59167949c",
+   "files": {
+    "ground_truth.json": "48951ab11b1c0c6a9074d1239b5823560950793134fe163695be834ddde8dd5d",
+    "plan.pdf": "dafe918dadeec0ca486b7a91a625b04171fbbf6c37dfa3c97bdee7ab08ebeca5",
+    "plan.png": "8929c955eda37ef61af7cdefff77e3d4a7e5134bbfe52d467888f7a0b9737abc"
+   }
+  },
+  {
+   "id": "swiss_8125",
+   "seed": 3043788033,
+   "degrade": 0.715,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": 31.743,
+    "extent_m": 13.0,
+    "wall_area_m2": 28.4,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 58,
+    "n_openings": 21,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 0.715,
+     "rotation_deg": -1.75
+    }
+   },
+   "phash": "fae3c18c84c4d33b",
+   "files": {
+    "ground_truth.json": "fc4d22346d1d40a43c2a74061ae49cee7a86b111e044c632953d404075442caf",
+    "plan.pdf": "601ac323cc855b3e8d4af841b0ca3e59ec83a37a866a7efd29767b12a15dff0c",
+    "plan.png": "d2f8540e0a0ad31e447ef7318fde67b1ff25cd51caeb802879d71252c579e9fd"
+   }
+  },
+  {
+   "id": "swiss_14140",
+   "seed": 2316259554,
+   "degrade": 0.264,
+   "n_rooms": 36,
+   "stats": {
+    "rotation_deg": 33.271,
+    "extent_m": 40.4,
+    "wall_area_m2": 70.7,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 162,
+    "n_openings": 60,
+    "n_rooms": 36,
+    "degradation": {
+     "strength": 0.264,
+     "rotation_deg": 0.492
+    }
+   },
+   "phash": "bbe2918dc4c9b433",
+   "files": {
+    "ground_truth.json": "e7ede550e0c56d03ac2755d745cfb3aca92b50af9c7690ce7092902e41f10812",
+    "plan.pdf": "4bc29b95c0207361f58bef2ff9b5cecc3e71c50c265e2681a4563f976d0e877a",
+    "plan.png": "aa04e17448a719a9d706e69fea88357d8cc04b18f972e001ca98ef8bd861bfc8"
+   }
+  },
+  {
+   "id": "swiss_44962",
+   "seed": 3360301022,
+   "degrade": 0.247,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": -33.769,
+    "extent_m": 17.1,
+    "wall_area_m2": 28.14,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 69,
+    "n_openings": 27,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.247,
+     "rotation_deg": -0.71
+    }
+   },
+   "phash": "ffc59073948987c4",
+   "files": {
+    "ground_truth.json": "ee411895e60e98e1e81975183c71371a385b746a5493838be3219e32048b4d69",
+    "plan.pdf": "bef6325b4e45a2b04e11b5b48899f88f423de67a7db5afe675cf8a65be993c27",
+    "plan.png": "5208476d7cac9d5ae7d8bce97db0f118d44392404934d095ed610d5571a0550d"
+   }
+  },
+  {
+   "id": "swiss_2288",
+   "seed": 438404175,
+   "degrade": 0.477,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 28.5,
+    "extent_m": 19.1,
+    "wall_area_m2": 26.17,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 84,
+    "n_openings": 28,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.477,
+     "rotation_deg": -1.078
+    }
+   },
+   "phash": "ff6d94e185079192",
+   "files": {
+    "ground_truth.json": "1965096486266f5bd8cf12fb1c2b1a8c53d269783890b437b3f1efc8f74e5755",
+    "plan.pdf": "efcccd85f7c71a28b7982665707fe0533bb81b73e6d4c755fa6434d107a5f2b0",
+    "plan.png": "e04361e4f03f7f5fb941b25726456af6fe7b46b1d0a2639b4a98d72a0228bac4"
+   }
+  },
+  {
+   "id": "swiss_18392",
+   "seed": 2898591317,
+   "degrade": 0.449,
+   "n_rooms": 26,
+   "stats": {
+    "rotation_deg": -5.523,
+    "extent_m": 40.1,
+    "wall_area_m2": 75.81,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 99,
+    "n_openings": 27,
+    "n_rooms": 26,
+    "degradation": {
+     "strength": 0.449,
+     "rotation_deg": -0.971
+    }
+   },
+   "phash": "af3681e8c47ac2cd",
+   "files": {
+    "ground_truth.json": "e478ed64aab5405a373ac554fee2845b987fd3fec5d0fa5c218006ea7da39ac1",
+    "plan.pdf": "db30570da888f202e0a5b3636a511a4828acc3d5f3538a6a745589895bbc4928",
+    "plan.png": "40692a1abc51b15332d0e997db1999e1543dec50625c7e43c8a3335930bd72d9"
+   }
+  },
+  {
+   "id": "swiss_13140",
+   "seed": 2646606709,
+   "degrade": 0.558,
+   "n_rooms": 11,
+   "stats": {
+    "rotation_deg": -19.575,
+    "extent_m": 23.5,
+    "wall_area_m2": 69.9,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 116,
+    "n_openings": 30,
+    "n_rooms": 11,
+    "degradation": {
+     "strength": 0.558,
+     "rotation_deg": 1.474
+    }
+   },
+   "phash": "fb438834b648b667",
+   "files": {
+    "ground_truth.json": "52320a325234ec5d045dad9f5d50f9e6454ef59c1184ba66014008fe69eeb249",
+    "plan.pdf": "4a11ec73e8df0dca1d7c033cdeacad762501f89bb4f582c79541a45321f90967",
+    "plan.png": "ba61aa70f00a7a5eaa95fee64904ec2966820b76ffc0e3119f319c1e4171e5b8"
+   }
+  },
+  {
+   "id": "swiss_2403",
+   "seed": 344194501,
+   "degrade": 0.395,
+   "n_rooms": 12,
+   "stats": {
+    "rotation_deg": 21.0,
+    "extent_m": 16.4,
+    "wall_area_m2": 22.09,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 55,
+    "n_openings": 18,
+    "n_rooms": 12,
+    "degradation": {
+     "strength": 0.395,
+     "rotation_deg": 0.759
+    }
+   },
+   "phash": "fae490cb9dccb091",
+   "files": {
+    "ground_truth.json": "45c10bf1fbc9795e3041bda09458286ee9f870dc126e05c525b9f9ffb5e4a986",
+    "plan.pdf": "dab2fc26483b6299bfcc689bbbcd2cb7eec57f7106956535c2d996ff9b40a655",
+    "plan.png": "ba383fd7850eb16cd2ddca17d8c4d656b1d8fddc7d7eb623eb6550fff3cc88fb"
+   }
+  },
+  {
+   "id": "swiss_14199",
+   "seed": 2963191799,
+   "degrade": 0.248,
+   "n_rooms": 42,
+   "stats": {
+    "rotation_deg": 32.148,
+    "extent_m": 39.9,
+    "wall_area_m2": 69.45,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 4,
+    "n_walls": 187,
+    "n_openings": 64,
+    "n_rooms": 42,
+    "degradation": {
+     "strength": 0.248,
+     "rotation_deg": -0.689
+    }
+   },
+   "phash": "fe399dc2c36c84c8",
+   "files": {
+    "ground_truth.json": "bb39c9f684af56f5d667175b3f77777b20a6fd4c262cdc45e4549a4c30ee5c0a",
+    "plan.pdf": "eddb930408fca344644b0d007513d2d5b9497344ed6588f0079f30eefc96ff6b",
+    "plan.png": "2f3afc139ab3a7099bbff3b131663eccf8e4c0be723f2b122cc7b2c19a1883f9"
+   }
+  },
+  {
+   "id": "swiss_44435",
+   "seed": 1962892923,
+   "degrade": 0.658,
+   "n_rooms": 36,
+   "stats": {
+    "rotation_deg": 4.066,
+    "extent_m": 43.4,
+    "wall_area_m2": 92.17,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 245,
+    "n_openings": 58,
+    "n_rooms": 36,
+    "degradation": {
+     "strength": 0.658,
+     "rotation_deg": -1.891
+    }
+   },
+   "phash": "b2bd49e39ca2cd88",
+   "files": {
+    "ground_truth.json": "65665bcfe6531dbcaf1021aed03918d9847bb4f2a99fae6e0adf3316126d93f2",
+    "plan.pdf": "78ccfcb0b2a0391d481bc5dae08e33e3619fed088fcbd751fd8613e48f13ccb6",
+    "plan.png": "0a204dd86b0c633083a2f8f88fd221e48b17000049b1f25d2137586a5a3e394d"
+   }
+  },
+  {
+   "id": "swiss_7565",
+   "seed": 4168859132,
+   "degrade": 0.354,
+   "n_rooms": 11,
+   "stats": {
+    "rotation_deg": 32.859,
+    "extent_m": 13.0,
+    "wall_area_m2": 33.28,
+    "unsupported_wall_share": 0.0001,
+    "n_openings_dropped": 0,
+    "n_walls": 83,
+    "n_openings": 20,
+    "n_rooms": 11,
+    "degradation": {
+     "strength": 0.354,
+     "rotation_deg": -0.829
+    }
+   },
+   "phash": "ae4691c49433d767",
+   "files": {
+    "ground_truth.json": "14692e54eaf828c0a32e1650f9770bc6137ad7c72673886efeb2a98dc3196c1e",
+    "plan.pdf": "4f3667e96365c14d7ad0218a2ba54a0caa0fdb19095f32193e498dcb9fa7d502",
+    "plan.png": "fdff604d1d4540668772aad016c82f89f0e85a157eeb944b2f1bb6b2f8a4960a"
+   }
+  },
+  {
+   "id": "swiss_2295",
+   "seed": 545687231,
+   "degrade": 0.598,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 28.5,
+    "extent_m": 15.9,
+    "wall_area_m2": 23.18,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 85,
+    "n_openings": 24,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.598,
+     "rotation_deg": 1.266
+    }
+   },
+   "phash": "fae9a1c6d28984d6",
+   "files": {
+    "ground_truth.json": "8448bb246ec68a049f877d8658a0069e50b7a551f066278e2cfad6a944c9b729",
+    "plan.pdf": "77e9b4d4d3e8ccf44c2c53e637b3ddb7af946a8fb40cecc3c84c753ad7e1a701",
+    "plan.png": "c76794344db95830f02d2dfa6032cbbae94c284059ffab3b4c3efe272fcedee5"
+   }
+  },
+  {
+   "id": "swiss_48302",
+   "seed": 3802768826,
+   "degrade": 1.129,
+   "n_rooms": 28,
+   "stats": {
+    "rotation_deg": -20.31,
+    "extent_m": 37.0,
+    "wall_area_m2": 73.49,
+    "unsupported_wall_share": 0.0095,
+    "n_openings_dropped": 0,
+    "n_walls": 236,
+    "n_openings": 58,
+    "n_rooms": 28,
+    "degradation": {
+     "strength": 1.129,
+     "rotation_deg": -2.732
+    }
+   },
+   "phash": "fbf3b0b2e0a48d88",
+   "files": {
+    "ground_truth.json": "83b691197d75efda79534985f86920e2f875d45247ff6bc906fef45ab663914b",
+    "plan.pdf": "90c3504ec5809f8cd3a2e6ae5145820343b0c948e902435a87b9ed4f91b5ac04",
+    "plan.png": "abc07108aaa7d16dba97e4a72fe91f47e5f18358cbfb90d41c00937b99f56674"
+   }
+  },
+  {
+   "id": "swiss_9091",
+   "seed": 1384066129,
+   "degrade": 0.528,
+   "n_rooms": 49,
+   "stats": {
+    "rotation_deg": -11.542,
+    "extent_m": 42.3,
+    "wall_area_m2": 89.27,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 239,
+    "n_openings": 76,
+    "n_rooms": 49,
+    "degradation": {
+     "strength": 0.528,
+     "rotation_deg": 1.523
+    }
+   },
+   "phash": "fea185e6949cb149",
+   "files": {
+    "ground_truth.json": "d559dad4f619887648f99f506c8be4c49a099749c5badf377299767fceb2ae94",
+    "plan.pdf": "731945e049ae905a9725b3e091938dd3371bae2c083a388c3934f270fec79900",
+    "plan.png": "d1f696ec0150ef665535f8e2e0913291c7a7a1896bbf90b1d28ec7c922182994"
+   }
+  },
+  {
+   "id": "swiss_329",
+   "seed": 966922508,
+   "degrade": 0.258,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": 5.379,
+    "extent_m": 16.7,
+    "wall_area_m2": 27.71,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 98,
+    "n_openings": 25,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.258,
+     "rotation_deg": -0.393
+    }
+   },
+   "phash": "facad0a595ccc4b1",
+   "files": {
+    "ground_truth.json": "e5057e040cd764c6e79c6e897fdf87f1273017127d8f79049718abfdebf4c642",
+    "plan.pdf": "e174c5116f33c0c5bd0582a9016e63aa219ff380a951f6c571d1bf607325c09a",
+    "plan.png": "c76424b863684bf9228a1e9448ee22a9c9b422fc114d276223f39aedcb1c1fc2"
+   }
+  },
+  {
+   "id": "swiss_42327",
+   "seed": 83092455,
+   "degrade": 0.125,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": 11.641,
+    "extent_m": 18.6,
+    "wall_area_m2": 40.53,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 120,
+    "n_openings": 28,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.125,
+     "rotation_deg": -0.234
+    }
+   },
+   "phash": "bb1990c0c266edf3",
+   "files": {
+    "ground_truth.json": "e803b3035c827652839bb0920552c2b8db8fb93358515caad365ced6d9c9986d",
+    "plan.pdf": "886f6f10ee253813e0a0844f6b45b0bf3859d347ec2b0a5e18f5183d8927153c",
+    "plan.png": "c40981b383397f4c550e07e0a9963e0664dcca59fab94fd147a14df3a53777ed"
+   }
+  },
+  {
+   "id": "swiss_15250",
+   "seed": 1658597183,
+   "degrade": 1.013,
+   "n_rooms": 4,
+   "stats": {
+    "rotation_deg": 34.595,
+    "extent_m": 8.4,
+    "wall_area_m2": 7.87,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 20,
+    "n_openings": 7,
+    "n_rooms": 4,
+    "degradation": {
+     "strength": 1.013,
+     "rotation_deg": 1.905
+    }
+   },
+   "phash": "a91c94d386679b9c",
+   "files": {
+    "ground_truth.json": "e5172aff4678d79e3ea42713dda9021c2b6f947e07a0eecd54cbdebc6e422b26",
+    "plan.pdf": "63fe0bc4f3f0d7097c88715ced78cdd051d9793c495efe3dcb4919b51a82765b",
+    "plan.png": "114603aa6d48316008a065c3b773a8a573b85da6abab9ec1feeb9020868a8e3a"
+   }
+  },
+  {
+   "id": "swiss_11081",
+   "seed": 2301833088,
+   "degrade": 0.957,
+   "n_rooms": 29,
+   "stats": {
+    "rotation_deg": 26.041,
+    "extent_m": 29.2,
+    "wall_area_m2": 62.03,
+    "unsupported_wall_share": 0.0004,
+    "n_openings_dropped": 0,
+    "n_walls": 190,
+    "n_openings": 56,
+    "n_rooms": 29,
+    "degradation": {
+     "strength": 0.957,
+     "rotation_deg": 1.931
+    }
+   },
+   "phash": "ba09c44ce16e9dd6",
+   "files": {
+    "ground_truth.json": "53b5c1588b6e441cbc006e9fd1c83bfa91b23733dd61d487e8309f69747acd6f",
+    "plan.pdf": "e9509ae59988bacf08d32c7e4966eec790adb81bc45858d0fb92ebae8671c793",
+    "plan.png": "5457e85759e3f20b303aa53c30737fd4227dfe70fe64a53fe18f7ae40f6161d6"
+   }
+  },
+  {
+   "id": "swiss_9461",
+   "seed": 3085256582,
+   "degrade": 0.397,
+   "n_rooms": 26,
+   "stats": {
+    "rotation_deg": -32.403,
+    "extent_m": 33.8,
+    "wall_area_m2": 64.35,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 101,
+    "n_openings": 46,
+    "n_rooms": 26,
+    "degradation": {
+     "strength": 0.397,
+     "rotation_deg": -1.103
+    }
+   },
+   "phash": "aa1797c1e93d90ca",
+   "files": {
+    "ground_truth.json": "2bdbc4904f3892c16cd8714032c5f7541600b5b9e9e0e464e08e79aaae67dc87",
+    "plan.pdf": "3e0f77712bfcf3418ebfdbf70a7398e5f6666ff8dd209fec8d8f36b3db1a8400",
+    "plan.png": "dfadf2f36837e6dc6163562d7b8e7cc535889ee15fd4d5768103fb0ac2ad5437"
+   }
+  },
+  {
+   "id": "swiss_5986",
+   "seed": 1103733048,
+   "degrade": 0.985,
+   "n_rooms": 48,
+   "stats": {
+    "rotation_deg": -21.928,
+    "extent_m": 40.0,
+    "wall_area_m2": 88.32,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 227,
+    "n_openings": 73,
+    "n_rooms": 48,
+    "degradation": {
+     "strength": 0.985,
+     "rotation_deg": 1.679
+    }
+   },
+   "phash": "ee4c999796b091e1",
+   "files": {
+    "ground_truth.json": "33ebbff8701df00ecc06f1f973ebbb033b80e1c2dcbffca32f17419320dba0d1",
+    "plan.pdf": "44a9104fed50e029ecc170c0298d51e49239c5925d9bc8404b498645dd72d59f",
+    "plan.png": "9555dbfeb2b364824b5c853e59cfc086656c902e561ad596a479c9231ace34cc"
+   }
+  },
+  {
+   "id": "swiss_26503",
+   "seed": 3005174972,
+   "degrade": 1.11,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": 3.666,
+    "extent_m": 15.7,
+    "wall_area_m2": 31.62,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 166,
+    "n_openings": 25,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 1.11,
+     "rotation_deg": 3.322
+    }
+   },
+   "phash": "aee785cc91cd9033",
+   "files": {
+    "ground_truth.json": "b08b307418db717149e6f8fb58f14bf6ba1af5d9a585e704c950c7b725beeaed",
+    "plan.pdf": "6744db96815d478e53196e32016923cc1a6801d5d385047b713b6d56ede12bc3",
+    "plan.png": "c78461a952b932a702cda6e0165177f28e896e353c54573c555d1ce45ab31e87"
+   }
+  },
+  {
+   "id": "swiss_2296",
+   "seed": 209543082,
+   "degrade": 1.05,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 28.5,
+    "extent_m": 16.2,
+    "wall_area_m2": 24.2,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 85,
+    "n_openings": 24,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 1.05,
+     "rotation_deg": -2.651
+    }
+   },
+   "phash": "fbcd90e2904c95c7",
+   "files": {
+    "ground_truth.json": "7ef41605a3911e0fbe32823348e90027fa5c1b5114c14678d28a5e8d87da1543",
+    "plan.pdf": "b2e3737ee7ba2e954001862dcbed7a2cfee46f4303708d9237b181437578dbf3",
+    "plan.png": "eb2975804cec8b4a198f8d431eb6633bba982d4b12bc26cbf1fc9bf73b689e3a"
+   }
+  },
+  {
+   "id": "swiss_50671",
+   "seed": 2531643110,
+   "degrade": 1.079,
+   "n_rooms": 25,
+   "stats": {
+    "rotation_deg": -37.03,
+    "extent_m": 31.3,
+    "wall_area_m2": 50.58,
+    "unsupported_wall_share": 0.0189,
+    "n_openings_dropped": 0,
+    "n_walls": 103,
+    "n_openings": 42,
+    "n_rooms": 25,
+    "degradation": {
+     "strength": 1.079,
+     "rotation_deg": 1.638
+    }
+   },
+   "phash": "ea4dbd03e51281fc",
+   "files": {
+    "ground_truth.json": "824c07b66c83e8a10bf5cafbb7b69834106540fb2b248e1b5ddb68c554b139f8",
+    "plan.pdf": "347a7f9b8e4bd4833bec60472833d266c15e736e3daa87d16a66bea09f679ac0",
+    "plan.png": "545d2cf597371e1861419235935e58ec129d42023be53954e876bdb2097ec782"
+   }
+  },
+  {
+   "id": "swiss_13597",
+   "seed": 145476661,
+   "degrade": 0.141,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": 43.356,
+    "extent_m": 20.9,
+    "wall_area_m2": 46.47,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 90,
+    "n_openings": 31,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.141,
+     "rotation_deg": -0.344
+    }
+   },
+   "phash": "bbe69c136c48c8e3",
+   "files": {
+    "ground_truth.json": "dcc23cb5fca68bb1efaf23d686ab48153a0f0a5afe0908579550e16f41039d49",
+    "plan.pdf": "e28d6e9a2a682f06621b88522248b76ec66c1e2c56620f9fd411e80e2acbc939",
+    "plan.png": "7fc7fa6cffe79c738f6638f4d34522898b32c6e3e45af4a48f84e48b4af683ba"
+   }
+  },
+  {
+   "id": "swiss_13803",
+   "seed": 3814452763,
+   "degrade": 1.099,
+   "n_rooms": 20,
+   "stats": {
+    "rotation_deg": -33.503,
+    "extent_m": 18.0,
+    "wall_area_m2": 47.2,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 77,
+    "n_openings": 32,
+    "n_rooms": 20,
+    "degradation": {
+     "strength": 1.099,
+     "rotation_deg": -3.172
+    }
+   },
+   "phash": "e74e18319f33cc31",
+   "files": {
+    "ground_truth.json": "d7f1bf2bfaa816b3c22c83e01804be0299c74baf7c79e493c431b46bb2732c1d",
+    "plan.pdf": "37de92c1818c726d830f10c101ba98465eb4964ed55ff1df678685e7ad85a234",
+    "plan.png": "93d213879cc7cdba31aeb6dd125250e34db154979dbd13ec7a742db96dceaa4f"
+   }
+  },
+  {
+   "id": "swiss_5193",
+   "seed": 354056430,
+   "degrade": 0.284,
+   "n_rooms": 45,
+   "stats": {
+    "rotation_deg": -0.137,
+    "extent_m": 49.1,
+    "wall_area_m2": 103.14,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 200,
+    "n_openings": 89,
+    "n_rooms": 45,
+    "degradation": {
+     "strength": 0.284,
+     "rotation_deg": -0.81
+    }
+   },
+   "phash": "ef62c1148f3d813d",
+   "files": {
+    "ground_truth.json": "b3cbb31b4e87f4c8e557c8a488c9cbbd531b4c1fdfdcd8e1333a2408f644db76",
+    "plan.pdf": "e78b52986016ce15fda3204a8e288660a9dde7cf3208881f42df3183425989bb",
+    "plan.png": "93d1f39ef7ede7790a69b9cbc2812c5b7d10b20b528a07492c69f1caee645884"
+   }
+  },
+  {
+   "id": "swiss_6173",
+   "seed": 358808585,
+   "degrade": 0.401,
+   "n_rooms": 30,
+   "stats": {
+    "rotation_deg": -1.733,
+    "extent_m": 40.3,
+    "wall_area_m2": 66.65,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 149,
+    "n_openings": 60,
+    "n_rooms": 30,
+    "degradation": {
+     "strength": 0.401,
+     "rotation_deg": 0.879
+    }
+   },
+   "phash": "eea5d0c491cab569",
+   "files": {
+    "ground_truth.json": "a1016d6616617b5ad13916a77a3ca01abaa916e51503ffe98ab6970b67b70a33",
+    "plan.pdf": "74b830d860e0004b41d63b08bf1486de218f906c4ba290be2de198f31a939f23",
+    "plan.png": "9f1307c148484dada4a1cecaed2b198d8fd40dc3c8925d44993eb90cdfbe24f1"
+   }
+  },
+  {
+   "id": "swiss_14204",
+   "seed": 367357136,
+   "degrade": 0.197,
+   "n_rooms": 38,
+   "stats": {
+    "rotation_deg": 32.133,
+    "extent_m": 39.5,
+    "wall_area_m2": 67.9,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 5,
+    "n_walls": 187,
+    "n_openings": 63,
+    "n_rooms": 38,
+    "degradation": {
+     "strength": 0.197,
+     "rotation_deg": -0.488
+    }
+   },
+   "phash": "bb42d89fe5499886",
+   "files": {
+    "ground_truth.json": "5f3e8c46100d89aa55a1445a2ec05c1fcdc9bd9295f5e64488dd0344661d64f1",
+    "plan.pdf": "93c4ce356c6ce7d5bd4858b278ff2378715e1401c6bc762d56bcb55c8ceda99b",
+    "plan.png": "137bacff8c5ad2308f003d530dbb38a55cb2fed8de42ebe7513cf6edb4b24ba8"
+   }
+  },
+  {
+   "id": "swiss_42325",
+   "seed": 2183429860,
+   "degrade": 0.78,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": 11.641,
+    "extent_m": 18.6,
+    "wall_area_m2": 40.53,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 118,
+    "n_openings": 28,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.78,
+     "rotation_deg": 2.225
+    }
+   },
+   "phash": "bb19d0c0cb62eda3",
+   "files": {
+    "ground_truth.json": "4e22b2c450c27fd248507a417fa9b326e30d5849edfbd1e36ecda026264335e3",
+    "plan.pdf": "af772f6f8039388fb07af868b13688cdb521da4b78e738bfa260a29199cdfeba",
+    "plan.png": "06e8f4a4e08126ff765218936210f4b061d812c38cc7bdf4b704fbbddcfc99a6"
+   }
+  },
+  {
+   "id": "swiss_44978",
+   "seed": 4203474767,
+   "degrade": 1.024,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": -34.326,
+    "extent_m": 17.1,
+    "wall_area_m2": 28.29,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 65,
+    "n_openings": 27,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 1.024,
+     "rotation_deg": 1.539
+    }
+   },
+   "phash": "fe6295c59433c386",
+   "files": {
+    "ground_truth.json": "b4cb52991ed97cdabe0eda819d119b4982782e5a1ed8b02b85c399339c52a6ea",
+    "plan.pdf": "30bda8b9def3f4e007d707e08d477eab9795bb0ffc5a5ef7e56e992c74bcad5e",
+    "plan.png": "0a16397bf8a9d952fcae196e58f450e22cb60ba34a2edea3d40701dea07cee88"
+   }
+  },
+  {
+   "id": "swiss_2432",
+   "seed": 1861654306,
+   "degrade": 0.267,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": 30.084,
+    "extent_m": 15.6,
+    "wall_area_m2": 28.85,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 68,
+    "n_openings": 34,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.267,
+     "rotation_deg": 0.613
+    }
+   },
+   "phash": "ea4397cc98c2c537",
+   "files": {
+    "ground_truth.json": "6fe60191f7595b6b35d994ac7c8749915c8d3140c407b66a4271b3c30eaeb597",
+    "plan.pdf": "0a221d9e5042f15680e3d5b027fa8c10347b19d5ea4f31ab9521bfabd51b1086",
+    "plan.png": "4a0baa8aa53f174b8959a9646fb95f3b9ff37f145fc3abfb4208e5abb91e9096"
+   }
+  },
+  {
+   "id": "swiss_2297",
+   "seed": 828256336,
+   "degrade": 0.103,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": 28.101,
+    "extent_m": 16.2,
+    "wall_area_m2": 23.74,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 80,
+    "n_openings": 30,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.103,
+     "rotation_deg": -0.257
+    }
+   },
+   "phash": "fa6994e2c1ca9ce2",
+   "files": {
+    "ground_truth.json": "f2dba5d2a2ae1a2e1a0771b6ca8140e932aab8a30072407f935594f3f5c6c95b",
+    "plan.pdf": "3138f5cfe0593547c9c36b5d3941d68ddedc291486af5092d3e95a80efc03552",
+    "plan.png": "b0f7c478c3e23630f5ffb2e186d440caa0f1042ad944b6bd3d7e26ed8f1c12ad"
+   }
+  },
+  {
+   "id": "swiss_14573",
+   "seed": 3735644096,
+   "degrade": 0.215,
+   "n_rooms": 38,
+   "stats": {
+    "rotation_deg": -3.58,
+    "extent_m": 44.3,
+    "wall_area_m2": 85.77,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 4,
+    "n_walls": 140,
+    "n_openings": 64,
+    "n_rooms": 38,
+    "degradation": {
+     "strength": 0.215,
+     "rotation_deg": -0.423
+    }
+   },
+   "phash": "fa438743c90eb665",
+   "files": {
+    "ground_truth.json": "3536e792313d02ce69293dde7bdd87f75c911e25e8801352ab65a03232af4198",
+    "plan.pdf": "1827de164e9be3526fe6a84fc795221e9f5419a75545d3ca18bd804a7f6bd3ca",
+    "plan.png": "7dfa9272a81c81b4bc483f9bda35372668eb22d975b7b9d07dd0b5d4a6c45ea6"
+   }
+  },
+  {
+   "id": "swiss_10249",
+   "seed": 3397000824,
+   "degrade": 0.212,
+   "n_rooms": 44,
+   "stats": {
+    "rotation_deg": -37.698,
+    "extent_m": 44.6,
+    "wall_area_m2": 82.5,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 329,
+    "n_openings": 72,
+    "n_rooms": 44,
+    "degradation": {
+     "strength": 0.212,
+     "rotation_deg": -0.36
+    }
+   },
+   "phash": "fee484c8c4c6e783",
+   "files": {
+    "ground_truth.json": "3bfc20f7a9817548b0b7dfea6d91c3fe9d385816af0e9149b1b03be685ad800b",
+    "plan.pdf": "99aff45d416f9f6d26fbb40b93f8bcd7241c459f330a33d626c9a16291698f3a",
+    "plan.png": "75e8ffb57bd9eff96cf9795567faf7e1e6b20b39592da35e50c591213c6e171d"
+   }
+  },
+  {
+   "id": "swiss_2279",
+   "seed": 3512721312,
+   "degrade": 0.375,
+   "n_rooms": 25,
+   "stats": {
+    "rotation_deg": 40.0,
+    "extent_m": 18.8,
+    "wall_area_m2": 39.2,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 127,
+    "n_openings": 36,
+    "n_rooms": 25,
+    "degradation": {
+     "strength": 0.375,
+     "rotation_deg": -0.953
+    }
+   },
+   "phash": "bb459532e472d1cc",
+   "files": {
+    "ground_truth.json": "cfad5a78879a7ecd7c925dca45ed3f90778e67076b3cdf60b5ea05d7eae2f61d",
+    "plan.pdf": "410741ff64f06a568762266871be7f48669dc70d9e2fc401e88ed68773c12bf6",
+    "plan.png": "4c0533d7e7c39c4446206786a17c3cf382133c6797d4c17710ee4d35f8ca6720"
+   }
+  },
+  {
+   "id": "swiss_14168",
+   "seed": 3696549167,
+   "degrade": 1.088,
+   "n_rooms": 35,
+   "stats": {
+    "rotation_deg": 32.491,
+    "extent_m": 40.2,
+    "wall_area_m2": 70.02,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 162,
+    "n_openings": 60,
+    "n_rooms": 35,
+    "degradation": {
+     "strength": 1.088,
+     "rotation_deg": -2.513
+    }
+   },
+   "phash": "aa0681f1f0e8f43f",
+   "files": {
+    "ground_truth.json": "b0e9197716c0e6193ab3ab84a8a5417c46389481665c31c851f92f1ccb9d5ba7",
+    "plan.pdf": "a5cae43be28fb89a686791fcec2e0a34f15e27580862777ee125739579994494",
+    "plan.png": "7c3fcbc5f8e4f1c7305206c92ea37948402760ccf625f4872bde57e4146e3722"
+   }
+  },
+  {
+   "id": "swiss_14193",
+   "seed": 1026409720,
+   "degrade": 0.887,
+   "n_rooms": 34,
+   "stats": {
+    "rotation_deg": 32.579,
+    "extent_m": 40.2,
+    "wall_area_m2": 69.93,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 162,
+    "n_openings": 60,
+    "n_rooms": 34,
+    "degradation": {
+     "strength": 0.887,
+     "rotation_deg": -2.362
+    }
+   },
+   "phash": "ebb996c6c1399446",
+   "files": {
+    "ground_truth.json": "9bbe892b1351447724b0d4246e587b3c680e315cb5d667ad5f9953b128787903",
+    "plan.pdf": "7fe4bc028cc6a26263de40224838d92c4dd89c92a0ed46c875dd2df5f6df0ddc",
+    "plan.png": "9c4e6f48f9a6542775df76799fbf9304c794f0c866efd44d7891e71c6e7b148a"
+   }
+  },
+  {
+   "id": "swiss_49312",
+   "seed": 2445951879,
+   "degrade": 0.815,
+   "n_rooms": 24,
+   "stats": {
+    "rotation_deg": 42.518,
+    "extent_m": 40.7,
+    "wall_area_m2": 42.01,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 138,
+    "n_openings": 32,
+    "n_rooms": 24,
+    "degradation": {
+     "strength": 0.815,
+     "rotation_deg": -2.361
+    }
+   },
+   "phash": "ede98dc0b21e9487",
+   "files": {
+    "ground_truth.json": "4cf3ecd0451a2c3f57febcb0bee065f5f81e54c9eb7674218f17e1064bff9ca7",
+    "plan.pdf": "aed35efd2f328954e6fb55ec1f6bed91174b38077951759769d5d6709cc0c408",
+    "plan.png": "11f73436d7ed0d008d683172907ff31b15c825b0da4328dfcd5416c371f3c734"
+   }
+  },
+  {
+   "id": "swiss_2415",
+   "seed": 1625190480,
+   "degrade": 0.042,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 20.988,
+    "extent_m": 15.5,
+    "wall_area_m2": 26.06,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 48,
+    "n_openings": 28,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.042,
+     "rotation_deg": 0.086
+    }
+   },
+   "phash": "be6995c299cc91c9",
+   "files": {
+    "ground_truth.json": "39095ed55716e6f33b0ad3619c38d25444635e7c2055c25da86437cee19f8f10",
+    "plan.pdf": "82999d2609533bddc699203e462b91a2d610dccececdbce5c5c2c542083a8cc3",
+    "plan.png": "477e19ffedbcece53bbf1787d60bec4397acdcadacfa56fedc6e3abaed25c7fb"
+   }
+  },
+  {
+   "id": "swiss_11516",
+   "seed": 3592067496,
+   "degrade": 0.085,
+   "n_rooms": 35,
+   "stats": {
+    "rotation_deg": 30.712,
+    "extent_m": 40.7,
+    "wall_area_m2": 75.94,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 175,
+    "n_openings": 61,
+    "n_rooms": 35,
+    "degradation": {
+     "strength": 0.085,
+     "rotation_deg": -0.144
+    }
+   },
+   "phash": "fac09f35614ca70d",
+   "files": {
+    "ground_truth.json": "cbee1e156b53930546fc68e9de3a55c9d7b4e78c080e36008dc9232dbf6e5fc9",
+    "plan.pdf": "7b04e357fbfd1adc8c95e78bf8a8a943814a66f4cde6ea27ce62f9fb0930ac6b",
+    "plan.png": "df4122cdfbacf217685dc0505d0781485e0e85974698a5ca14493cfebb03e60e"
+   }
+  },
+  {
+   "id": "swiss_8275",
+   "seed": 2454516716,
+   "degrade": 0.237,
+   "n_rooms": 15,
+   "stats": {
+    "rotation_deg": 33.405,
+    "extent_m": 21.1,
+    "wall_area_m2": 45.17,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 2,
+    "n_walls": 96,
+    "n_openings": 32,
+    "n_rooms": 15,
+    "degradation": {
+     "strength": 0.237,
+     "rotation_deg": -0.514
+    }
+   },
+   "phash": "fec8c306c5349c3b",
+   "files": {
+    "ground_truth.json": "6433024c4b1e89da62c68eb830d7167871c658a4fc1c0749c42bc6f29ef6fb65",
+    "plan.pdf": "7ac00ba9739e36450a44a81dbf94e9e51d62ee5a190e9c97d5bda6ee8ac8d291",
+    "plan.png": "a34e85b805310bed33d44bbb0a476b9d9cf5adf55d9063308cc4114001a5b022"
+   }
+  },
+  {
+   "id": "swiss_1647",
+   "seed": 380222417,
+   "degrade": 0.542,
+   "n_rooms": 18,
+   "stats": {
+    "rotation_deg": 41.727,
+    "extent_m": 19.7,
+    "wall_area_m2": 70.4,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 4,
+    "n_walls": 118,
+    "n_openings": 25,
+    "n_rooms": 18,
+    "degradation": {
+     "strength": 0.542,
+     "rotation_deg": -1.491
+    }
+   },
+   "phash": "fe2791c0c43e926b",
+   "files": {
+    "ground_truth.json": "4c3324f21e60831289c1e76bcfa03394dc7b79c74c161213111e6de459a41775",
+    "plan.pdf": "621abe15a243cfa88c5667d2febbc8319041da8d18269527cf446ee8f3913be9",
+    "plan.png": "9763f10b868ec302e6274f87f7a027182a8d611284551ca33bee9daf5acad97b"
+   }
+  },
+  {
+   "id": "swiss_44932",
+   "seed": 2814677845,
+   "degrade": 0.835,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": -33.001,
+    "extent_m": 17.1,
+    "wall_area_m2": 28.15,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 65,
+    "n_openings": 25,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.835,
+     "rotation_deg": -1.671
+    }
+   },
+   "phash": "bebe94c1c1e1c3c8",
+   "files": {
+    "ground_truth.json": "db7a10c71f2687d9b04d3567d74f3d757be093bcb72dffe3aac8efbd985b8a25",
+    "plan.pdf": "8cbaa4473b63a0646fa2ead55b5d1df0f9f51ef168e1f7801a276d8555e87f2a",
+    "plan.png": "5078b2d28fa3bf9c8e3ac4c6d2156c6827f60924b4d38149a2b75b51f9f9795f"
+   }
+  },
+  {
+   "id": "swiss_23653",
+   "seed": 2021465956,
+   "degrade": 0.831,
+   "n_rooms": 4,
+   "stats": {
+    "rotation_deg": -0.237,
+    "extent_m": 15.9,
+    "wall_area_m2": 15.06,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 43,
+    "n_openings": 8,
+    "n_rooms": 4,
+    "degradation": {
+     "strength": 0.831,
+     "rotation_deg": -2.303
+    }
+   },
+   "phash": "ae93c1b29cc4639d",
+   "files": {
+    "ground_truth.json": "e1a36fd76d8619895db7e07b8da8cfff35b6b4d9aa9a2319bb08baeeefc369de",
+    "plan.pdf": "c651e6f9d9853cf0a6908f932ed977ace91e9a644f90c82d749bdfe0581d96f1",
+    "plan.png": "ae899687a14006321dc0df1e754a343c1e2f7362674d5efbbcb9f45e1956da36"
+   }
+  },
+  {
+   "id": "swiss_13759",
+   "seed": 2229382242,
+   "degrade": 0.779,
+   "n_rooms": 43,
+   "stats": {
+    "rotation_deg": -14.773,
+    "extent_m": 39.8,
+    "wall_area_m2": 99.31,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 218,
+    "n_openings": 74,
+    "n_rooms": 43,
+    "degradation": {
+     "strength": 0.779,
+     "rotation_deg": -2.06
+    }
+   },
+   "phash": "e662cd1d9ab1bc24",
+   "files": {
+    "ground_truth.json": "5b886537026474984e29292c30403bceba31990f972b301ae07ca0c75c1e3bc9",
+    "plan.pdf": "01c5833b8487a7211f12083efec69bb77dfa1eb4a00dba79be3d51a681dfe58e",
+    "plan.png": "668f34151a56c5236f8fae7ad002f215f7e0e7335ebaf58e0220a9127a7dce22"
+   }
+  },
+  {
+   "id": "swiss_6809",
+   "seed": 3854951779,
+   "degrade": 0.458,
+   "n_rooms": 37,
+   "stats": {
+    "rotation_deg": -26.308,
+    "extent_m": 42.5,
+    "wall_area_m2": 68.73,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 189,
+    "n_openings": 58,
+    "n_rooms": 37,
+    "degradation": {
+     "strength": 0.458,
+     "rotation_deg": -0.886
+    }
+   },
+   "phash": "feb38dc0c860d89d",
+   "files": {
+    "ground_truth.json": "ca1fb2cc7bf771c24e2af45cff54298994ba84347c0b24f069b4d69162f28d9a",
+    "plan.pdf": "1b2d9e5d3ad414b974170edc0a685270f08936f1f3301972e217a1914853b70e",
+    "plan.png": "1fcdeaab9080bb95e309886483368a0a932267d2833264a0b3b8b8bbe359cd4c"
+   }
+  },
+  {
+   "id": "swiss_50635",
+   "seed": 1611500134,
+   "degrade": 0.023,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": -37.02,
+    "extent_m": 31.3,
+    "wall_area_m2": 49.31,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 135,
+    "n_openings": 52,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.023,
+     "rotation_deg": 0.047
+    }
+   },
+   "phash": "eb6e9cc965c6c094",
+   "files": {
+    "ground_truth.json": "f4d75413ae467e6da370c99c402c40f86452fd123b9fed8885071323212c4823",
+    "plan.pdf": "9fa4504d2be9cbd5a0e14e5621d442d9b3678002d48adc016b543c11907de434",
+    "plan.png": "7e437de743807b26f56b6e97b3ef009224f4b7df1ba0a24354c6f8f709741be7"
+   }
+  },
+  {
+   "id": "swiss_8010",
+   "seed": 1495837270,
+   "degrade": 0.183,
+   "n_rooms": 14,
+   "stats": {
+    "rotation_deg": -22.843,
+    "extent_m": 18.4,
+    "wall_area_m2": 32.57,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 46,
+    "n_openings": 27,
+    "n_rooms": 14,
+    "degradation": {
+     "strength": 0.183,
+     "rotation_deg": -0.365
+    }
+   },
+   "phash": "ea4495e3944f8dc3",
+   "files": {
+    "ground_truth.json": "a3474dd339200eef393613b2079156df74b84012c82f85addbdd8adf58c551f2",
+    "plan.pdf": "48e9684b653e1f533e1bd270fb2af022be563284f20e59dbdc657fa6c92865df",
+    "plan.png": "a08030bc138791f2a8c0f3133d46abaa75d24664ff3322d18b3fdfe20c6aa030"
+   }
+  },
+  {
+   "id": "swiss_7566",
+   "seed": 44714068,
+   "degrade": 0.529,
+   "n_rooms": 11,
+   "stats": {
+    "rotation_deg": 33.022,
+    "extent_m": 13.0,
+    "wall_area_m2": 32.54,
+    "unsupported_wall_share": 0.0298,
+    "n_openings_dropped": 0,
+    "n_walls": 84,
+    "n_openings": 21,
+    "n_rooms": 11,
+    "degradation": {
+     "strength": 0.529,
+     "rotation_deg": -1.04
+    }
+   },
+   "phash": "aaee9485916d9663",
+   "files": {
+    "ground_truth.json": "8aaed8dda3c91ebaee108acdf0ad20f6cbb02ab0a3abafce84077b12f4a7200f",
+    "plan.pdf": "ab810ee5273e16d84a699d33ac6789fcc21430fc7a03bfd91fdbc523f62d3adf",
+    "plan.png": "a187f815091818713f3fe3adeb26922fc41313e063f4ae0464cf4bda4b87f65f"
+   }
+  },
+  {
+   "id": "swiss_9537",
+   "seed": 3719576662,
+   "degrade": 0.475,
+   "n_rooms": 17,
+   "stats": {
+    "rotation_deg": -0.243,
+    "extent_m": 17.3,
+    "wall_area_m2": 34.22,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 93,
+    "n_openings": 25,
+    "n_rooms": 17,
+    "degradation": {
+     "strength": 0.475,
+     "rotation_deg": 0.98
+    }
+   },
+   "phash": "fe6484c9b1c6919b",
+   "files": {
+    "ground_truth.json": "c1bf79e3d1dc30bd0e7b52a35da21e78c3a461442b0db3ccf3a92c944ba4bd0c",
+    "plan.pdf": "43d8b14af187678f1456ea7214b15f67d5b298338053661072605699be8309a3",
+    "plan.png": "a132527255868da83d89a06ce8a85d4230af340316d2f18e18e23ca7a083b9a7"
+   }
+  },
+  {
+   "id": "swiss_13805",
+   "seed": 2320250637,
+   "degrade": 1.1,
+   "n_rooms": 20,
+   "stats": {
+    "rotation_deg": -33.503,
+    "extent_m": 18.0,
+    "wall_area_m2": 47.2,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 76,
+    "n_openings": 32,
+    "n_rooms": 20,
+    "degradation": {
+     "strength": 1.1,
+     "rotation_deg": -2.108
+    }
+   },
+   "phash": "aa0dd82197768d76",
+   "files": {
+    "ground_truth.json": "ce84cc77d6dde0027741f16d7ee49a28413a97ed6d0f6bca12534ac043a42f32",
+    "plan.pdf": "154a4e5a8421ba07c05b2a8cc18dd4f8d57181e9461ef9d0085a38bc51b316da",
+    "plan.png": "fd4aaddcd9dd44b4248b2ef03ec895a0652697a11d3f84967e9f150ecc09bfcc"
+   }
+  },
+  {
+   "id": "swiss_8274",
+   "seed": 1199722234,
+   "degrade": 0.062,
+   "n_rooms": 18,
+   "stats": {
+    "rotation_deg": 33.008,
+    "extent_m": 21.0,
+    "wall_area_m2": 46.7,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 94,
+    "n_openings": 32,
+    "n_rooms": 18,
+    "degradation": {
+     "strength": 0.062,
+     "rotation_deg": 0.135
+    }
+   },
+   "phash": "b3c8ce37cc24999a",
+   "files": {
+    "ground_truth.json": "e266df8196c9392949c13c1313060759a56952e4dd6a07d03d0dc2aaab7e0a93",
+    "plan.pdf": "7105bfa7f82065255873ae4a9673112ddd025b0180eef5eb0ea7f177ac8d2523",
+    "plan.png": "fd03a21bc7d4151ca905bdab76c355d2b83cc6d84bad1afbd531a9848586f4ac"
+   }
+  }
+ ]
 }
