@@ -232,3 +232,36 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
 - **Decision:** keep scale 0.65. Next: val-synth 200 plans for both seeds at 0.65 before the lead's
   locked run. A lighter encoder (ResNet-18) was not trained; it is the fallback if the real
   locked-run runtime exceeds +25 %.
+
+## ocr-fast (2026-11-25, branch exp/ocr-fast = main) -> NEGATIVE, no pipeline change
+
+- **Hypothesis:** OCR (about 75 % of the 1-core time) can be cut by at least 40 % with no accuracy loss.
+- **Tool:** `scripts/dev_ocr_speed.py` (1 core via `taskset`, OMP threads 1; OCR step only = line
+  removal + detection + recognition + parsing; dimension recall/precision = value within 1.5 mm
+  and anchor within 60 px of a GT dimension; room stamps = name + area; val-synth first N plans,
+  synthetic). Node load was 10-12 throughout, so absolute seconds vary about +-15 % between runs;
+  only runs side by side are compared.
+- **Where the time goes (cProfile, plan s200003, 1933x2258 px at 300 dpi, 8 detector calls):**
+  detector 8.2 s of 11.9 s, recognition about 2.3 s, parsing/dimension-line search 0.8 s, line
+  removal 0.2 s. The detector costs 0.65-0.9 s per Mpx whatever the window shape, so only fewer
+  pixels or a smaller model help. Recognition is already small.
+- **Baseline, 12 plans:** 17.6 and 20.0 s/plan in two runs; recall 0.803, precision 0.838, stamps
+  69/70. 30 plans: 21.6 s, recall 0.797, precision 0.841, stamps 168/171.
+- **Tried (all dropped):**
+  - Detect on the page shrunk to a longest side of 896/1024/1280 px, recognise crops of the
+    full-resolution page (30 plans): 6.7 / 7.3 / 8.4 s (-69 to -61 %) but recall 0.724 / 0.675 /
+    0.714 (-7 to -12 pp, small superscript digits such as `36⁵` are lost or misread). 1800 px (12
+    plans): 14.2 s (-35 %), recall 0.771 (-3 pp). Fails "no accuracy loss".
+  - One detector call on the whole page instead of 1600 px tiles (tile 2600): about 18 s vs 17.6 s,
+    recall 0.789 (-1.4 pp). No gain: the loaded node hides the 2.9 s vs 4x1.3 s microbenchmark gain.
+  - Drop vertical-looking boxes and boxes cut by a tile border before recognition (tile 1600,
+    exact same reads): 21.9 vs 20.0 s side by side, recall 0.807. Recognition is too small a share.
+  - Ink-cluster windows (detect only around dilated glyph clusters): the cluster bounding boxes
+    cover 47-74 % of the page (dimension chains and walls form one ring cluster), so no saving.
+  - Turned page only in windows around the ink left after blanking the upright reads: 13.1 s
+    (-27 %), recall 0.50 (vertical dimensions not found). Dropped.
+- **Decision:** `src/kelpod/ocr/` unchanged, no smoke run (no candidate). Not tried: a smaller or
+  quantised detector (PP-OCRv4 mobile ONNX is already the mobile one; no offline alternative found),
+  per-plan detector scale from the measured text height, a cheap text-line proposal network.
+  Next idea with a real chance: run the detector at 0.65 scale and re-detect only the small
+  superscript regions at full scale; or train a text-line detector for this plan style.
