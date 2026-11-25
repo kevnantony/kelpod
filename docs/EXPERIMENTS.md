@@ -2,6 +2,19 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## ocr-fast (2026-11-25, branch exp/ocr-fast, negative result, closed)
+
+- **Hypothesis:** OCR (~85 % of per-plan runtime on 1 core) can be made >= 40 % faster without
+  accuracy loss, buying headroom under the +25 % runtime rule.
+- **Profile (1 core, val-synth s200003):** 11.9 s OCR = detector 8.2 s (8 calls, ~0.65-0.9 s/MP),
+  recognition 2.3 s, dimension parsing 0.8 s, line removal 0.2 s.
+- **Tried (val-synth dev, 12-30 plans):** detect on a downscaled page (896-1800 px): 30-60 % faster
+  but dimension recall -3 to -12 pp (superscript mm digits lost); one whole-page detector call: no
+  gain; skipping boxes before recognition: no gain; 90-degree pass only on leftover ink: recall
+  0.50. No change kept; 0 GPU-h.
+- **Untried ideas:** per-plan detector scale from measured text height; downscaled detection plus
+  full-resolution re-detection around superscripts; a text-line detector trained on our plan style.
+
 ## historic-v2 (2026-11-25, branch exp/historic-v2 @ b8d363c, not gated)
 
 - **Change (on baseline-v1):** historic-plans (scale bars, interior dimensions, sheet splitting,
