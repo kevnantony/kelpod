@@ -372,7 +372,7 @@ def attach_openings(
                 continue
             s = float(np.dot(mid - a, u))
             dist = abs(float(_cross(u, mid - a)))
-            if -0.05 <= s <= L + 0.05 and dist <= max(0.6 * w.thickness_m, 0.2) and dist < best_d:
+            if -0.05 <= s <= L + 0.05 and dist <= max(0.6 * w.thickness_m, prm.opening_wall_tol_m) and dist < best_d:
                 best, best_d = (w, a, u, L), dist
         if best is None:
             unplaced += 1

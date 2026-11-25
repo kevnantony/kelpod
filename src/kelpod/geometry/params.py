@@ -16,6 +16,10 @@ class GeometryParams:
     """Walls within this angle of 0/90 degrees become axis-parallel."""
     snap_abs_m: float = 0.06
     """...or whose ends deviate across the wall by less than max(this, half the thickness)."""
+    opening_wall_tol_m: float = 0.3
+    """An opening belongs to the nearest parallel wall within max(0.6 x thickness, this). The
+    opening comes from pixels, the wall may have been moved by the dimension fit (a few cm to
+    2 dm on thin walls), so too small a value loses doors on correctly fitted plans."""
     snap_short_deg: float = 15.0
     short_piece_m: float = 1.0
     """Pieces shorter than this have noisy angles and snap to the axes within snap_short_deg."""
