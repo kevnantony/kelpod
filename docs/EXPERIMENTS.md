@@ -2,6 +2,75 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## din-web-v2 (2026-11-25, branch exp/din-web-v2, locked run 1 of 2: FAIL on door recall only)
+
+- **Change vs din-web-plans:** footprint guard fixed (in the partial-footprint case only wall and
+  window networks that border the footprint and total >= 3 m are kept; loose stubs such as
+  dimension extension lines dropped). Root cause found on one val plan (s200009, open outline).
+- **Val-synth (200, synthetic), main -> branch:** correct-closed 0.720 -> 0.725, room IoU 0.9401 ->
+  0.9443, edit cost -3.7 %, ext wall length error +4.9 % (not flagged), door recall 0.961 -> 0.959.
+- **Locked run (test-synth 300 + fresh 200, synthetic):** correct-closed +2.0 pp [-0.3, +4.3]
+  (test-synth), +3.0 pp [+1.0, +5.5] (fresh, primary): rules 2 and 4 pass. Rule 3 fails: door
+  recall Δ CI [-3.3, -1.1] pp (test-synth) and [-4.5, -1.3] pp (fresh). **Not promoted.**
+- **Fix (4be979b):** opening-to-wall attach tolerance 0.3 m (GeometryParams.opening_wall_tol_m);
+  the chain-decoded dimension fit can move a thin wall >0.2 m from its detected door gap. Val-synth
+  door recall -0.1 pp [-0.3, 0]. Disclosure (agent): while looking for its run folder it listed the
+  per-plan ids of the locked run directory once; not used for any decision.
+- **Locked run 2 of 2 (2026-11-25):** rule 3 now passes (door recall test-synth -2.0 pp
+  [-3.2, -0.9], fresh -1.9 pp [-3.9, 0.0]; runtime +5-7 %). Rule 2 FAILS: fresh correct-closed
+  +1.5 pp [-1.0, +4.0] (test-synth +2.3 pp [0.0, +5.0]); room IoU +0.009 [-0.004, +0.021].
+  **Not promoted; branch budget used, branch closed.** The gain is real but small; the run-to-run
+  difference on fresh (+3.0 vs +1.5 pp) shows its noise. Parts (upscaling, footprint guard,
+  attach tolerance, chain OCR) can return inside a branch with a new idea.
+- **CPU job for exp/learned-fast:** Slurm 128900, 9 CPUs / 24 GB, <= 4 h, val-synth smoke for both
+  seeds vs main (needs its own node so runtime is not distorted by the din-web locked run).
+
+## historic-plans (2026-11-24, branch exp/historic-plans @ d4ef811, includes din-web-plans; not gated)
+
+- **Change:** scale-bar detection (`geometry/scalebar.py`), interior dimension arrows
+  (`ocr/interior.py`), sheet splitting (`clean/sheets.py`, `pipeline.convert_all`), historic room
+  names, exterior spaces (Garten, Vorhof, Altan, ...) flagged and left out of the IFC.
+- **Labels:** the 3 user plans, labelled by the agent from overlays (+-5 px, not an expert),
+  outside git. The scale-bar tick value (1 m) was assumed with these plans in view.
+- **Real, 3 plans (room IoU / wall F1), main+din-web -> branch, classical:** villa 0.02/0.16 ->
+  0.07/0.32; Gundel 0.31/0.59 -> 0.30/0.55; Tafel 71 plan 2 0.23/0.27 -> 0.18/0.41, plan 3
+  0.14/0.23 -> 0.29/0.71. Scale error 59 % -> 1-2 % on villa and Tafel.
+- **Same branch with the learned v1 segmenter (seed 1, ONNX), measured by the lead:** wall F1
+  villa 0.70, Gundel 0.46, Tafel 0.97 / 0.84; room IoU 0.19 / 0.12 / 0.46 / 0.50. The learned model
+  finds the walls; rooms stay open (dangling ends at door gaps in solid walls).
+- **Synthetic guard:** benchmark seeds 300-319 at degrade 0.5 unchanged; val-synth smoke (40) flags
+  ext_wall_length_error (inherited from din-web, being fixed on exp/din-web-v2).
+- **Next:** rebase on exp/din-web-v2 once fixed; learned segmenter + door-gap closing in solid
+  walls; then gate.
+
+## learned-v1 (2026-11-24, branch exp/learned-v1, not yet run through the gate)
+
+- **Change:** U-Net ResNet-34 retrained with train-only style and degradation randomisation (held-out
+  options guarded by a test), synth_v1 / swiss_v1 / resplan_v1 renders, CubiCasa5k; learned is the
+  default backend on the branch (no silent fallback); ONNX export.
+- **GPU:** kseg-v1-s1 1.86 GPU-h, kseg-v1-s2 1.65 GPU-h (ampere; expected ~4 GPU-h total).
+- **Val-synth (200, synthetic):** both seeds correct-closed 0.985 (classical 0.720), edit cost
+  0.435, room IoU 0.982, wall F1 0.999. Runtime about 81-84 s per plan under load in the eval job,
+  against about 49 s for classical on the same node.
+- **Blocker:** protocol rule 3 tolerates at most +25 % runtime, so the current model cannot be
+  promoted however accurate it is. Next: `exp/learned-fast` (faster CPU inference: int8 ONNX,
+  lower inference resolution, lighter encoder) before the locked run. The runtime rule itself is a
+  decision for the founders (asked in README), not changed by the agent.
+
+## din-web-plans (2026-11-24, branch exp/din-web-plans @ 2430913, includes ocr-chainsum; FAIL)
+
+- **Change:** effective-resolution estimate from glyph height + Lanczos/unsharp upscaling of
+  low-res inputs, footprint-filter guard, thin double-line wall detector (`segment/pairs.py`,
+  used only when classical does not close), plus the ocr-chainsum OCR changes.
+- **Real web plans (dev, no labels):** efh 0 -> 5 rooms (not the real rooms), 1 component, scale
+  from dimensions; Positionsplan 0 -> 5 rooms (one merged), 1 component. Neither plan correct.
+- **Locked run 1 of 2 (2026-11-24 18:09, test-synth 300 + fresh 200, synthetic):** primary (fresh)
+  correct-closed +0.005 [-0.010, +0.020]; room IoU +0.047 [+0.025, +0.071] (rule 2 passes via the
+  IoU alternative, rule 4 passes); rule 3 FAILS: door precision -3 to -6 pp, edit cost +11 to +24 %,
+  exterior wall length error +16 to +69 % on both splits. **Not promoted.**
+- **Next:** a new branch with the regression found and fixed on dev/val data only (which component
+  costs doors and envelope length), keeping the room IoU gain.
+
 ## ocr-chainsum (2026-11-24, branch exp/ocr-chainsum @ 9fe1219, not promoted)
 
 - **Hypothesis:** joint decoding of Maßketten (n-best readings from RapidOCR's CTC output, chain
