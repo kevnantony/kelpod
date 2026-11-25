@@ -2,6 +2,25 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## historic-v2 (2026-11-25, branch exp/historic-v2 @ b8d363c, not gated)
+
+- **Change (on baseline-v1):** historic-plans (scale bars, interior dimensions, sheet splitting,
+  historic room names, exterior spaces) + din-web-v2 fixes + door-gap bridging in solid walls
+  (`geometry/doorgap.py`: collinear same-thickness ends or a perpendicular wall behind; 0.55-1.3 m
+  gaps become doors, up to 2.6 m bridged as wall; kept only if the closed-room count rises).
+  Chain OCR decoding switched back to greedy by default (it shifted exterior lengths ~0.05 %).
+- **Real, 3 plans (agent-made labels; room IoU at label scale), main -> branch:** Tafel 71 plan 2
+  0.00 -> 0.72, plan 3 0.00 -> 0.55, villa 0.17 -> 0.41, Gundel 0.00 -> 0.25. Scale error Tafel
+  91 % -> 1.9 %, Gundel 68 % -> 5 %, villa 37 % -> 50 % (scale bar without numbers; learned walls
+  read ~2x too thick).
+- **Val-synth smoke (200, synthetic):** seed 1 unchanged (correct-closed 0.945, no rule-3 flag);
+  seed 2 flags that also appear for baseline-v1 itself as candidate (control job 128920), i.e.
+  caused by comparing candidate seed 2 with the baseline's seed 1 (eval flaw, see below).
+- **Promotion problem:** the gains are on real plans; the protocol has no real-plan split yet, and
+  the synthetic splits are neutral by design, so rule 2 cannot pass. Asked the founders (README).
+- **Eval flaw found:** locked_eval runs the baseline with its first declared seed only; with a
+  2-seed baseline, candidate seed k must be paired with baseline seed k. Fix on an eval/* branch.
+
 ## learned-fast -> PROMOTED as baseline-v1 (2026-11-25)
 
 - **Change:** learned-v1 U-Net (2 seeds) as the default segmenter; whole-page ONNX inference at
