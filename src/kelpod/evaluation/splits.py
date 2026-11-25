@@ -33,14 +33,18 @@ SYNTH_SPLITS: dict[str, dict] = {
 FRESH = {"n": 200, "style": "heldout", "family": "fresh"}
 # Splits that need data or renderers that are not frozen yet (see eval/README.md).
 PENDING_SPLITS: dict[str, dict] = {
-    "val-swiss": {"family": "val", "kind": "dataset"},
-    "val-resplan": {"family": "val", "kind": "dataset"},
-    "val-cubicasa": {"family": "val", "kind": "dataset"},
-    "test-ood-swiss": {"family": "test-ood", "kind": "dataset"},
-    "test-ood-resplan": {"family": "test-ood", "kind": "dataset"},
-    "test-ood-cubicasa": {"family": "test-ood", "kind": "dataset"},
     "real-dev": {"family": "val", "kind": "proxy"},
     "test-real": {"family": "test-real", "kind": "sealed"},
+}
+# Dataset splits (frozen by ``build_dataset_split``): sizes follow from the runtime budget
+# (docs/EVAL_PROTOCOL.md; ~25 s per plan and run, 8 workers, 4 runs per plan).
+DATASET_SPLITS: dict[str, dict] = {
+    "val-swiss": {"family": "val", "dataset": "swiss", "n": 100, "ids": "val"},
+    "val-resplan": {"family": "val", "dataset": "resplan", "n": 100, "ids": "val"},
+    "val-cubicasa": {"family": "val", "dataset": "cubicasa", "n": 100, "ids": "val"},
+    "test-ood-swiss": {"family": "test-ood", "dataset": "swiss", "n": 150, "ids": "test"},
+    "test-ood-resplan": {"family": "test-ood", "dataset": "resplan", "n": 150, "ids": "test"},
+    "test-ood-cubicasa": {"family": "test-ood", "dataset": "cubicasa", "n": 200, "ids": "test"},
 }
 LOCKED_FAMILIES = ("test-synth", "test-ood", "test-real", "fresh")
 """Families whose items are aggregates-only (every run is logged)."""
@@ -269,8 +273,107 @@ def swiss_heldout_ids(csv_path: Path) -> dict[str, dict[str, list[int]]]:
     }
 
 
+def _dataset_job(args: tuple) -> dict | None:
+    """Render one candidate of a dataset split (runs in a pool worker)."""
+    from kelpod.evaluation import datasets as D
+
+    dataset, cid, seed, degrade, out, payload = args
+    d = Path(out) / cid
+    if dataset == "cubicasa":
+        r = D.cubicasa_item(payload)
+        if r is None:
+            return None
+        img, graph, meta = r
+        D.write_item(d, img, graph, meta, D.CUBICASA_DPI)
+        info = {"n_rooms": len(graph.rooms), "stats": meta["stats"]}
+        png = img
+    else:
+        plan = (
+            D.swiss_floor_plan(payload[0], payload[1])
+            if dataset == "swiss"
+            else D.resplan_plan(payload)
+        )
+        if plan is None:
+            return None
+        info = D.vector_item(plan, seed=seed, degrade=degrade, directory=d)
+        if info is None:
+            return None
+        png = str(d / "plan.png")
+    return {"id": cid, "seed": seed, "degrade": degrade if dataset != "cubicasa" else None,
+            "n_rooms": info["n_rooms"], "stats": info["stats"], "phash": phash(png),
+            "files": _item_files(d)}  # fmt: skip
+
+
+def build_dataset_split(name: str, *, workers: int = 8, data: Path | None = None) -> dict:
+    """Render a frozen dataset split from the held-out ID lists of its pending manifest.
+    Candidates are taken in the order of ``sha256('kelpod-eval/<split>/<id>')``; the first ``n``
+    that render (extent 3-60 m, enough walls and rooms, little unsupported wall area) are kept."""
+    from kelpod.evaluation import datasets as D
+    from kelpod.evaluation.vectorplans import VECTOR_VERSION
+
+    cfg = DATASET_SPLITS[name]
+    root = repo_root()
+    if git_dirty(root, "src/kelpod/evaluation"):
+        raise RuntimeError("commit the renderer first: the manifest records its commit")
+    old = json.loads((manifest_dir(root) / f"{name}.json").read_text())
+    if old["status"] == "frozen":
+        raise FileExistsError(f"{name} is frozen")
+    out = (data or data_root()) / name
+    if out.exists() and any(out.iterdir()):
+        raise FileExistsError(f"{out} is not empty: a frozen split is never regenerated")
+    ds, n = cfg["dataset"], cfg["n"]
+    held = old["heldout_ids"]
+    key = lambda i: hashlib.sha256(f"kelpod-eval/{name}/{i}".encode()).hexdigest()  # noqa: E731
+    pool = int(n * 1.7) + 10
+    degrades = split_degrades(name, pool)
+    jobs = []
+    if ds == "swiss":
+        floors = sorted(held["swiss_floor_id"], key=key)[:pool]
+        rows = D.swiss_rows(set(floors))
+        payloads = [(f"swiss_{f}", (f, rows[f])) for f in floors]
+    elif ds == "resplan":
+        plans = D.resplan_load()
+        ids = sorted(held["resplan_id"], key=key)
+        payloads = [(f"resplan_{i}", plans[int(i)]) for i in ids if int(i) in plans][:pool]
+    else:
+        folders = sorted(held["cubicasa_id"], key=key)[:pool]
+        payloads = [("cubicasa_" + f.strip("/").replace("/", "_"), f) for f in folders]
+    for k, (cid, payload) in enumerate(payloads):
+        seed = int(key(cid)[:8], 16)
+        jobs.append((ds, cid, seed, degrades[k], str(out), payload))
+    out.mkdir(parents=True, exist_ok=True)
+    with ProcessPoolExecutor(workers) as ex:
+        res = list(ex.map(_dataset_job, jobs, chunksize=2))
+    items = [r for r in res if r][:n]
+    keep = {i["id"] for i in items}
+    import shutil
+
+    for r in res:  # candidates beyond the first n successes are not part of the split
+        if r and r["id"] not in keep:
+            shutil.rmtree(out / r["id"], ignore_errors=True)
+    if len(items) < n:
+        raise RuntimeError(f"{name}: only {len(items)} of {n} candidates rendered")
+    m = {
+        "manifest_version": MANIFEST_VERSION, "split": name, "status": "frozen", "kind": "dataset",
+        "family": cfg["family"], "created_utc": datetime.now(UTC).strftime("%Y-%m-%d %H:%M"),
+        "data_dir": f"~/kelpod-data/eval/{name}", "input_file": "plan.pdf",
+        "gt_file": "ground_truth.json",
+        "scoring": "scale-free" if ds == "cubicasa" else "metric",
+        "generator": {"module": "kelpod.evaluation.vectorplans", "commit": git_commit(root),
+                      "version": VECTOR_VERSION, "style": "train",
+                      "dpi": D.CUBICASA_DPI if ds == "cubicasa" else D.DPI},
+        "source": old.get("source"),
+        "params": {"candidates": f"sorted by sha256('kelpod-eval/{name}/<id>'), first {n} that "
+                   f"render ({len(res)} tried)",
+                   "degrade": f"uniform {DEGRADE_RANGE}, per candidate index, from "
+                   f"sha256('kelpod-eval/{name}') (not for CubiCasa: real scans, no degradation)"},
+        "heldout_ids": held, "n_items": len(items), "items": items,
+    }  # fmt: skip
+    return m
+
+
 def pending_manifest(name: str, *, note: str, extra: dict | None = None) -> dict:
-    cfg = PENDING_SPLITS[name]
+    cfg = PENDING_SPLITS.get(name) or {**DATASET_SPLITS[name], "kind": "dataset"}
     return {
         "manifest_version": MANIFEST_VERSION,
         "split": name,
@@ -317,7 +420,7 @@ def load_manifests(root: Path | None = None) -> dict[str, dict]:
 
 
 def split_data_dir(manifest: dict) -> Path:
-    if os.environ.get("KELPOD_EVAL_DATA") and manifest.get("kind") == "synth":
+    if os.environ.get("KELPOD_EVAL_DATA") and manifest.get("kind") in ("synth", "dataset"):
         return data_root() / manifest["split"]
     return Path(os.path.expanduser(manifest["data_dir"]))
 
@@ -501,6 +604,9 @@ def main(argv: list[str] | None = None) -> int:
     b = sub.add_parser("build", help="generate a frozen synthetic split")
     b.add_argument("split", choices=sorted(SYNTH_SPLITS))
     b.add_argument("--workers", type=int, default=8)
+    bd = sub.add_parser("build-dataset", help="render a frozen dataset split")
+    bd.add_argument("split", choices=sorted(DATASET_SPLITS))
+    bd.add_argument("--workers", type=int, default=8)
     pd = sub.add_parser("pending", help="(re)write manifests of splits that are not frozen")
     pd.add_argument("--only", nargs="*")
     args = ap.parse_args(argv)
@@ -511,6 +617,11 @@ def main(argv: list[str] | None = None) -> int:
         if path.exists():
             raise SystemExit(f"{path} exists: frozen splits are never rebuilt")
         m = build_synth_split(args.split, workers=args.workers)
+        path.write_text(json.dumps(m, indent=1) + "\n")
+        print(f"{path}: {m['n_items']} items in {m['data_dir']}")
+    elif args.cmd == "build-dataset":
+        path = mdir / f"{args.split}.json"
+        m = build_dataset_split(args.split, workers=args.workers)
         path.write_text(json.dumps(m, indent=1) + "\n")
         print(f"{path}: {m['n_items']} items in {m['data_dir']}")
     else:

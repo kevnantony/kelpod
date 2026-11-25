@@ -189,6 +189,7 @@ def decide(
     p95_cand: dict[str, float | None],
     families: dict[str, str],
     test_real_pages: int = 0,
+    family_deltas: dict[str, dict[str, Delta]] | None = None,
 ) -> Decision:
     """Rules 2-4 over the per-split deltas.
 
@@ -219,7 +220,13 @@ def decide(
     crit = criterion or "correct_closed"
     sign = -1 if crit == "edit_cost" else 1
     fam_gain: dict[str, bool] = {}
-    for split, ds in deltas.items():
+    if family_deltas is not None:
+        # one verdict per family, on the delta pooled over all its splits (a family with several
+        # splits, e.g. test-ood, must not count twice or win on its best split alone)
+        for fam, ds in family_deltas.items():
+            if fam in GENERALISATION_SPLITS and crit in ds and ds[crit].delta is not None:
+                fam_gain[fam] = sign * ds[crit].delta > 0
+    for split, ds in ({} if family_deltas is not None else deltas).items():
         fam = families.get(split)
         if split == primary or fam not in GENERALISATION_SPLITS or crit not in ds:
             continue
