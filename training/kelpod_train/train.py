@@ -176,15 +176,17 @@ def main() -> None:
     ap.add_argument("--val-limit", type=int, default=60)
     ap.add_argument("--workers", type=int, default=12)
     ap.add_argument("--init", default=None, help="state dict to start from (continue training)")
+    ap.add_argument("--seed", type=int, default=0, help="training seed (init of new layers, data)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     out = Path(a.out).expanduser()
     out.mkdir(parents=True, exist_ok=True)
-    torch.manual_seed(0)
-    random.seed(0)
+    torch.manual_seed(a.seed)
+    random.seed(a.seed)
+    np.random.seed(a.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     mix = {k: float(v) for k, v in (s.split(":") for s in a.mix.split(","))}
-    ds = CropDataset(mix, a.size, a.iters * a.batch)
+    ds = CropDataset(mix, a.size, a.iters * a.batch, seed=a.seed)
     print({s: len(v) for s, v in ds.items.items()}, flush=True)
     dl = DataLoader(ds, batch_size=a.batch, num_workers=a.workers, pin_memory=True,
                     drop_last=True, persistent_workers=True, prefetch_factor=4)
@@ -206,10 +208,23 @@ def main() -> None:
     dice = smp.losses.DiceLoss("multiclass", ignore_index=IGNORE)
     log = open(out / "log.jsonl", "a")
     best = -1.0
+    start = 0
+    ckpt = out / "ckpt.pth"
+    if ckpt.exists():  # resume a pre-empted / timed-out job (full state, saved every eval)
+        st = torch.load(ckpt, map_location="cpu", weights_only=False)
+        model.load_state_dict(st["model"])
+        opt.load_state_dict(st["opt"])
+        sched.load_state_dict(st["sched"])
+        start, best = int(st["iter"]), float(st["best"])
+        print(f"resumed from {ckpt} at iteration {start}, best {best:.4f}", flush=True)
+    if start >= a.iters:
+        print("already done", flush=True)
+        return
+    ds.length = (a.iters - start) * a.batch
     t0 = time.time()
     run = 0.0
     val_srcs = [s for s in a.val.split(",") if (DATA / "val" / s).exists()]
-    for it, (x, y) in enumerate(dl):
+    for it, (x, y) in enumerate(dl, start=start):
         x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
         with torch.autocast(device.type, dtype=torch.bfloat16, enabled=device.type == "cuda"):
             logits = model(x)
@@ -239,9 +254,14 @@ def main() -> None:
                 torch.save(model.state_dict(), out / "best.pth")
                 meta = {"encoder": a.encoder, "classes": CLASS_NAMES, "iter": it + 1,
                         "m_per_px": 0.0254 / 200 * 100, "input": "gray/255, white=1",
-                        "val": v, "mix": mix}
+                        "val": v, "mix": mix, "seed": a.seed}
                 export(model, out / "model.pt", meta)
+                (out / "best_meta.json").write_text(json.dumps(meta))
                 model.to(device)
+            torch.save({"model": model.state_dict(), "opt": opt.state_dict(),
+                        "sched": sched.state_dict(), "iter": it + 1, "best": best},
+                       out / "ckpt.tmp")
+            (out / "ckpt.tmp").replace(ckpt)
         if it + 1 >= a.iters:
             break
     print(f"done, best score {best:.4f}, {(time.time() - t0) / 3600:.2f} h", flush=True)

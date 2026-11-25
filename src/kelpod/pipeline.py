@@ -19,9 +19,21 @@ def convert(
     storey_height_m: float = 2.60,
     page_index: int = 0,
     ocr_backend: str = "rapidocr",
-    segment_backend: str = "classical",
+    segment_backend: str | None = None,
 ) -> PipelineResult:
-    """Convert one floor-plan scan to a closed IFC model (one page = one storey for now)."""
+    """Convert one floor-plan scan to a closed IFC model (one page = one storey for now).
+
+    ``segment_backend=None`` uses the run configuration (``kelpod-run.toml``), default
+    ``"learned"``. The learned backend takes its checkpoint from :mod:`kelpod.runconfig` and fails
+    with :class:`kelpod.runconfig.CheckpointError` if there is none (no silent fallback);
+    pass ``segment_backend="classical"`` to use the OpenCV baseline."""
+    from kelpod.runconfig import default_segment_backend, resolve_checkpoint
+
+    backend = segment_backend or default_segment_backend()
+    if backend == "learned":
+        segmenter = segment.LearnedSegmenter(weights=resolve_checkpoint().path)
+    else:
+        segmenter = segment.get_segmenter(backend)
     timings: list[StepTiming] = []
 
     def timed(step: str, fn, *args, **kwargs):
@@ -32,7 +44,7 @@ def convert(
 
     pages = timed("clean", clean.run, source, dpi=dpi, plan_scale=plan_scale)
     page = pages[page_index]
-    seg = timed("segment", segment.run, page, backend=segment_backend)
+    seg = timed("segment", segmenter.segment, page)
     ann = timed("ocr", ocr.run, page, backend=ocr_backend)
     graph = timed("geometry", geometry.run, page, seg, ann)
     model = timed(

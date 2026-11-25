@@ -41,6 +41,8 @@ def _entries(args) -> list[dict]:
     meta = json.loads(meta_p.read_text()) if meta_p.exists() else {}
     key = img.name.replace("_img.png", "")
     extra: dict = {}
+    v1 = source.endswith("_v1")
+    source = source.removesuffix("_v1")
     if source == "synth":
         extra = {"seed": int(meta.get("seed", key.split("_")[1])), "style": "train",
                  "degrade": meta.get("degrade")}
@@ -51,6 +53,9 @@ def _entries(args) -> list[dict]:
         extra = {"cubicasa_id": folder}
     elif source == "resplan":
         extra = {"resplan_id": int(key.split("_")[1])}
+    if v1:  # style-randomised page: the full train style (split "train") and render seed
+        extra["style"] = meta.get("style", {"split": "train"})
+        extra["render_seed"] = meta.get("seed")
     out = [{"path": img.name, "sha256": _sha(img), "phash": phash(img), **extra}]
     if lab.exists():
         out.append({"path": lab.name, "sha256": _sha(lab), **extra})
@@ -70,14 +75,15 @@ def _swiss_ids(floors: set[int]) -> dict[int, dict]:
 
 def write(source: str) -> Path:
     imgs = sorted((DATA / "train" / source).glob("*_img.png"))
-    ids = _swiss_ids({int(p.name.split("_")[1]) for p in imgs}) if source == "swiss" else {}
+    is_swiss = source.removesuffix("_v1") == "swiss"
+    ids = _swiss_ids({int(p.name.split("_")[1]) for p in imgs}) if is_swiss else {}
     files: list[dict] = []
     with ProcessPoolExecutor(12) as ex:
         for e in ex.map(_entries, [(source, p, ids) for p in imgs], chunksize=32):
             files += e
     man = {"source": f"{source}-train", "data_dir": str(DATA / "train" / source),
            "n_pages": len(imgs), "files": files}
-    if source == "swiss":
+    if is_swiss:
         man["holdout_rule"] = "crc32(str(site_id)) % 10: 0 = test, 1 = val, else train"
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{source}.json"

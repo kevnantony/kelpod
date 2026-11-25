@@ -29,8 +29,12 @@ def convert(
     page: Annotated[int, typer.Option(help="Page of a multi-page PDF (0-based)")] = 0,
     report: Annotated[Path | None, typer.Option(help="Write a JSON report here")] = None,
     segment_backend: Annotated[
-        str, typer.Option(help="classical, or learned (needs KELPOD_SEG_CHECKPOINT)")
-    ] = "classical",
+        str | None,
+        typer.Option(
+            help="learned (default, checkpoint from kelpod-run.toml or KELPOD_SEG_CHECKPOINT) "
+            "or classical"
+        ),
+    ] = None,
     ocr_backend: Annotated[str, typer.Option(help="rapidocr or none")] = "rapidocr",
 ) -> None:
     """Convert a floor-plan scan to a closed IFC model."""

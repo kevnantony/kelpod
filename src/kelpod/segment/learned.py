@@ -77,8 +77,9 @@ class _OnnxModel:
         except ImportError as exc:  # pragma: no cover
             raise ImportError("an .onnx checkpoint needs onnxruntime") from exc
         so = ort.SessionOptions()
-        if threads:
-            so.intra_op_num_threads = threads
+        # explicit thread count (usable CPUs, capped): ORT's default pins threads to CPUs that
+        # may lie outside a Slurm/cgroup allocation
+        so.intra_op_num_threads = threads or min(8, len(os.sched_getaffinity(0)))
         self.sess = ort.InferenceSession(str(path), so, providers=["CPUExecutionProvider"])
         meta = self.sess.get_modelmeta().custom_metadata_map
         self.meta = json.loads(meta.get("kelpod", "{}"))
@@ -98,6 +99,21 @@ def load_model(path: str | Path, *, threads: int | None = None):
     if p.suffix == ".onnx":
         return _OnnxModel(p, threads)
     return _TorchScriptModel(p, threads)
+
+
+_CACHE: dict[tuple, object] = {}
+
+
+def load_model_cached(path: str | Path, *, threads: int | None = None):
+    """:func:`load_model`, kept per process (keyed by path, size and mtime), so a server or a
+    batch run loads the network once."""
+    p = Path(path)
+    st = p.stat()
+    key = (str(p.resolve()), st.st_size, st.st_mtime_ns, threads)
+    if key not in _CACHE:
+        _CACHE.clear()
+        _CACHE[key] = load_model(p, threads=threads)
+    return _CACHE[key]
 
 
 def predict_tiled(
@@ -475,6 +491,11 @@ class LearnedSegmenter:
     ``KELPOD_SEG_CHECKPOINT`` environment variable. ``predictor``: any callable that maps a
     grayscale page at the training scale to a class map (used to evaluate other networks, e.g.
     the CubiCasa5k model zero-shot, through the same post-processing).
+
+    ``infer_scale``: the page is shrunk by this factor (INTER_AREA) before the network and the
+    logits are resized back (bilinear). 0.65 with whole-page inference (``tile=2048``) cuts the CPU
+    time of the network about 10x against 1024 px tiles at full scale (docs/EXPERIMENTS.md,
+    learned-fast).
     """
 
     name = "learned"
@@ -486,7 +507,8 @@ class LearnedSegmenter:
         predictor: LabelPredictor | None = None,
         params: PostParams | None = None,
         threads: int | None = None,
-        tile: int = 1024,
+        tile: int = 2048,
+        infer_scale: float = 0.65,
     ) -> None:
         env = os.environ.get(ENV_CHECKPOINT)
         self.weights = Path(weights) if weights else (Path(env) if env else None)
@@ -494,6 +516,7 @@ class LearnedSegmenter:
         self.params = params
         self.threads = threads
         self.tile = tile
+        self.infer_scale = infer_scale
         self._model = None
 
     def _predict(self, gray: np.ndarray) -> np.ndarray:
@@ -506,8 +529,20 @@ class LearnedSegmenter:
                     f"{ENV_CHECKPOINT}=/path/to/model.pt (see training/README.md); or use "
                     "backend='classical'"
                 )
-            self._model = load_model(self.weights, threads=self.threads)
+            if not self.weights.is_file():
+                raise FileNotFoundError(f"segmentation checkpoint not found: {self.weights}")
+            self._model = load_model_cached(self.weights, threads=self.threads)
+        h, w = gray.shape
+        s = self.infer_scale
+        if s != 1.0:
+            gray = cv2.resize(
+                gray, (max(32, round(w * s)), max(32, round(h * s))), interpolation=cv2.INTER_AREA
+            )
         logits = predict_tiled(self._model, gray, tile=self.tile)
+        if s != 1.0:
+            logits = np.stack(
+                [cv2.resize(c, (w, h), interpolation=cv2.INTER_LINEAR) for c in logits]
+            )
         return np.argmax(logits, axis=0).astype(np.uint8)
 
     def predict_labels(self, page: RasterPage) -> np.ndarray:
