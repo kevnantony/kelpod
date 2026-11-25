@@ -278,7 +278,7 @@ def _pin_worker(slots, cores_per_plan: int) -> None:
 def run_task(task: dict) -> dict:
     """Run one worktree on one input and score it (runs in a pool worker)."""
     from kelpod.contracts import PlanGraph
-    from kelpod.evaluation.panel import plan_panel, proxy_panel
+    from kelpod.evaluation.panel import plan_panel, proxy_panel, scalefree_panel
 
     src = Path(task["input"])
     work = Path(tempfile.mkdtemp(prefix="kelpod-locked-"))
@@ -312,7 +312,8 @@ def run_task(task: dict) -> dict:
         runtime = result.get("runtime_s") if pred is not None else None
         if task["gt"]:
             gt = PlanGraph.model_validate(json.loads(Path(task["gt"]).read_text())["graph"])
-            row["panel"] = plan_panel(pred, gt, runtime_s=runtime, ifc_ok=ifc_ok)
+            score = scalefree_panel if task.get("scoring") == "scale-free" else plan_panel
+            row["panel"] = score(pred, gt, runtime_s=runtime, ifc_ok=ifc_ok)
         else:
             row["panel"] = proxy_panel(pred, runtime_s=runtime, ifc_ok=ifc_ok)
         if not result.get("ok"):
@@ -366,10 +367,10 @@ def split_items(desc: dict, fresh_dir: Path | None, limit: int | None) -> list[d
     else:
         m = desc["manifest"]
         d = split_data_dir(m)
-        if m["kind"] == "synth":
+        if m["kind"] in ("synth", "dataset"):
             rows = [
                 {"id": i["id"], "input": d / i["id"] / m["input_file"],
-                 "gt": d / i["id"] / m["gt_file"]}
+                 "gt": d / i["id"] / m["gt_file"], "scoring": m.get("scoring", "metric")}
                 for i in m["items"]
             ]  # fmt: skip
         else:  # proxy / sealed without annotations: the item is the input file
@@ -731,6 +732,7 @@ def main(argv: list[str] | None = None) -> int:
                 tasks.append({
                     "split": s["split"], "id": it["id"], "side": side, "python": pythons[side],
                     "input": str(it["input"]), "gt": str(it["gt"]) if it["gt"] else None,
+                    "scoring": it.get("scoring", "metric"),
                     "args": sides_info[side]["args"], "env": sides_info[side]["env"],
                 })  # fmt: skip
     print(f"{len(tasks)} runs on {args.workers} workers", flush=True)
@@ -771,8 +773,13 @@ def main(argv: list[str] | None = None) -> int:
         if names:
             deltas[primary] = pooled(res[side], names, side, seed_commits)
             kinds[primary] = kinds[names[0]]
+        fam_deltas = {}  # rule 4 counts families, each pooled over its splits (test-ood: 3 splits)
+        for fam in sorted(set(fams.values())):
+            members = [n for n, f in fams.items() if f == fam]
+            if fam in ("test-synth", "test-ood", "fresh") and members:
+                fam_deltas[fam] = pooled(res[side], members, side, seed_commits)
         dec = decide(
-            deltas, kinds, primary=primary,
+            deltas, kinds, primary=primary, family_deltas=fam_deltas,
             p95_cand={n: r["p95_cand"] for n, r in res[side].items()},
             families=fams, test_real_pages=test_real_pages,
         )  # fmt: skip

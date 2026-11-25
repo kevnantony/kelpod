@@ -1,15 +1,29 @@
 {
  "manifest_version": 1,
  "split": "test-ood-cubicasa",
- "status": "pending",
+ "status": "frozen",
  "kind": "dataset",
  "family": "test-ood",
- "created_utc": "2026-11-24 01:34",
- "note": "official CubiCasa5k test split (400 plans); needs a loader from the SVG annotations to a PlanGraph ground truth",
+ "created_utc": "2026-11-25 09:57",
+ "data_dir": "~/kelpod-data/eval/test-ood-cubicasa",
+ "input_file": "plan.pdf",
+ "gt_file": "ground_truth.json",
+ "scoring": "scale-free",
+ "generator": {
+  "module": "kelpod.evaluation.vectorplans",
+  "commit": "1f609ac65c3174109084d93284b05f351cef76ac",
+  "version": "1",
+  "style": "train",
+  "dpi": 200.0
+ },
  "source": {
   "dataset": "CubiCasa5k",
   "file": "test.txt",
   "sha256": "3997ee6378007f10e945b2621921127477530abe8f8c053f43e327a365f5ce5a"
+ },
+ "params": {
+  "candidates": "sorted by sha256('kelpod-eval/test-ood-cubicasa/<id>'), first 200 that render and are no near duplicate of a training image (350 tried, 4 dropped as near duplicates)",
+  "degrade": "uniform (0.0, 1.2), per candidate index, from sha256('kelpod-eval/test-ood-cubicasa') (not for CubiCasa: real scans, no degradation)"
  },
  "heldout_ids": {
   "cubicasa_id": [
@@ -415,6 +429,4007 @@
    "high_quality/20168"
   ]
  },
- "n_items": 0,
- "items": []
+ "n_items": 200,
+ "items": [
+  {
+   "id": "cubicasa_high_quality_architectural_1718",
+   "seed": 4233971065,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 57.79,
+    "unsupported_wall_share": 0.0039,
+    "n_openings_dropped": 0,
+    "n_walls": 52,
+    "n_openings": 24,
+    "n_rooms": 14
+   },
+   "phash": "bb1be4c3c3203f8c",
+   "files": {
+    "ground_truth.json": "3c5ad0697620500a2232b93fe42db1b9b75cfadad588297bc679e7dabc533f04",
+    "plan.pdf": "c46088bbb83567b60db2042d60e8330f5314da63a0d71de3a23381f3fb0fa00d",
+    "plan.png": "2770dcef34f7c9ed870cbc06403a41e094b401b07d992923c08cfda50a446353"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_20019",
+   "seed": 2780327366,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 30.53,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 27,
+    "n_openings": 9,
+    "n_rooms": 6
+   },
+   "phash": "c5c17a876a9f219c",
+   "files": {
+    "ground_truth.json": "eb1c72cf42693e3af530e60f9e1a692376cf0fd132390921f1938d0da5647d57",
+    "plan.pdf": "413bebd224a075430e26bf155c52162d84f885fe18176924c994c393c3812d3a",
+    "plan.png": "925f7a0b8657673cef4fd96a8d1ece784ea32ccda9b2a3b56200a0ded8697bcb"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1845",
+   "seed": 3246981887,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 7.14,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 10,
+    "n_openings": 5,
+    "n_rooms": 4
+   },
+   "phash": "c997fa95611e290e",
+   "files": {
+    "ground_truth.json": "d3553d3ca67e0222efb249c299788e0be90b62410a3adef2f79800b0a07f47dc",
+    "plan.pdf": "65d807aa659bce64b2310fc29c02f8702dc54e587acf7ad76ca8882a4a923865",
+    "plan.png": "b793e68afe70adaeb1b837c715ac6d267d70bfd003ba92d09a9d41b26ef0e39f"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1339",
+   "seed": 781366140,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 16.76,
+    "unsupported_wall_share": 0.047,
+    "n_openings_dropped": 0,
+    "n_walls": 22,
+    "n_openings": 8,
+    "n_rooms": 6
+   },
+   "phash": "9ac04cab4ebf6196",
+   "files": {
+    "ground_truth.json": "08857be5abda42c88a7606e990efcec6291484e186913bb939f4d2e035d542ba",
+    "plan.pdf": "f9640d8fa5bfe37a89417a86124fc099d0de4ff831bbe9aefa0f1927be1b65ef",
+    "plan.png": "3acf18179ca4c2914f6ab40205d808d3b3aedd42efff7ff87ca6b3585e00b250"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11960",
+   "seed": 2683537859,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 19.54,
+    "unsupported_wall_share": 0.024,
+    "n_openings_dropped": 0,
+    "n_walls": 33,
+    "n_openings": 11,
+    "n_rooms": 7
+   },
+   "phash": "f004e764d92b353b",
+   "files": {
+    "ground_truth.json": "a6bdd077266f268372c9084808ad3f99985c03894acce48d02574f289d7943c0",
+    "plan.pdf": "3cc6d4a961f8007e75d99499de84d8b4887d0e3da87c1ef7ce4b86510037e034",
+    "plan.png": "705d9ba9002392032c8deec91a78b3af5fd1efdf081c52fde0dd40087067c3c7"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1279",
+   "seed": 870994082,
+   "degrade": null,
+   "n_rooms": 13,
+   "stats": {
+    "wall_area_m2": 89.02,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 42,
+    "n_openings": 24,
+    "n_rooms": 13
+   },
+   "phash": "e24ab731ad6c9195",
+   "files": {
+    "ground_truth.json": "1cb574be37d06c91aca3edf46f10e1ec59d8293536e8d99a1b278b24efb5ca50",
+    "plan.pdf": "79abb6a40eefaeab0d876bad90cd774b615a4234359e0e49c558bbc13fe79ef7",
+    "plan.png": "a3ed152738ab86dbd8bacd79bd7138929513fcd0c9a76a121aaab0bb6157fb13"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_8269",
+   "seed": 2527042039,
+   "degrade": null,
+   "n_rooms": 3,
+   "stats": {
+    "wall_area_m2": 19.36,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 16,
+    "n_openings": 6,
+    "n_rooms": 3
+   },
+   "phash": "bac7c63b913cc6c0",
+   "files": {
+    "ground_truth.json": "019ac32d3c269df36a78cf1abfddd46a86ce8f773f6ba2e29a36b6d64c26c16c",
+    "plan.pdf": "41e26f13818ee29236ac741099e52420cf2a419860b989f85729a35f254210e0",
+    "plan.png": "639b3802db82aa1aaf4e7cd7bf9503e74417c99d16b7c40f17fdf3da53a4aaa5"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2037",
+   "seed": 2921695673,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 29.73,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 19,
+    "n_openings": 8,
+    "n_rooms": 6
+   },
+   "phash": "bb856c3a8568d52d",
+   "files": {
+    "ground_truth.json": "f62e58e62b0f9af8e678622a24c157c3a353ccd855ed14d379309015aba0fb8e",
+    "plan.pdf": "4136e5ae0af3bd5e9c10499823a3c8191f823ae5ecbabf53c17a9dff01e0b216",
+    "plan.png": "ac0af58b135d6c5e9ae0670ee2283c5ddd00a0fba36c40fe461eeaebbd6e403c"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6023",
+   "seed": 629026712,
+   "degrade": null,
+   "n_rooms": 15,
+   "stats": {
+    "wall_area_m2": 99.0,
+    "unsupported_wall_share": 0.0884,
+    "n_openings_dropped": 1,
+    "n_walls": 56,
+    "n_openings": 31,
+    "n_rooms": 15
+   },
+   "phash": "be1cb1eb83849db0",
+   "files": {
+    "ground_truth.json": "c6a48fb0b132ee22f9790749eaf33dc1ccd47cf4545ac3ed2bcda8eedc738038",
+    "plan.pdf": "f1012392059cf695944cf468f82c2b0569a03a7deb30b3aaab5d71cbe1074c27",
+    "plan.png": "f8a6f05b9bade71674e11e093c9fd944425306b12285efbacfe03231baa167f2"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6053",
+   "seed": 79616578,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 31.96,
+    "unsupported_wall_share": 0.0248,
+    "n_openings_dropped": 0,
+    "n_walls": 37,
+    "n_openings": 14,
+    "n_rooms": 9
+   },
+   "phash": "ffb16a943ac0b192",
+   "files": {
+    "ground_truth.json": "cdcd6003c89b774fa04d8dfa8d851b3bae95effb2a63c3636134b034a4c1d7c2",
+    "plan.pdf": "17ba5cca396d9dd802f506aae601f614841387dc29ee8e871973c3772cb50e7d",
+    "plan.png": "cd3054cacaabae7d2cdcc8ea7a2e369adb8258f6b96408f9c79652fb2cf2d9c3"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11752",
+   "seed": 2324791323,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 30.15,
+    "unsupported_wall_share": 0.0743,
+    "n_openings_dropped": 0,
+    "n_walls": 39,
+    "n_openings": 20,
+    "n_rooms": 10
+   },
+   "phash": "af4896adc996c0f4",
+   "files": {
+    "ground_truth.json": "e7100fafaa2604adfbc7eb4a942b8bfb99b2d82502e915987bfcf18abf4a0d98",
+    "plan.pdf": "8551f3e56ba23e780b96313bfd20e7e0ca0f6b8374726e07541ecdc6f55a3fca",
+    "plan.png": "5a5882bca3f34b5a8d4737799a8479841c4313ea55d38b7cf18e613982be7eaf"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_546",
+   "seed": 2204076582,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 17.33,
+    "unsupported_wall_share": 0.0076,
+    "n_openings_dropped": 0,
+    "n_walls": 49,
+    "n_openings": 12,
+    "n_rooms": 4
+   },
+   "phash": "ea6cad9350ad1595",
+   "files": {
+    "ground_truth.json": "cc4904c8b092137d81de108c949693630cb064abae14ba4fd4408844af74f2c8",
+    "plan.pdf": "872564b2ef8a9bfccc940ddf06bf06fc93f47140e61637df073679a6f470fcfb",
+    "plan.png": "c1792ec2d3602b5e7c9e47a291731a8b6847b8b18cc18dd1103a6d1153be2d4e"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4812",
+   "seed": 3818068067,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 23.05,
+    "unsupported_wall_share": 0.0401,
+    "n_openings_dropped": 0,
+    "n_walls": 42,
+    "n_openings": 26,
+    "n_rooms": 12
+   },
+   "phash": "f7b2b82586d2da06",
+   "files": {
+    "ground_truth.json": "d7774cc0efb073f537f912ec84024aee61eef8b4130baa058a7d2bb0c2daabad",
+    "plan.pdf": "92d44e2b46b9b8b5fd2197a333d16d750d0b05c52f830c5bc944b4ecae9f7e77",
+    "plan.png": "28d34a64f8baa41104306e2c1f131f198cdcf05e1b25972ac196091ff0f15fc2"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_3801",
+   "seed": 342148271,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 39.35,
+    "unsupported_wall_share": 0.1315,
+    "n_openings_dropped": 0,
+    "n_walls": 27,
+    "n_openings": 10,
+    "n_rooms": 7
+   },
+   "phash": "ced4334b95bec02c",
+   "files": {
+    "ground_truth.json": "3ff3c74f3f865e07e1e7a22e76deeed4ef8a16a51d92fd7b2b4f7459e03f6863",
+    "plan.pdf": "38b2759001ae8361f4674235b61a4898f1dde674f64225c3790f774d56ed6c68",
+    "plan.png": "936b195845e57f138c9176166cbb1dd19b10cb9e57d4205159e59ae39b72a194"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_8304",
+   "seed": 710934000,
+   "degrade": null,
+   "n_rooms": 21,
+   "stats": {
+    "wall_area_m2": 124.85,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 65,
+    "n_openings": 27,
+    "n_rooms": 21
+   },
+   "phash": "f7a6a263c0556f18",
+   "files": {
+    "ground_truth.json": "ce58b77eeecd2781a4f8649134be876c1fee01b19010404964c038a6500301d3",
+    "plan.pdf": "9ba787fe41123da3bd7eac114adcdb82125f33bb67898adc115a2de5be580386",
+    "plan.png": "c894fc20b33bd50d9ff8708e33fefbb7d800e06c186654df03bce2cbb607c3be"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11573",
+   "seed": 1056611156,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 20.61,
+    "unsupported_wall_share": 0.1128,
+    "n_openings_dropped": 0,
+    "n_walls": 23,
+    "n_openings": 15,
+    "n_rooms": 9
+   },
+   "phash": "98aced43cf798431",
+   "files": {
+    "ground_truth.json": "69c16a11fc3bfc4bf50e90da836cd98432a1f9d1f2e473057f789032cf00bda3",
+    "plan.pdf": "ceb63c304aaa4b400908be0eaa8f0a3fd0dc61309e61b23551c41620d5dd5ed5",
+    "plan.png": "c4c73dd1897e921f73af56a0514fb25912d5dab79c53c77b36efe9ecd37ae7f4"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_20174",
+   "seed": 3283428175,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 43.65,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 15,
+    "n_rooms": 12
+   },
+   "phash": "ca1be034bdb5a5c1",
+   "files": {
+    "ground_truth.json": "a81976b6b9432714f47ac5a6c3f4cf46ba9361ab04ccd908e9e74128d89d90ca",
+    "plan.pdf": "ef6c3057bc2becf64e76296c6e6c45f06f2aa27b2fe7ba0dcdb90344a99f39cc",
+    "plan.png": "cfecfed57d89c7b9398bf4f4f56fdb3b0206a82085503b3b19dd6579d63915b7"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_3598",
+   "seed": 2373787929,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 8.79,
+    "unsupported_wall_share": 0.0424,
+    "n_openings_dropped": 0,
+    "n_walls": 18,
+    "n_openings": 10,
+    "n_rooms": 5
+   },
+   "phash": "d1527a3faa691e21",
+   "files": {
+    "ground_truth.json": "72f36fcc505fa451b2fe03fe835f2aa194bb0cd2f23d89073c8d1daa28c03950",
+    "plan.pdf": "114bfd43ae1ddf953ae39626c67b3a521ba860e81dcaad4f61af3f2718687e7b",
+    "plan.png": "22f2024608ee2d9be826646a0b1c18c3a630bc7bc9ecb7b794dd39ac1d195afe"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1754",
+   "seed": 851900620,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 12.31,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 15,
+    "n_openings": 6,
+    "n_rooms": 5
+   },
+   "phash": "bef3c125b82e844b",
+   "files": {
+    "ground_truth.json": "e6d65816e15422b2dadfedfe4c6f5016365368be2614d60cd0e18b5e3c1e3424",
+    "plan.pdf": "2cfc1e0fca0b9e3fe57db2e56705a0203e5130cc403f7bbbc3737bae2be34eee",
+    "plan.png": "093c3897985bd686d23c8543e3119af76dd18137a7163912fcf6a56ea6421f8a"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9452",
+   "seed": 2506110290,
+   "degrade": null,
+   "n_rooms": 18,
+   "stats": {
+    "wall_area_m2": 85.94,
+    "unsupported_wall_share": 0.0159,
+    "n_openings_dropped": 0,
+    "n_walls": 69,
+    "n_openings": 54,
+    "n_rooms": 18
+   },
+   "phash": "c0a99da527d85da6",
+   "files": {
+    "ground_truth.json": "6036016bd5f88bb88a02c697e49a52db1830d55dd1199c369d174bcc154c784d",
+    "plan.pdf": "89d7daa867d9744f38b7cbd9a1d46b0b2a31f2b8524baf7ca114d79b9f5d4bc3",
+    "plan.png": "9dbf1537072492874e30ae7941c35989a027cdded24177c7c8bb3cf1405760ae"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1945",
+   "seed": 4060660426,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 12.82,
+    "unsupported_wall_share": 0.1673,
+    "n_openings_dropped": 0,
+    "n_walls": 20,
+    "n_openings": 10,
+    "n_rooms": 7
+   },
+   "phash": "dbb12fb41146388f",
+   "files": {
+    "ground_truth.json": "7cf4d7f75c88c9598d493f6d1f845cae5f3d2a87e12fea107154023b846fca57",
+    "plan.pdf": "8390c05db511fef74f84541bfaf8f8959f37d03d942141e56aed284b6c3ddced",
+    "plan.png": "09dbf95ad1b12b26589981fb674cc61355f81aab683d35f92d85d70468f0a90b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_5023",
+   "seed": 1817601455,
+   "degrade": null,
+   "n_rooms": 20,
+   "stats": {
+    "wall_area_m2": 113.94,
+    "unsupported_wall_share": 0.0488,
+    "n_openings_dropped": 3,
+    "n_walls": 141,
+    "n_openings": 46,
+    "n_rooms": 20
+   },
+   "phash": "8b8e31f24c9d13f1",
+   "files": {
+    "ground_truth.json": "65a8fd07e84fe3d77113d15326accf4139af46a776372efe8568b35e85d5494c",
+    "plan.pdf": "c00c3f46afb88548e25e447a1a11cf8bb3fedabdc974905caf4eb183bdadc917",
+    "plan.png": "be32010aff824928cd34a8b2363079fe3396e5bb827931249f631ddafc1cf968"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11859",
+   "seed": 177170481,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 18.58,
+    "unsupported_wall_share": 0.2876,
+    "n_openings_dropped": 2,
+    "n_walls": 25,
+    "n_openings": 10,
+    "n_rooms": 6
+   },
+   "phash": "b541d926e1f866d8",
+   "files": {
+    "ground_truth.json": "ccc11c6533540bfbdc8d74493c3b4bc8073b4a842274f659a1fa7d6cbf2d7fb8",
+    "plan.pdf": "d834d25360c2f4de8ccd88aeec7859c3d7f81d37d73627936db095698c270758",
+    "plan.png": "6069ab33a6b1829028bf1927e5e63fe8562c4f5fb8c3b07e35bd2239551e60b6"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4068",
+   "seed": 720166989,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 97.57,
+    "unsupported_wall_share": 0.0213,
+    "n_openings_dropped": 0,
+    "n_walls": 43,
+    "n_openings": 25,
+    "n_rooms": 17
+   },
+   "phash": "b83dc11377e0d878",
+   "files": {
+    "ground_truth.json": "a2bd1055bf4b932ab03c4adf75ad4c81894b7795226df35d61e5c6d3370a643d",
+    "plan.pdf": "f344e25d0bf15f9dadf4c572656d917a0879369aced6f957c392fb71ea377c5f",
+    "plan.png": "50c7849e14345021d07b013fc0d66c9c4f045805987052f65cd789758e7e84c7"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_5774",
+   "seed": 1240790378,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 80.46,
+    "unsupported_wall_share": 0.013,
+    "n_openings_dropped": 0,
+    "n_walls": 84,
+    "n_openings": 42,
+    "n_rooms": 17
+   },
+   "phash": "b1e05a994e47654f",
+   "files": {
+    "ground_truth.json": "5d372881ba57ae50e3f90686ce28c8e622224bfcba0d4755f5b0443bb8c40031",
+    "plan.pdf": "2277e28db3a285670c99691c6f2440356ffdf59c9994d0c6c2f08f1debd5def5",
+    "plan.png": "dd2b2c9af2a5702278973b1206d29bb057596c169af1062023368257a31254a5"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_4712",
+   "seed": 3090621455,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 17.16,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 20,
+    "n_openings": 10,
+    "n_rooms": 6
+   },
+   "phash": "e6995b6662413a3e",
+   "files": {
+    "ground_truth.json": "62dda04ac2ac73ab460587ed1f2643378f925ca023ad90043ae806f335f2cfb3",
+    "plan.pdf": "55f72b8fb93a8e8079f5f867f110f6e7589fee29c44b8dc0fb42a6bb157eadf4",
+    "plan.png": "5ce7d237e54de9ed5624fa9f7fdd34aa351528c8b174484b5b0ddeb02e96d97b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7780",
+   "seed": 686453054,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 52.34,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 39,
+    "n_openings": 19,
+    "n_rooms": 12
+   },
+   "phash": "bd71ba43cc87c28c",
+   "files": {
+    "ground_truth.json": "1aa3f300e528f89dcf29b8c5e19b85d0447d6f2de5ef3ed0d7b1cf78f42240c5",
+    "plan.pdf": "ff99907f46102c70486e15a6fda8272f931a5aafaad050a026d2d5491f5b1266",
+    "plan.png": "f349776a9d944b6e2ed4c2635286920e3472f6211d5d9605bb3e165b7aa8bdaf"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7894",
+   "seed": 1325996223,
+   "degrade": null,
+   "n_rooms": 16,
+   "stats": {
+    "wall_area_m2": 42.91,
+    "unsupported_wall_share": 0.0724,
+    "n_openings_dropped": 0,
+    "n_walls": 74,
+    "n_openings": 45,
+    "n_rooms": 16
+   },
+   "phash": "e969ddd6962cc848",
+   "files": {
+    "ground_truth.json": "3d590fa4ddce778af6363db66437bcad0e7bc189e0402c5ff0766bf3a7351f50",
+    "plan.pdf": "30b87acbccba7d44a1663e706a9706a7d3e83d5ef712a613a5e82483b8f537ee",
+    "plan.png": "59694c25dd3408c8b4dcf3badfe2268d7379019cafc64a66babf0c8f505d8a43"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1041",
+   "seed": 3288133794,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 34.19,
+    "unsupported_wall_share": 0.0657,
+    "n_openings_dropped": 0,
+    "n_walls": 22,
+    "n_openings": 10,
+    "n_rooms": 7
+   },
+   "phash": "95b269f022eb2cd6",
+   "files": {
+    "ground_truth.json": "70fbe25842c421fa39db3ff450925c3fbc1194eec31c94497e54446d2de77d92",
+    "plan.pdf": "a016053f7f6da0d34459252574830c0369b3269d2079da936c1aaa7d0a01cdbd",
+    "plan.png": "f150994a10f7d57147fe731d608852875403be2c1b52c0c6bb2e4a27a77dc921"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_32",
+   "seed": 2150839742,
+   "degrade": null,
+   "n_rooms": 16,
+   "stats": {
+    "wall_area_m2": 50.98,
+    "unsupported_wall_share": 0.0157,
+    "n_openings_dropped": 0,
+    "n_walls": 52,
+    "n_openings": 37,
+    "n_rooms": 16
+   },
+   "phash": "9b87e4b1433e6631",
+   "files": {
+    "ground_truth.json": "2cdadd3c9a2d992f110eabf563ceb0bab51f1b61d12aa0f6abebb5e46a654b7f",
+    "plan.pdf": "f11fff0323f692bd99616b6bf38453492309b4c066dfce0bf5171d1344108299",
+    "plan.png": "55a5485fb0f5ae740c6aae2ce057a0f697039273f70414e6a20ff7ace502b304"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_3512",
+   "seed": 831890760,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 45.98,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 34,
+    "n_openings": 17,
+    "n_rooms": 9
+   },
+   "phash": "b0f8c73cc3f90cc4",
+   "files": {
+    "ground_truth.json": "8bfe5f95bc3559875f3aaa17de0c3153b057210afb8a2d87d3e492b227ed7658",
+    "plan.pdf": "ece246a9eb64caf5c3484090fe5063325ed60d633f5a38f108c641262606a99d",
+    "plan.png": "ad8ca675f6f656c966e1f1dcd3b733bdda2df646ac914a2675adef74e3f3a5e8"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_8571",
+   "seed": 2929744144,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 70.43,
+    "unsupported_wall_share": 0.0318,
+    "n_openings_dropped": 0,
+    "n_walls": 56,
+    "n_openings": 29,
+    "n_rooms": 17
+   },
+   "phash": "bbc28ccff438c03c",
+   "files": {
+    "ground_truth.json": "5f0c822be7989fb43c9bce747b8c8d0bfa48b622a189cbcf7de07c7546e64b43",
+    "plan.pdf": "52a3b48fc2f08520f5124839aa996c4d90941eda4386cd6054a281cbc5822b37",
+    "plan.png": "a19c63230ffc4301e7d58dd4daed8a52b89b417914a44bc164621fbdf8e6e9a8"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_141",
+   "seed": 3889438981,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 53.59,
+    "unsupported_wall_share": 0.0033,
+    "n_openings_dropped": 0,
+    "n_walls": 35,
+    "n_openings": 21,
+    "n_rooms": 11
+   },
+   "phash": "fc93c32c9b93e484",
+   "files": {
+    "ground_truth.json": "1c3292090edaf931195d024461a0d7ec7c13dda033b923224dbe08b2c232b797",
+    "plan.pdf": "13c26165735867c869015e2ff1e7541944bc5fc592affed3673937d125a42a6e",
+    "plan.png": "35c360e6fa68a275b54b55f478e9ea812e457b414ca556c7fe3266eab31b4788"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3660",
+   "seed": 3903747079,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 23.73,
+    "unsupported_wall_share": 0.0239,
+    "n_openings_dropped": 0,
+    "n_walls": 30,
+    "n_openings": 9,
+    "n_rooms": 4
+   },
+   "phash": "e6c03b37606e5b13",
+   "files": {
+    "ground_truth.json": "ce2761d36fe3c0224d2b5fefc41095438682ac9555b92a6e5da610d9caa00fca",
+    "plan.pdf": "aebf275cab079ddf17f8a3081c8103cd913fa08d3a9ed79960ac6ad312441ef9",
+    "plan.png": "24f8e4e2680967b6eb6dc3004e51e1822aaead1931dd4763a6478c33261a00b4"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13213",
+   "seed": 1993660825,
+   "degrade": null,
+   "n_rooms": 18,
+   "stats": {
+    "wall_area_m2": 43.75,
+    "unsupported_wall_share": 0.0102,
+    "n_openings_dropped": 0,
+    "n_walls": 61,
+    "n_openings": 30,
+    "n_rooms": 18
+   },
+   "phash": "f83895c38746c3c7",
+   "files": {
+    "ground_truth.json": "5ad3a61632ba535dd43d4c468f250f087250d91143373d27304d6106b259719f",
+    "plan.pdf": "d961802cd1dc65ecb306cc5b2c1f3a1d511746531e023c64c41000a92966b3fe",
+    "plan.png": "9781b17a83abbde4708ada1d3e58712d28ca57cc7f8b9e53f6056c87a8e4527c"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13500",
+   "seed": 868452384,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 26.51,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 27,
+    "n_openings": 10,
+    "n_rooms": 6
+   },
+   "phash": "b7c5e238c44f483b",
+   "files": {
+    "ground_truth.json": "45e02e3d533a53e23fd451fd2bb84c105ca17d7a8afe8c9fafe0793a88210fea",
+    "plan.pdf": "68f20fdc0364b9f951e3578e6c6e1501a1e66ebe4baa9644c150527c6ef952f5",
+    "plan.png": "44b2ecd260005e25e30da1b3fe2950e6eea274109458769e3ee5685e4bde921e"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9443",
+   "seed": 3901907689,
+   "degrade": null,
+   "n_rooms": 16,
+   "stats": {
+    "wall_area_m2": 67.51,
+    "unsupported_wall_share": 0.0222,
+    "n_openings_dropped": 0,
+    "n_walls": 67,
+    "n_openings": 48,
+    "n_rooms": 16
+   },
+   "phash": "ed259c2a929ed195",
+   "files": {
+    "ground_truth.json": "0b3cd0b6d1189af583e1764ab24a9e1b4e6aa6a2b52a2104e406503d86288ca3",
+    "plan.pdf": "4172cb524d557f66891130d1799640c5c2e9b227cb5f527dc4b12910845416c2",
+    "plan.png": "5325938356ab452f372ce245a6e5eec12b49cd8f9874b74e097766d27299bacf"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3608",
+   "seed": 1862638681,
+   "degrade": null,
+   "n_rooms": 20,
+   "stats": {
+    "wall_area_m2": 100.17,
+    "unsupported_wall_share": 0.0396,
+    "n_openings_dropped": 0,
+    "n_walls": 69,
+    "n_openings": 31,
+    "n_rooms": 20
+   },
+   "phash": "eeb5b252b46a8964",
+   "files": {
+    "ground_truth.json": "07312ceee4907848f1fd12b47dbc1d26cc98a5a87b985e1b4817602aee4e106c",
+    "plan.pdf": "bdb153bcedb6854dbaacec54621d9de3e2e3d6bb81667257f8fecececb1921e9",
+    "plan.png": "2b68575adc5d40662f30062d47e635dcd2bec2761b0a1cb99eb119ad59675d60"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13181",
+   "seed": 2068218508,
+   "degrade": null,
+   "n_rooms": 3,
+   "stats": {
+    "wall_area_m2": 9.01,
+    "unsupported_wall_share": 0.0041,
+    "n_openings_dropped": 0,
+    "n_walls": 13,
+    "n_openings": 4,
+    "n_rooms": 3
+   },
+   "phash": "bacd3938e134c1c7",
+   "files": {
+    "ground_truth.json": "c09ebbadbbac71ac7ff368c334a85d849cc8f7422d2abb15d1a5dbe508a0dee7",
+    "plan.pdf": "726049a1165b866be1f2312064f32da835b9abc6e005a716d6a83b8d1faa6ff9",
+    "plan.png": "3dd32ca17afa359966fa51eab424e3056426a13cb670a539f5e594988eb3cde9"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_4617",
+   "seed": 3527747472,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 24.87,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 28,
+    "n_openings": 10,
+    "n_rooms": 8
+   },
+   "phash": "81d2ff7c9489d425",
+   "files": {
+    "ground_truth.json": "38fdf9a8974d56576043b37fa160cd2c347dae95690e438490b3d22a1858a033",
+    "plan.pdf": "67e013116007171e8e4d6806f271243466e6fa40ebac7c84e9d3a54a81802f36",
+    "plan.png": "76120454c7599a094af2523b95282136d6134dafe557af8cdbd254a86c772a15"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12002",
+   "seed": 707461476,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 15.55,
+    "unsupported_wall_share": 0.1081,
+    "n_openings_dropped": 0,
+    "n_walls": 25,
+    "n_openings": 10,
+    "n_rooms": 6
+   },
+   "phash": "9a700e316e0ee0ff",
+   "files": {
+    "ground_truth.json": "fc79ed462aea978d45113e2c48656d8f5d70bcffff572c3986e0750dc83ca691",
+    "plan.pdf": "23a22b8f2a564cd93947e99d0f4bed7270a48946f6e4af5d71686ba85d237cba",
+    "plan.png": "fecfb7d95618ae66013e934103d32b185b5269a4a83c206ba524c476ca7e2fdd"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1772",
+   "seed": 1702774389,
+   "degrade": null,
+   "n_rooms": 13,
+   "stats": {
+    "wall_area_m2": 66.92,
+    "unsupported_wall_share": 0.0104,
+    "n_openings_dropped": 0,
+    "n_walls": 55,
+    "n_openings": 22,
+    "n_rooms": 13
+   },
+   "phash": "ae93d86d27789906",
+   "files": {
+    "ground_truth.json": "7bc73514aee39d58d663651a79d05ba71bcc8c50b7d864121f8efd1ccdd5d815",
+    "plan.pdf": "a84088e145fcd47bbe0eefd9e3a7e0e1429981654625ca068743c43825a5bf1f",
+    "plan.png": "a9b78144c84e78ef9501a568cf18c8e402d1ede9f873471f1c5bda8aa2082a5e"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_3162",
+   "seed": 4073233145,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 42.55,
+    "unsupported_wall_share": 0.0056,
+    "n_openings_dropped": 0,
+    "n_walls": 32,
+    "n_openings": 15,
+    "n_rooms": 10
+   },
+   "phash": "c0ccb731ada4ed49",
+   "files": {
+    "ground_truth.json": "7a3a3d5e38195efa6dafdca0ccf7c48bc572a6e1347b8ad177aee4e037df0974",
+    "plan.pdf": "9d729ec20d3386128130524268869fa42569fa708e7cbc1f59f176c1e38f5fac",
+    "plan.png": "bbae57c136feab3f8f379ab9b81da3b4e19d9623a5b66945feec4c25406f3d95"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2536",
+   "seed": 3258859638,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 56.37,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 32,
+    "n_openings": 14,
+    "n_rooms": 9
+   },
+   "phash": "81e4fa836e818f57",
+   "files": {
+    "ground_truth.json": "689aae0212b532028f42a8411e6363a6409b7e9b06b2012708389adf7355e061",
+    "plan.pdf": "761a8fd99e7bc333cdcdcb30dbb4504ef9a054091e262c249802b4a802bd8343",
+    "plan.png": "9c0ee5f0f538ccbe0b0d8a3a3a965948cb77e66d9a819c43f4302408bfa5ad7c"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_287",
+   "seed": 1036393527,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 78.47,
+    "unsupported_wall_share": 0.1132,
+    "n_openings_dropped": 0,
+    "n_walls": 59,
+    "n_openings": 41,
+    "n_rooms": 17
+   },
+   "phash": "ed4d99636a3d2c30",
+   "files": {
+    "ground_truth.json": "dd5609149cacc2846720f3cee2a14af47fffa9cf871161ad81bc86d699aee671",
+    "plan.pdf": "1b294858794d70f718e38b5bdf64986d7c572c28d72f0f5003cab817f496b4c7",
+    "plan.png": "a9b8411332f342ce78742f7f8b0f250c57f83c592880baeb702f94d5e979bf0f"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13254",
+   "seed": 1508934552,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 9.4,
+    "unsupported_wall_share": 0.103,
+    "n_openings_dropped": 0,
+    "n_walls": 14,
+    "n_openings": 4,
+    "n_rooms": 5
+   },
+   "phash": "fe99e10e8166996a",
+   "files": {
+    "ground_truth.json": "eb98a8345dc0f8a419211a99ad7cde3cd243032f147471a5eb7ba268393cf216",
+    "plan.pdf": "2edfb10cec5c17bdd373a10541228ed50c7e2f528bbbca8ae8fc71870403dc09",
+    "plan.png": "a56f4345c21ca111c9f082de81ba87feb32ac45cab5adf11da1f69ec3b3adec7"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6697",
+   "seed": 936889116,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 70.08,
+    "unsupported_wall_share": 0.0808,
+    "n_openings_dropped": 0,
+    "n_walls": 51,
+    "n_openings": 37,
+    "n_rooms": 14
+   },
+   "phash": "cd93e47691628dcc",
+   "files": {
+    "ground_truth.json": "963080073bbc565a1377ea6698a8d2bdb3e1cce5cbf74948a8b6e0cefe1b622a",
+    "plan.pdf": "49dc2e04f7522e6ade03ed862570475f2be80ad5751b97966770bb09d41fad07",
+    "plan.png": "0627e954ad12e1030a14cdbbedabaf365e5cd67c8aa8db9f1e64c2200284c0a0"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13589",
+   "seed": 3371083153,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 23.12,
+    "unsupported_wall_share": 0.0251,
+    "n_openings_dropped": 0,
+    "n_walls": 20,
+    "n_openings": 11,
+    "n_rooms": 7
+   },
+   "phash": "9fc1e038c13ee33c",
+   "files": {
+    "ground_truth.json": "0d7e1b0be3f81f265f20126bdb55b17ab18499331af770967cd46f37d393f6b3",
+    "plan.pdf": "bad3437cf154f3387ad06f7800ab53d067632096363bd931333585b96a7a72e7",
+    "plan.png": "9d25c4c1524f3d3a2b6373bbecc9bde626cac545c701942630d928c5019dd23f"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_5588",
+   "seed": 2853367711,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 33.31,
+    "unsupported_wall_share": 0.0818,
+    "n_openings_dropped": 0,
+    "n_walls": 24,
+    "n_openings": 11,
+    "n_rooms": 5
+   },
+   "phash": "de36a15d81aa95c9",
+   "files": {
+    "ground_truth.json": "a15a9f2772ec0b02030d04d50dea921b24221bd1600ea3f9881b9290bb5c1c9b",
+    "plan.pdf": "eea5bcd1af68b31b0099bbfd6c13b27a96bafcaa0fb11ab854874503cfdb42b3",
+    "plan.png": "377cf4e354c151bcca9981f54bb458a2d1d5d40c876c48b212be4aa0a6af4a4e"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7715",
+   "seed": 950592983,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 30.0,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 46,
+    "n_openings": 14,
+    "n_rooms": 8
+   },
+   "phash": "bf9f6060d063f0b4",
+   "files": {
+    "ground_truth.json": "558f9b282e4a30a87ada9b297c358d92e0adf9f1886663628bbb606c3a59deca",
+    "plan.pdf": "41826b4914f022c6879a650a8ca7d4600328bc376ac8c17a9564caa820d76384",
+    "plan.png": "703b2efc881f966fc2fcdef86c406f00426f33eaee56621827498e57d7f0473d"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4589",
+   "seed": 3016094746,
+   "degrade": null,
+   "n_rooms": 18,
+   "stats": {
+    "wall_area_m2": 41.53,
+    "unsupported_wall_share": 0.0058,
+    "n_openings_dropped": 0,
+    "n_walls": 54,
+    "n_openings": 29,
+    "n_rooms": 18
+   },
+   "phash": "ae5ba4f0a4c70be4",
+   "files": {
+    "ground_truth.json": "bce6d6907f955c349196040130ef88dd3c0391366a77d828409344692a85cd1e",
+    "plan.pdf": "7dea1cadd2308cfc8a7b9a2afc4ae4f7f14f8572bcaec5eec41c3b0195091ee2",
+    "plan.png": "e96f1ea3d735d55f4ef928c57d35bedd45ed63c5c2a502ec868a7889168ad60f"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7606",
+   "seed": 3652654472,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 60.78,
+    "unsupported_wall_share": 0.0563,
+    "n_openings_dropped": 0,
+    "n_walls": 36,
+    "n_openings": 17,
+    "n_rooms": 9
+   },
+   "phash": "ab52e53ad6c9f021",
+   "files": {
+    "ground_truth.json": "59ed60e18a3a692d4862cc8d00098837075725307889eada1946a70582fc040e",
+    "plan.pdf": "01f53eb0d37fde227fab8cc79eae249da1e7852e5b4f79ad468fe0a3e26b3939",
+    "plan.png": "c65ee93a5b4cb16932975278ae625792ebc5ac83635a2f21b3eb577d805b9997"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4911",
+   "seed": 2181840881,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 27.3,
+    "unsupported_wall_share": 0.0351,
+    "n_openings_dropped": 0,
+    "n_walls": 23,
+    "n_openings": 13,
+    "n_rooms": 6
+   },
+   "phash": "f058296e0b6e296f",
+   "files": {
+    "ground_truth.json": "9af11e2e48c312b42ed9655cfaaa3b0c71f7b2bf901c8143aa9210d0c1f41178",
+    "plan.pdf": "3d208d4758836806be113a4c159603507a022196c61a583eb12f4dcf067fddd0",
+    "plan.png": "c351c6c760517f1fd10c6fdb7f0e287d04a5fd8278b78d56b3e979c6010bd6d2"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2582",
+   "seed": 239810627,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 91.53,
+    "unsupported_wall_share": 0.0333,
+    "n_openings_dropped": 1,
+    "n_walls": 43,
+    "n_openings": 28,
+    "n_rooms": 10
+   },
+   "phash": "eb85f172c46993c8",
+   "files": {
+    "ground_truth.json": "1f07fcf6c2bc4e889f64a3f69c0c883f83b96210a7f40ca0a067186c95b85b5a",
+    "plan.pdf": "991593cb4c02fd4440de5c1b45e7e95ed15f30c27c9668ca70f0f97c9d2a7de6",
+    "plan.png": "b4f0203f03a39eb7855c7228da06024120fe9daccdd91dc13344901ac7218528"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9093",
+   "seed": 2533271020,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 19.41,
+    "unsupported_wall_share": 0.0729,
+    "n_openings_dropped": 0,
+    "n_walls": 16,
+    "n_openings": 9,
+    "n_rooms": 5
+   },
+   "phash": "81c6bf78fe11c40e",
+   "files": {
+    "ground_truth.json": "039a497941cb061a483e671efac9b5e91b61f581e302488d033420332adeb303",
+    "plan.pdf": "c4c5992bf15c5166172f6a8c498c88ff778890a97cc8f74f6eb25d3417adb626",
+    "plan.png": "0a5862a89addfb3bb449d129cf7ff901684c31c919891fc03cac2b42e35a8e9b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_20023",
+   "seed": 3193914706,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 27.16,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 12,
+    "n_rooms": 9
+   },
+   "phash": "ee92b06fc690c587",
+   "files": {
+    "ground_truth.json": "4a95f78f9cd95b16095d0d9b581e489d67317138e0d5436296b5be6f1bf08b23",
+    "plan.pdf": "081ac81f89acbcde1e15e91a28594e5a03157db35ce1fb7c5690bd0aa9b5101e",
+    "plan.png": "75cb6661af28a0e90735712fe680a30f34e2ef961d6302effa9019fc4a55eeba"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11750",
+   "seed": 615528166,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 11.92,
+    "unsupported_wall_share": 0.0211,
+    "n_openings_dropped": 0,
+    "n_walls": 23,
+    "n_openings": 12,
+    "n_rooms": 8
+   },
+   "phash": "d5f77a8806144b7c",
+   "files": {
+    "ground_truth.json": "bcc10059c83c28d40b7ddb6eabf2bb06102e95f9574d14ec86b4b060f0a3a94c",
+    "plan.pdf": "afda5f5284a3d3b5c868db67796738cdffd593630489fd965aaca5bf7e99729d",
+    "plan.png": "4450b5f72302694319f0101d3d8e9c48853bd4a53930ed324ce0aba606f9088f"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_211",
+   "seed": 2207059605,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 46.76,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 38,
+    "n_openings": 14,
+    "n_rooms": 11
+   },
+   "phash": "c65da2276c53f12a",
+   "files": {
+    "ground_truth.json": "c9ccc93b3089a1fc270518387a96fcd3885ed3e7b9c999926650d9676131a4f8",
+    "plan.pdf": "5882af5a7f8c786e65909a0eb69b08f0ff4bc5050d2a8527e111f656864cbcfc",
+    "plan.png": "72d97da2d8e3f07eaa1b758e3c160b1f84ab1004b917d403515546cb68414d59"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4813",
+   "seed": 3431263627,
+   "degrade": null,
+   "n_rooms": 24,
+   "stats": {
+    "wall_area_m2": 91.72,
+    "unsupported_wall_share": 0.0394,
+    "n_openings_dropped": 0,
+    "n_walls": 75,
+    "n_openings": 45,
+    "n_rooms": 24
+   },
+   "phash": "9a48b5f5b5b49107",
+   "files": {
+    "ground_truth.json": "15b15be9c2fe529515b662b2f9a9d27bbb8d0bc26de554f531ad5cd4a9304bb9",
+    "plan.pdf": "83382bc08dd99b090001f5cb6a8f2cc67584fb0b00a70293551f779725b159cc",
+    "plan.png": "688b82e18e04eaec30135f5ab1c0d37faa9eb44c58deb9da2db4a3565963f334"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1590",
+   "seed": 2962118540,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 32.3,
+    "unsupported_wall_share": 0.0272,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 14,
+    "n_rooms": 9
+   },
+   "phash": "ab9af439d870c2cc",
+   "files": {
+    "ground_truth.json": "9569629b6a9d799e27206112e9af9ea9528d26dcd03e23a59d4db864c7b41395",
+    "plan.pdf": "250f11bfcf568bd63fd0b62ee54cc496826af343af5b82297379aea158c0bd3a",
+    "plan.png": "27f4223e919ba9ef8bcbd37c20b96a57cd7728ab3802e3b33a5b60bb95a6903a"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1191",
+   "seed": 158166441,
+   "degrade": null,
+   "n_rooms": 15,
+   "stats": {
+    "wall_area_m2": 58.42,
+    "unsupported_wall_share": 0.0369,
+    "n_openings_dropped": 0,
+    "n_walls": 53,
+    "n_openings": 41,
+    "n_rooms": 15
+   },
+   "phash": "aa53b49ccb3996e0",
+   "files": {
+    "ground_truth.json": "f990680b549810436ec87a9a247ba877042aa736d68648d9016b97bc369b1e89",
+    "plan.pdf": "de9f83fe00d730879da65b5ba994aeae6157525efc9ffc86ab197feb6209e400",
+    "plan.png": "73d5c86d654290a8f7b81ac131b39d9dd05b6bc0346f30d619a0c93611bd058f"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1837",
+   "seed": 3494775026,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 12.93,
+    "unsupported_wall_share": 0.1876,
+    "n_openings_dropped": 0,
+    "n_walls": 20,
+    "n_openings": 8,
+    "n_rooms": 6
+   },
+   "phash": "8085af49b7d2fa92",
+   "files": {
+    "ground_truth.json": "a308d062f68184f0127ee272c44a85d37c7bdbc96fd44144310ca184b0054bb3",
+    "plan.pdf": "05d7b151eb74f703637fa0ce44ee7fedb53417cad21f2a0b35d145e97676e2a8",
+    "plan.png": "30ae7fb60a9f5c3ab6f09dc574e390f967b0ab9b0e9d67baee13e657e37adf5a"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1284",
+   "seed": 3679805759,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 59.6,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 33,
+    "n_openings": 18,
+    "n_rooms": 11
+   },
+   "phash": "ea83a53c9535d4d1",
+   "files": {
+    "ground_truth.json": "8d47c7975b942a239133280da9700619ee51d3ea91b3e7b5ab4c3bfc17e0a07e",
+    "plan.pdf": "7818d49f17ad871bfaf4b9bce97b2a2500c5336e2abc8d5367ac84cd2ae613a3",
+    "plan.png": "33d873b1e88ccd5197c20e18742d6cc207079f15248cc2d92635d5ce7234f51f"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7691",
+   "seed": 4217089919,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 43.88,
+    "unsupported_wall_share": 0.0294,
+    "n_openings_dropped": 0,
+    "n_walls": 42,
+    "n_openings": 19,
+    "n_rooms": 11
+   },
+   "phash": "eab5d1622d8d3631",
+   "files": {
+    "ground_truth.json": "da533e8d06741cc7bb9910eb17b8407792601bd958c9fde0a16fd6bf46a1f930",
+    "plan.pdf": "ad08e86d186c2b428c46631da76d84459f78308908c78ff94c564b4e8e9d696c",
+    "plan.png": "fbed1b1e3f769c86af5c857363ec1dd5c4fbb91125e890960167f65e12fb284b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1264",
+   "seed": 1620387291,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 46.7,
+    "unsupported_wall_share": 0.0346,
+    "n_openings_dropped": 0,
+    "n_walls": 48,
+    "n_openings": 23,
+    "n_rooms": 14
+   },
+   "phash": "d5c7199526d14bc5",
+   "files": {
+    "ground_truth.json": "4c258aaecdac6c944832f2a0830888cf6a48e67867c6bf99b6bec1d57a26159e",
+    "plan.pdf": "61a78626c78c33f3d2ae8b39fccdcb5fc51faf4bb8fc36f2f508bdaf582df13b",
+    "plan.png": "c0522350d0ea8a8cdf45c11497563658ca38cfa0f3380d1dfd8ed01b79d82e1d"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_481",
+   "seed": 1569401964,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 54.07,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 3,
+    "n_walls": 30,
+    "n_openings": 15,
+    "n_rooms": 10
+   },
+   "phash": "f8d28731c2559d8b",
+   "files": {
+    "ground_truth.json": "68db2d66cd96b1063764da75b624b1ae5c7167ade0068da154bfcf062c768e35",
+    "plan.pdf": "209f74be985be95be505ba6dc5fda418f69f3ab82fcc5af4399ebf0973b2e245",
+    "plan.png": "ce73596b6368e9d77b446be904d9373de6274d6b5b752860fd5ed7ccc1bc14cf"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2204",
+   "seed": 951348477,
+   "degrade": null,
+   "n_rooms": 19,
+   "stats": {
+    "wall_area_m2": 41.81,
+    "unsupported_wall_share": 0.0308,
+    "n_openings_dropped": 3,
+    "n_walls": 78,
+    "n_openings": 41,
+    "n_rooms": 19
+   },
+   "phash": "ba35a6252724b51f",
+   "files": {
+    "ground_truth.json": "fec72434cf5ba7c664adcccc99bedf645ed62bdd9d1a17d1ee9f9064fd9fd295",
+    "plan.pdf": "df751d5237fd25b3feb287910c5b130eabb0feb6daac16c99a7d313372817459",
+    "plan.png": "0f1bec6cb70b3f7b88f841530ec8c1020b92899a91121fcf116fa225b3f54202"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_8389",
+   "seed": 1403470315,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 27.29,
+    "unsupported_wall_share": 0.2104,
+    "n_openings_dropped": 0,
+    "n_walls": 37,
+    "n_openings": 17,
+    "n_rooms": 8
+   },
+   "phash": "8040ff2f203ef92f",
+   "files": {
+    "ground_truth.json": "ca31ef78a77edb5416a2f86af668771fb621daa4faf526095e8f7ca16403c05a",
+    "plan.pdf": "7ef82697c2f8c579808f3fa11c8ade07690b7430fc6bc8f575742f8259c6d355",
+    "plan.png": "bfb72efd5f32ee00fb67d42aeca1bca7c13674406fe998586a62d50b8bb833b9"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12627",
+   "seed": 1915164137,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 19.64,
+    "unsupported_wall_share": 0.0446,
+    "n_openings_dropped": 2,
+    "n_walls": 28,
+    "n_openings": 12,
+    "n_rooms": 8
+   },
+   "phash": "ba68ab431862cfb9",
+   "files": {
+    "ground_truth.json": "901aada12f714d8fb0c3bfa967b1c04a0c3475489d53c43f29c570e05923964a",
+    "plan.pdf": "609b40b07b1e4d21ee3c4bc0af9578e38688ee517184586519e7bd42cc2974c2",
+    "plan.png": "64397feaee55755ac9ad84f65afbdd179204228c4c3fddfeb9e92b3d38aad3f6"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3868",
+   "seed": 1788386917,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 24.96,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 18,
+    "n_openings": 12,
+    "n_rooms": 7
+   },
+   "phash": "c0883dc6557a077f",
+   "files": {
+    "ground_truth.json": "2ab902e5b21986e8a9abaff5326be315980e4318f4c24ac252989d76b945e40d",
+    "plan.pdf": "1b7727e329a70a027b434356297e4c27ba45361a8b0d5b3bfe2a9623951d0134",
+    "plan.png": "6d4a169402c7d84954bdc0b043da14314a750123b3431043a96c23f656a91ce0"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7647",
+   "seed": 1429809284,
+   "degrade": null,
+   "n_rooms": 13,
+   "stats": {
+    "wall_area_m2": 72.63,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 50,
+    "n_openings": 33,
+    "n_rooms": 13
+   },
+   "phash": "f842690ace6f952d",
+   "files": {
+    "ground_truth.json": "cdd6f402c0911117e05bb71ad6a53addc4a196d8c96003e6579788023c634324",
+    "plan.pdf": "8eca82ea481675b080ec534bd6935a0f94e11ae5caf7307fdc5e7790a1835c7e",
+    "plan.png": "142a6f61a152968b2f0d9ec7a3debcdb9b436c36ac792e11ab3d7e079ca9af07"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12217",
+   "seed": 3254113116,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 15.29,
+    "unsupported_wall_share": 0.0303,
+    "n_openings_dropped": 1,
+    "n_walls": 13,
+    "n_openings": 5,
+    "n_rooms": 4
+   },
+   "phash": "82c8a832f965fd33",
+   "files": {
+    "ground_truth.json": "ceb9d0484bcb27f82a4d4dbe23012ec283fe20fb0388378052a71ee30853dcbe",
+    "plan.pdf": "64fa46da303ec616ea488f30ad5e157559a23576925f8fb4ac216d6c37653548",
+    "plan.png": "eb346028ec2e676cf9735a6f31a3da0e1fe90e6a071172891aa9f06362112280"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6187",
+   "seed": 1900842321,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 11.95,
+    "unsupported_wall_share": 0.0056,
+    "n_openings_dropped": 0,
+    "n_walls": 15,
+    "n_openings": 4,
+    "n_rooms": 4
+   },
+   "phash": "adce72b842930ce7",
+   "files": {
+    "ground_truth.json": "b9d138a8e6417103d26a6b0d6698bd9152d1fe64dab04a43c943f356abb6c805",
+    "plan.pdf": "ef3b3dbcad815e6e3efa659b9e4d03a71a836f8c449d376511e0bc4fe782e14f",
+    "plan.png": "9b5b449c1b9426d111a4dff12bf81ceb42b484cf254fa626ec9225a989b92420"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6631",
+   "seed": 3747362812,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 11.78,
+    "unsupported_wall_share": 0.0377,
+    "n_openings_dropped": 0,
+    "n_walls": 13,
+    "n_openings": 5,
+    "n_rooms": 4
+   },
+   "phash": "b777d18d9d382282",
+   "files": {
+    "ground_truth.json": "04c2e8aa1a600f3d211d5b4359d69ab39546a9ba3f5ddd6a56949d8063a5910e",
+    "plan.pdf": "3d4ea70f4be187b27fc4f402db71cd303b704f558f292c6bb8f0317da2a3ea66",
+    "plan.png": "de6ee43be2d7fd9444923825fae2d14f5b5047e0ceb3ce2ab3d338bc8964b4e9"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_4815",
+   "seed": 3959663390,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 37.13,
+    "unsupported_wall_share": 0.0134,
+    "n_openings_dropped": 0,
+    "n_walls": 56,
+    "n_openings": 20,
+    "n_rooms": 14
+   },
+   "phash": "e34a94a59eb3cca4",
+   "files": {
+    "ground_truth.json": "99ffbd603e4c1da6646233527edf0b3b8a5f64ce2ec437e3252e7e324e461d78",
+    "plan.pdf": "aa71dd28e1f98141ea7b241d6ac596188c545e74eeef504c8fa05d1f4904fe2e",
+    "plan.png": "f9cf579aaaaa83134ef63a39c6044c76da590e7802bf870b87e6393a2b97853b"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12030",
+   "seed": 3426501736,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 13.46,
+    "unsupported_wall_share": 0.2588,
+    "n_openings_dropped": 0,
+    "n_walls": 10,
+    "n_openings": 7,
+    "n_rooms": 6
+   },
+   "phash": "ec74b86ac18b968e",
+   "files": {
+    "ground_truth.json": "d9c600aa1646d340f21a9a1303f9c83f9a90d754a2b102966e73a4c220c98ed2",
+    "plan.pdf": "6fc09bc506e35bf6dec3dd6d9474506932969925d14dc44e16d32dfdb53dc085",
+    "plan.png": "163fd74fbf4b35f53294152a972e7e943b2d104fc159135c76e30bdc6160a5a0"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_1692",
+   "seed": 3629424700,
+   "degrade": null,
+   "n_rooms": 24,
+   "stats": {
+    "wall_area_m2": 83.98,
+    "unsupported_wall_share": 0.1845,
+    "n_openings_dropped": 3,
+    "n_walls": 109,
+    "n_openings": 51,
+    "n_rooms": 24
+   },
+   "phash": "b645638e7d487e03",
+   "files": {
+    "ground_truth.json": "e20789a738869850d0a671d0fafdc852fd435b0e89bacb3bf59708f2855e7d80",
+    "plan.pdf": "ba3904ea5db85329350e843e6b6ed53524b8b764cb63ba0f2940d2ab520d2b20",
+    "plan.png": "167148de0948365c68e5a925967bfe1904a2540414ded7bcb688d0cccd6dcb68"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_5632",
+   "seed": 2998291883,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 47.05,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 27,
+    "n_openings": 14,
+    "n_rooms": 8
+   },
+   "phash": "86dfe7f9bac08102",
+   "files": {
+    "ground_truth.json": "54909e81a6c58addd95e68145a3a7531bfbe5c96adc933ef4cfe998f53d71e7c",
+    "plan.pdf": "bd32af169d8bc804e8c1abeb5309fb2f05ad24f0cf9db0f4d5a51d7cc49d7a00",
+    "plan.png": "00111b3ba4cbedf3866b0a2a05c6fa0b432a15eff759bc1c42f8962e1fb01c95"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_8138",
+   "seed": 1783982863,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 35.64,
+    "unsupported_wall_share": 0.0256,
+    "n_openings_dropped": 0,
+    "n_walls": 34,
+    "n_openings": 11,
+    "n_rooms": 6
+   },
+   "phash": "be819de6d095634a",
+   "files": {
+    "ground_truth.json": "0930a1710586c409a78181294171eae1ad4152b75ce87e9a262221b8654891c7",
+    "plan.pdf": "e775532d8e819d06a74aa0ea51884dafa27a1134a084226ca0c38f43b8d8f424",
+    "plan.png": "8c2a480fe9ddf78a3bd54350ab8156b5e2a22db46c984a442384b7fb9c3dbc04"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_5956",
+   "seed": 3938736563,
+   "degrade": null,
+   "n_rooms": 15,
+   "stats": {
+    "wall_area_m2": 49.17,
+    "unsupported_wall_share": 0.0629,
+    "n_openings_dropped": 0,
+    "n_walls": 71,
+    "n_openings": 39,
+    "n_rooms": 15
+   },
+   "phash": "ea3a86cd9162997c",
+   "files": {
+    "ground_truth.json": "80b6dbf7691e633eabde91cb63ea982431aad9ff5b0d5341f4ef7779bba2406e",
+    "plan.pdf": "7b4f8c9e9aae5254cd5a73d90e82cbcd9deebf56dd76fa8d999a61b04b7e9cf4",
+    "plan.png": "95d068273cd66ca7bd23317b2148792fce198fce8248670ebdabd3569d5a8c9c"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1285",
+   "seed": 1690062242,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 58.26,
+    "unsupported_wall_share": 0.0715,
+    "n_openings_dropped": 0,
+    "n_walls": 44,
+    "n_openings": 22,
+    "n_rooms": 12
+   },
+   "phash": "bb72b107923c6cd8",
+   "files": {
+    "ground_truth.json": "57f062265da08640521fa8e53e83dc6164a7eeba2995ca9698cd10f5fd52c611",
+    "plan.pdf": "a9ad6c90340899bf7a39d98e6aab320ef14d8e4361e38efe4277cb480cb8c469",
+    "plan.png": "1a4fb513de27ee53a6db6fb32c7d060dfd839ba9e0a103c4b75beeaac025e725"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12866",
+   "seed": 3490970015,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 19.75,
+    "unsupported_wall_share": 0.0432,
+    "n_openings_dropped": 0,
+    "n_walls": 36,
+    "n_openings": 18,
+    "n_rooms": 9
+   },
+   "phash": "ef8878b394e5861a",
+   "files": {
+    "ground_truth.json": "6a3e7592be8ccb47838e2724c502021fd3349246e90442318f34339d4118732b",
+    "plan.pdf": "920737d68ee05dbd0fd68852602bbd2876ab6e4742a0515d3deed462cd95bdf4",
+    "plan.png": "77442abcde5d46559e98df8ac70575709552f4ee5df9cd2798c14907de61f646"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_9448",
+   "seed": 2756790251,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 56.78,
+    "unsupported_wall_share": 0.0337,
+    "n_openings_dropped": 0,
+    "n_walls": 34,
+    "n_openings": 15,
+    "n_rooms": 10
+   },
+   "phash": "ab19986e1d9bc455",
+   "files": {
+    "ground_truth.json": "ea351f262b1bd745f0cff2db6f418711ba87e0a875b631cb69674c9d5a0c6eac",
+    "plan.pdf": "20847b30da7b718125fabdd0f81d9cd4415ab1f8ab2637c5c533dc8890cd97d3",
+    "plan.png": "3254f63024eb1bb11c621a6471d73327362a0007ac9be82ab0d457246e5ce938"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9540",
+   "seed": 2890312906,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 11.69,
+    "unsupported_wall_share": 0.0828,
+    "n_openings_dropped": 0,
+    "n_walls": 13,
+    "n_openings": 6,
+    "n_rooms": 4
+   },
+   "phash": "c04457a4d94fd93b",
+   "files": {
+    "ground_truth.json": "b5892f6f06e8a010be45746384485b261879fbd640195f209cd98468e177b420",
+    "plan.pdf": "cc63010217b8e1d0503bde554e5a05ba18c94f4f64ed89b19be68ba5dd8faacc",
+    "plan.png": "1e566ba0c0b4bee017c428705a0545c82f4c84f7ceecf7101fa2ae74a6381f0e"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11664",
+   "seed": 3757325554,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 18.88,
+    "unsupported_wall_share": 0.0364,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 11,
+    "n_rooms": 7
+   },
+   "phash": "ba629b394537626a",
+   "files": {
+    "ground_truth.json": "49b5d6771dcbb944a424d59f1fe6e34255b6901e65bed3f483c1a8c7d3d80ba4",
+    "plan.pdf": "92e3cb992d3f7423514a333e98d63d82259418d50ff77b464b560cfb2fcb0d77",
+    "plan.png": "ba507985a62eb198914b7a2b8699d557483b5083537f4518596527857348f8dd"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1944",
+   "seed": 314662587,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 59.2,
+    "unsupported_wall_share": 0.0026,
+    "n_openings_dropped": 0,
+    "n_walls": 33,
+    "n_openings": 14,
+    "n_rooms": 11
+   },
+   "phash": "c25abf14a527a6c9",
+   "files": {
+    "ground_truth.json": "58cad4fa10d874fe06cd214066b892af43c302aefa6d1c1395e0f1b3b6e1f346",
+    "plan.pdf": "3b36a39065019a52a4672b2313bd74f4a95dad0a12e3858aa319efa93db0fbc0",
+    "plan.png": "749861322d4d72fb48f740903eb9b5a29be3f71669eeab3e390cf905ab3c0db5"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9489",
+   "seed": 1242886566,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 18.08,
+    "unsupported_wall_share": 0.0153,
+    "n_openings_dropped": 0,
+    "n_walls": 20,
+    "n_openings": 7,
+    "n_rooms": 5
+   },
+   "phash": "9a5c3c6a1e37f061",
+   "files": {
+    "ground_truth.json": "7fd2c36a12000af946edd06838d1a0426720b7523681894bac850157111d58a6",
+    "plan.pdf": "e92869d783a1bab0ec47089a939b0b14ed990ff60d4e566e03e440633b61ae0f",
+    "plan.png": "7328c6e47a3afdcc1ba30c3952ebe66c8facd4caa5b99a9877883b48fe6b2ae0"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12200",
+   "seed": 2664813569,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 9.19,
+    "unsupported_wall_share": 0.0301,
+    "n_openings_dropped": 0,
+    "n_walls": 10,
+    "n_openings": 4,
+    "n_rooms": 4
+   },
+   "phash": "ea9991679586c396",
+   "files": {
+    "ground_truth.json": "ab55e4310898726dc75785c63e7d0e96002f7a98177c7569a98acb8e7aedfe6f",
+    "plan.pdf": "8ffdb1c55403975fcda1691716556f54a788044e09ddc2f70acb26a420dfe2c2",
+    "plan.png": "9e5d54b80ea731fe9c95b19dd2266d69f93e1dccc16034080208ee6f3cafb31b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_20188",
+   "seed": 425367393,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 8.94,
+    "unsupported_wall_share": 0.0783,
+    "n_openings_dropped": 0,
+    "n_walls": 21,
+    "n_openings": 9,
+    "n_rooms": 5
+   },
+   "phash": "c5a459b236a62bd9",
+   "files": {
+    "ground_truth.json": "e4656e11fd0ea0701da584a08eb9a09e5cf2a4afbc56908ac31f250b0560d6fa",
+    "plan.pdf": "ba11e6328ae86826f3c7ebcc8504d0be30612065a564a66b3c5ca9bb3ec22b46",
+    "plan.png": "0a29de49e88d8bc4fadfbf1343b0a2f82435f0d928a5f0e11f7fbdee73585df0"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7071",
+   "seed": 3710939761,
+   "degrade": null,
+   "n_rooms": 18,
+   "stats": {
+    "wall_area_m2": 41.83,
+    "unsupported_wall_share": 0.031,
+    "n_openings_dropped": 0,
+    "n_walls": 64,
+    "n_openings": 38,
+    "n_rooms": 18
+   },
+   "phash": "e96992b69269cc93",
+   "files": {
+    "ground_truth.json": "02ef742d70d6037dd6c3be50a590ef6dae609debbbdee4204730947ccd6dedf7",
+    "plan.pdf": "4fa926381016c92a9c1e2c6fdee561d2ee1152c07e4fa113c1d27f81ae14b828",
+    "plan.png": "d40e2a478bbd6f22da8877882f6dd78eb08e8fc790e355ec20be0f35bf9e705c"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9422",
+   "seed": 4185041947,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 7.33,
+    "unsupported_wall_share": 0.1289,
+    "n_openings_dropped": 0,
+    "n_walls": 9,
+    "n_openings": 5,
+    "n_rooms": 4
+   },
+   "phash": "91d562197a63627b",
+   "files": {
+    "ground_truth.json": "461c73297bf24ab29b572d2ecfdc20990eddba352b800116a997644aeda7e953",
+    "plan.pdf": "5391b5b4fedad728ca94bd81abb65ca15f17938b30869ee5fcbebcd0c282a6b6",
+    "plan.png": "7cf6b52da7021ba594d6a3d912577550a21be8abf1723a00e04fce4817c21cc4"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_3078",
+   "seed": 3333937142,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 40.41,
+    "unsupported_wall_share": 0.011,
+    "n_openings_dropped": 0,
+    "n_walls": 26,
+    "n_openings": 11,
+    "n_rooms": 5
+   },
+   "phash": "b3e84c91f184dc73",
+   "files": {
+    "ground_truth.json": "f1c03140ad730cefbe4135405fd28bf6546ef02473ec27c29b3cbc5ee617fb75",
+    "plan.pdf": "5a89da6a415fdc749b87729e594e548ec71a041da29915d99b45a8e453529087",
+    "plan.png": "0a42dc7d5b0374d796c83be00966c1371cb51fcb88e0e01b32c1ba7e755a100a"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13281",
+   "seed": 3294431696,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 8.05,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 12,
+    "n_openings": 5,
+    "n_rooms": 5
+   },
+   "phash": "9bc6b533c039e43a",
+   "files": {
+    "ground_truth.json": "eafbcd9dc5d017852d53d1dbd0ae117c7ff0583c438eb6d63358fe7dac0de513",
+    "plan.pdf": "076b34db79adcd74fa3a9fac321ec9adc6e6880a529b4c14cb6802fb672ea4b7",
+    "plan.png": "98fb1c418e6e6757ae779b5cd16af81712733d0efd5dc488aa9f98761dbc5b6b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_172",
+   "seed": 2448700868,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 22.4,
+    "unsupported_wall_share": 0.0916,
+    "n_openings_dropped": 0,
+    "n_walls": 25,
+    "n_openings": 11,
+    "n_rooms": 8
+   },
+   "phash": "f74e6239a5893d84",
+   "files": {
+    "ground_truth.json": "9e5912188d9f1ff5a93d16cc7e9c7fb82325788cd97ddc86f69aee5c08444d11",
+    "plan.pdf": "f8250611ee629f9d77c92ad18b6c4f45a5a0d7160ba1e6661a8325d772d619fa",
+    "plan.png": "c66e09ab4a8af16c210cd7d0e8b885cfd4273fe996768d8d071fe2964c667f4d"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7760",
+   "seed": 340996249,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 38.11,
+    "unsupported_wall_share": 0.0243,
+    "n_openings_dropped": 1,
+    "n_walls": 70,
+    "n_openings": 33,
+    "n_rooms": 17
+   },
+   "phash": "9ee3f1f2830c270d",
+   "files": {
+    "ground_truth.json": "9e84f25f4fb475279bae60f179ee90dd03bad3ef3d40dbc97414b88179d44519",
+    "plan.pdf": "b7f2ca198bde35b7a6a8b4828e221af9768995a087749d39caf5b93d457ca46d",
+    "plan.png": "ae1bb294253e74c99829e2327ac7bbbf102dff5550cd1e0f41e15958c55355d6"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6408",
+   "seed": 2163046727,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 56.93,
+    "unsupported_wall_share": 0.0095,
+    "n_openings_dropped": 0,
+    "n_walls": 32,
+    "n_openings": 17,
+    "n_rooms": 10
+   },
+   "phash": "b1cc3b8ff8048c79",
+   "files": {
+    "ground_truth.json": "7a0b16000e97422517a1b645efcdf8425f69ce7aa29d2554adfe93842e22d717",
+    "plan.pdf": "b70986efe0df99e4d737bad7bf9e241ead348c14933b201c1bcebce1ae389b6e",
+    "plan.png": "e052f980b977aa4f2cd23c696122c6fef91bce12bdefa402819e5f4eed067fe1"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_477",
+   "seed": 1687787430,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 46.28,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 14,
+    "n_rooms": 11
+   },
+   "phash": "9598e21bbae48a1f",
+   "files": {
+    "ground_truth.json": "15aae6d1584600e54c83d535f11f80142735d3aa86de1805e31ec0cdf4a2588f",
+    "plan.pdf": "319088453d39287af1951f388eb27184334610ffa4d29c934d160bfc64bb824e",
+    "plan.png": "ba803a647c17d606500aeb8b4035540a1f5c47a59a26f7b4a10b5d36892652cc"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2090",
+   "seed": 1434798231,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 11.04,
+    "unsupported_wall_share": 0.2051,
+    "n_openings_dropped": 0,
+    "n_walls": 17,
+    "n_openings": 8,
+    "n_rooms": 5
+   },
+   "phash": "8a703536696ab53e",
+   "files": {
+    "ground_truth.json": "76292fa61dc6158c8a8d8fe563e3a712c600b5a9e8c8e74a5a377d8f3018e43b",
+    "plan.pdf": "eed5d015f43bf6040ae43a53c098e781cbe23f4c40bb174f6ebcefbe0d11d3f9",
+    "plan.png": "f0575eaf353a9a3f5385d6d9f20b58bf3f95b604d2ed00676fa9b5342d74a3da"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2011",
+   "seed": 2044133068,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 27.04,
+    "unsupported_wall_share": 0.0292,
+    "n_openings_dropped": 0,
+    "n_walls": 52,
+    "n_openings": 28,
+    "n_rooms": 14
+   },
+   "phash": "ae94e91fcc65861a",
+   "files": {
+    "ground_truth.json": "17d710509748ba438d5e71e53a8f7c488213ad6f5b63f1ba6ac1bfe7233943d2",
+    "plan.pdf": "dc311528e20e51ff2ca2871efaa258a7f6abdc852e34453b824065c52cbce4e5",
+    "plan.png": "9397d8a875af1f038d9ef1205152396fc27575bfeddcf0e49c2f77864bd0db36"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_7790",
+   "seed": 3053515231,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 26.78,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 17,
+    "n_openings": 6,
+    "n_rooms": 4
+   },
+   "phash": "9012fe5eb02b72f2",
+   "files": {
+    "ground_truth.json": "c4254a2d0358b2c467eb85afafb168e8068527de9094200ce4c48bd78d4d8712",
+    "plan.pdf": "88f80840e358b00dc9d13dbd3d6d101aec6d10a62efeb6465e433e2205740623",
+    "plan.png": "bb9277ab4c775552a4a5ab38589de4aa3da246dfd77097bc8126002c1d436900"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13258",
+   "seed": 1637778342,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 29.16,
+    "unsupported_wall_share": 0.0348,
+    "n_openings_dropped": 1,
+    "n_walls": 41,
+    "n_openings": 19,
+    "n_rooms": 10
+   },
+   "phash": "ab27f47807c73819",
+   "files": {
+    "ground_truth.json": "6acdee4de24008542a12fe9a506e024e2f04fae706f92d090269d49e528f5377",
+    "plan.pdf": "814e208d89462b909684f17ad59d9be31f3d6974a0d102f612477b69d5e6b511",
+    "plan.png": "f1c2e8db52086970bf7511de43a1bd3fa60322460744f3ce639ca5a9c0cfc3e9"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9598",
+   "seed": 2333792284,
+   "degrade": null,
+   "n_rooms": 13,
+   "stats": {
+    "wall_area_m2": 71.92,
+    "unsupported_wall_share": 0.039,
+    "n_openings_dropped": 0,
+    "n_walls": 50,
+    "n_openings": 25,
+    "n_rooms": 13
+   },
+   "phash": "d90ca65b8c3d8787",
+   "files": {
+    "ground_truth.json": "281f5ad9c886a42ff19ec0d2b5a1a45f70855d8424e91ed41d28d595a87ec4b7",
+    "plan.pdf": "6305df2bd32079205ed74c70b85c864b4afeb586aecfbab27b1bd9ce5ba7cd3d",
+    "plan.png": "cc24948dfaf89734dba00ba7337a6628bcc9547e655feb8572daf76ff70303a8"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6549",
+   "seed": 1632446490,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 53.82,
+    "unsupported_wall_share": 0.0343,
+    "n_openings_dropped": 0,
+    "n_walls": 50,
+    "n_openings": 31,
+    "n_rooms": 14
+   },
+   "phash": "ee69b94ec458c0b5",
+   "files": {
+    "ground_truth.json": "711d39d11dac82e341c15f85960f864bcd4caa4bc77db03c76ba712f00b9c57e",
+    "plan.pdf": "b19a26984427a38aa1da81bc2049d3cb0983d4950d3dfa511fe2bcb56d75199f",
+    "plan.png": "1bd4aabb2f33f2a1740866c45fc5239c84bbaebcda992a37a8584d74690ff2c2"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3517",
+   "seed": 1871963236,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 28.4,
+    "unsupported_wall_share": 0.0141,
+    "n_openings_dropped": 0,
+    "n_walls": 27,
+    "n_openings": 10,
+    "n_rooms": 6
+   },
+   "phash": "95eeab1ce0a35c61",
+   "files": {
+    "ground_truth.json": "c48114e26d6e6f6994b4ca6289cc282e082ae444aa0e2709846545c62423fa70",
+    "plan.pdf": "a46a6a2718bc1a72f0f1db3902dfa89f95fed6352865d8da1d52f42cac102e09",
+    "plan.png": "a0ec0c72b6aa8c5e3473a49b42eb0cf7d9bae35b39f75c796f8a7ef1bf9ac702"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6042",
+   "seed": 3727551880,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 40.82,
+    "unsupported_wall_share": 0.0207,
+    "n_openings_dropped": 0,
+    "n_walls": 36,
+    "n_openings": 17,
+    "n_rooms": 11
+   },
+   "phash": "8101fe39035e7b3d",
+   "files": {
+    "ground_truth.json": "d48eafc0400a73390ffd45d739b9beabdad5474a16b8bde4a3d8a1281db62962",
+    "plan.pdf": "ba3926bdfa71772e03ef47085c94ddf8e5508f141782af6b3523cd30a808a587",
+    "plan.png": "c9f4d6d95a1791a672e26780dfc93c1fb633fec1ba293664969f89ed9a03dd49"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_7625",
+   "seed": 1690893728,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 24.36,
+    "unsupported_wall_share": 0.0162,
+    "n_openings_dropped": 0,
+    "n_walls": 17,
+    "n_openings": 5,
+    "n_rooms": 6
+   },
+   "phash": "d58a668eea98bac8",
+   "files": {
+    "ground_truth.json": "cc45d1b7883bc9f10e8a08b1a906779116558bf086957801588154841087cec9",
+    "plan.pdf": "ecfb8540c021ed63cb9d01442556466793ca960e7539b15a426c3aa7fbb77dc5",
+    "plan.png": "c5cf55089c32d60c19a028ba41db1ed34290bcdd5441bc5f9d9b4b016de47ebb"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_1403",
+   "seed": 119597730,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 34.16,
+    "unsupported_wall_share": 0.0435,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 17,
+    "n_rooms": 10
+   },
+   "phash": "971db35a39243d52",
+   "files": {
+    "ground_truth.json": "21a5af7af276010b0f16b48d376c688cb735eec3c6c17bffa12244607097f9e9",
+    "plan.pdf": "7a8297219e2ce870698e1fa4e9ef58754b284ab19a93d5680ec1a8cd4eaad84f",
+    "plan.png": "462dae8052dff157c3f81d0c72ff1c94a5bd37636f381d187bf9872314d01741"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_3676",
+   "seed": 2558124553,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 20.84,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 13,
+    "n_openings": 8,
+    "n_rooms": 5
+   },
+   "phash": "f5747a3aa87881b8",
+   "files": {
+    "ground_truth.json": "50c53593655a2450d08a32da01a5e6f62e19bd3fdf485daabebbb81c71f4f9a9",
+    "plan.pdf": "4d8af675ec8e55f6d970a00bbd776a52e061c8de356f6d870456a103753c6f60",
+    "plan.png": "245fcecb56d02a3b9b1cb9d8028ece2ccbc6f524e7d303276f8dbc125d140e20"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6716",
+   "seed": 417303894,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 39.81,
+    "unsupported_wall_share": 0.0171,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 15,
+    "n_rooms": 10
+   },
+   "phash": "95e5ea228e9bb8d0",
+   "files": {
+    "ground_truth.json": "ceb5f12f6134766edc7c9537d327dafec5fd6c34c60f8391913264935f172091",
+    "plan.pdf": "299ef3c128ed1b0ff6716458f45ca04241f2902342344721307de152ce342faa",
+    "plan.png": "d6c347f609aa4530565412227e4fb75970ccb649484aec31cefa6aaedeec353a"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3860",
+   "seed": 626419693,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 32.94,
+    "unsupported_wall_share": 0.0263,
+    "n_openings_dropped": 0,
+    "n_walls": 24,
+    "n_openings": 11,
+    "n_rooms": 9
+   },
+   "phash": "97d3e870d3681a36",
+   "files": {
+    "ground_truth.json": "84dca53158af058ae09ca06211e3c1774a38c941d87a666aa334ee58a8314692",
+    "plan.pdf": "ee5a5d55ef747f8f626ac261c1fa7a31f6aad9b07dca253e78baa5da08305679",
+    "plan.png": "114e594fc5ac879ed61121cd24edd007d3212c68e3ef7d8a52bb9895f0ba20cb"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_5156",
+   "seed": 4006961797,
+   "degrade": null,
+   "n_rooms": 13,
+   "stats": {
+    "wall_area_m2": 54.58,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 38,
+    "n_openings": 18,
+    "n_rooms": 13
+   },
+   "phash": "d1d4af398c6211ee",
+   "files": {
+    "ground_truth.json": "fd310371b215bfa6219e83c929591e34ff9b8ac0ed1dd93bc3b0f9e8d1b0d403",
+    "plan.pdf": "99e34fc9f3ddfcb24851b473c2164508355c21034e94ec5efd97d8b76798ce1d",
+    "plan.png": "3d22b72a60c8b60cd3506b82affab863b7a41f0431a1dd720337831c077965b8"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_8189",
+   "seed": 1494714651,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 20.01,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 28,
+    "n_openings": 10,
+    "n_rooms": 7
+   },
+   "phash": "bb3324396c2e38e5",
+   "files": {
+    "ground_truth.json": "8d16dfd47db0e37be6f5abdafd1cc15d2ac4c0bd77db0cbd2efc55327311f27c",
+    "plan.pdf": "a5a003ad87ae4287fa612af9c501bab8d91c042ac86da85173b741531c256a8c",
+    "plan.png": "6fc4ffd1ec6ce4d6f41568d773d6e43290e766e262203c32f44b151594346997"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9543",
+   "seed": 256095787,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 67.85,
+    "unsupported_wall_share": 0.0036,
+    "n_openings_dropped": 0,
+    "n_walls": 75,
+    "n_openings": 43,
+    "n_rooms": 17
+   },
+   "phash": "bbc5c03c87d32c65",
+   "files": {
+    "ground_truth.json": "0c4afcac74f9125893036aade9fbd2b720cf4a2de819640f5f05ac325ec3d3d6",
+    "plan.pdf": "5129140755ba7e4d49768a81f0bcf4433ae1978154ccf7193f05a685f8db7ee2",
+    "plan.png": "87039aeb52d51e82ea63a9d73882f0176090664a778da3f2e25871b1b8839345"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6704",
+   "seed": 1191085180,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 51.18,
+    "unsupported_wall_share": 0.1368,
+    "n_openings_dropped": 1,
+    "n_walls": 78,
+    "n_openings": 27,
+    "n_rooms": 17
+   },
+   "phash": "eb96b1b0861ee50d",
+   "files": {
+    "ground_truth.json": "5cbc425e5c35d26ee2bb88bbd9026aa55add3a79cd4a0beabeac84143c5a8188",
+    "plan.pdf": "9f367570a0ee34a1bafb3efbc6f177c91884a483c26694a33d9b892a9a0f8621",
+    "plan.png": "2ccacc33af478c4c6e83468607cd05e9592bc38704e10326fa6018672cfa3dfd"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1636",
+   "seed": 2554393194,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 20.93,
+    "unsupported_wall_share": 0.0581,
+    "n_openings_dropped": 0,
+    "n_walls": 23,
+    "n_openings": 12,
+    "n_rooms": 6
+   },
+   "phash": "b34cb762cc91e0ea",
+   "files": {
+    "ground_truth.json": "d52529cdcc65f32f6eeef0d2fa8a02d44ee9afc4f3f6dbaf920a20f860f2908b",
+    "plan.pdf": "7ff2b9a4225eecc394bebe620c95e6115d6d0da0c1db5681a1e6279b67d9a680",
+    "plan.png": "305607ff9617f02beaabf3be7926c5db1874ebc9750167cc76adf4d250d2e3ac"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_488",
+   "seed": 282542345,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 8.96,
+    "unsupported_wall_share": 0.0511,
+    "n_openings_dropped": 1,
+    "n_walls": 20,
+    "n_openings": 8,
+    "n_rooms": 5
+   },
+   "phash": "84e46e903b871bdb",
+   "files": {
+    "ground_truth.json": "fee0bbc03668ee365215f91be8b45257961ef5cd6baa1772950819d139d224e6",
+    "plan.pdf": "76b57a6ecc0cedfdcd89929a9a132295d35177b3103adbb019f7cdbe7630d834",
+    "plan.png": "1659b7823450d5fa289bc2684623b7db3a99435d73c6d25b02c04d7d8fdb5fd9"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12094",
+   "seed": 4186613546,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 49.59,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 23,
+    "n_openings": 12,
+    "n_rooms": 7
+   },
+   "phash": "fa91b8da88c6936a",
+   "files": {
+    "ground_truth.json": "1dee68f51daa4854625f4b6f89ed9e862f135a323d5b34d2aaf059750fe4d804",
+    "plan.pdf": "657dd660f262a0a44e323bab2eb5471d55d399c4249a4aa92745bdc77e34a559",
+    "plan.png": "88514559139c5baff01b8c721901699099393e6340e04b01882e7b46980ec7bd"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9531",
+   "seed": 4258479520,
+   "degrade": null,
+   "n_rooms": 16,
+   "stats": {
+    "wall_area_m2": 93.87,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 59,
+    "n_openings": 36,
+    "n_rooms": 16
+   },
+   "phash": "b9419e4a8792f1e5",
+   "files": {
+    "ground_truth.json": "bbf0ebe3aa9ff1d28fed5c6e295a5b911c7a5ced15e6e18c7ad2263102b6b1e7",
+    "plan.pdf": "474bf216a3d6eb306ead9978d555657e31d489ecdbe04db8cdc335de4acc0dca",
+    "plan.png": "642d212c02072d965386e5490d1c8f787568eb67e2af53ee40c99ff57dfb1abd"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_8726",
+   "seed": 1765491449,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 28.37,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 28,
+    "n_openings": 12,
+    "n_rooms": 10
+   },
+   "phash": "bfc0c81fc13e07f0",
+   "files": {
+    "ground_truth.json": "91611840f4421f7b846da837c8c05241b8d8ef1fa781efd7078b6df3e1486343",
+    "plan.pdf": "7c708c7d8d58dc965640213d1a91bd4720dc0dd452a966c2fb960e925b8bcab4",
+    "plan.png": "0f94edf62ca12b6f017dc39f1bc119b0cbbf2ebe601143bab792aa139b6bdd41"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2029",
+   "seed": 570965458,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 35.47,
+    "unsupported_wall_share": 0.0539,
+    "n_openings_dropped": 0,
+    "n_walls": 69,
+    "n_openings": 44,
+    "n_rooms": 17
+   },
+   "phash": "94b7311d683c473e",
+   "files": {
+    "ground_truth.json": "e60c7a88a77c8d361879a337cd7426e1141c7e8694741b91c7b47c1e6546c8ef",
+    "plan.pdf": "8b5b08f16682b93edadb0c020de1df7a929ec3abcc99de947a2f891a630902f6",
+    "plan.png": "72706650d54f4cef1ed9611aa5a6818378b0c4cea7cc81c8e00c1b388daacf59"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1141",
+   "seed": 965657198,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 21.39,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 19,
+    "n_openings": 10,
+    "n_rooms": 6
+   },
+   "phash": "b9217734d86725b8",
+   "files": {
+    "ground_truth.json": "dc45af0c3cd106f4ceff7648cdce8e1847ceb66bf201f837032a94159b4784d3",
+    "plan.pdf": "30fe87b8529302331c9b1d223cd74b3a7edaba5357e3681000d59a99b706712a",
+    "plan.png": "31209a89f2c31516472880f5c43b226ed0bb12bcaeacbcb86e7a02d87e90462f"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12729",
+   "seed": 1122458170,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 41.59,
+    "unsupported_wall_share": 0.0374,
+    "n_openings_dropped": 0,
+    "n_walls": 37,
+    "n_openings": 17,
+    "n_rooms": 11
+   },
+   "phash": "be9ae13a85d1861d",
+   "files": {
+    "ground_truth.json": "2610fa650d3d87e4d7c671f21cf18e46172a779df826cf3b8276a0084d8dbfc0",
+    "plan.pdf": "3ecc0b9dafa40c6a8d03c01117ad16fa5c5c20ab8d92169ee69ff9ebbdc173d4",
+    "plan.png": "571133987f0fb0882935f7e9ad83f497e7a6d771f2336966bd8763a8d9b932ab"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_416",
+   "seed": 1093255886,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 58.31,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 35,
+    "n_openings": 22,
+    "n_rooms": 12
+   },
+   "phash": "f427e29899c9c5a6",
+   "files": {
+    "ground_truth.json": "9e22bc6b8dc53e5cf4bc2a122d5eb93aefc7fc083fac271136132e8f9992efd9",
+    "plan.pdf": "a939b130a933817bafbb14028033007a62111f0316d15ed8058438b3b944fabf",
+    "plan.png": "7652da4fc124481fa8511d3867a09d28ecb7ad12e0c30e87f7c9b6bd58af6559"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3516",
+   "seed": 3545248214,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 11.84,
+    "unsupported_wall_share": 0.144,
+    "n_openings_dropped": 0,
+    "n_walls": 23,
+    "n_openings": 5,
+    "n_rooms": 4
+   },
+   "phash": "c4c533374e6a613d",
+   "files": {
+    "ground_truth.json": "164a00ae0124ce524a8d9131399966d51e2e2c9e8c00a62cb43bc3dd3721b805",
+    "plan.pdf": "607386a8498841cf1701949ebbe6b6c3b2cde9f7ce7934af621bdc99d8c8ac96",
+    "plan.png": "411ae32524d94604eca96949ae21c97b51ef784627d8f3080210944ca88c8067"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12214",
+   "seed": 1833359669,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 17.55,
+    "unsupported_wall_share": 0.0814,
+    "n_openings_dropped": 0,
+    "n_walls": 17,
+    "n_openings": 8,
+    "n_rooms": 5
+   },
+   "phash": "a6cc9139d9b46c36",
+   "files": {
+    "ground_truth.json": "7c5ffdcd67d2ff612abb84b74bb606f91cf681b226d27bc348ff6cceeb9b7d47",
+    "plan.pdf": "78ff6bd5eeeb2eea2827bfebe86ca505fd8b50baf524648369b63e20759a854f",
+    "plan.png": "59c9a03e255c45835ee3e55d4840ebbbbf1ecde7066f781a61fb1cd2203cf611"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7119",
+   "seed": 1488371791,
+   "degrade": null,
+   "n_rooms": 19,
+   "stats": {
+    "wall_area_m2": 119.67,
+    "unsupported_wall_share": 0.0824,
+    "n_openings_dropped": 1,
+    "n_walls": 75,
+    "n_openings": 43,
+    "n_rooms": 19
+   },
+   "phash": "eae1cc242d4bc33b",
+   "files": {
+    "ground_truth.json": "abaace576afbbe86be18b875848fe50820d2fb549f6dc6c768c0d628d14e3d1e",
+    "plan.pdf": "0cff49f4c90109813a684c3043d24a93d6e5487cc2af024455137e7bd312bced",
+    "plan.png": "f44ae4d6d576142c5cec55965b1f8a9531c7d7413193e742f325b542c6bfbb04"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1788",
+   "seed": 954093227,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 45.83,
+    "unsupported_wall_share": 0.0241,
+    "n_openings_dropped": 0,
+    "n_walls": 53,
+    "n_openings": 27,
+    "n_rooms": 17
+   },
+   "phash": "b14cf3af6c881a39",
+   "files": {
+    "ground_truth.json": "fea0d7dadef0bcbbd1098aa70676320611969f6bfbfea021846d4a10681ac7b5",
+    "plan.pdf": "2494d89dfc6ebfca5e66869b3f1825554b73b837c90770e19f93a7fa9c143d21",
+    "plan.png": "cdb1b4c537782e84b0fd1c04b6c35ba99647ba125dc3079382a6aa0e001e27e6"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_165",
+   "seed": 3242833625,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 47.62,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 24,
+    "n_openings": 13,
+    "n_rooms": 7
+   },
+   "phash": "a01b2e6e2e6b2b66",
+   "files": {
+    "ground_truth.json": "885775a6d98ed6c9849ef34004213e2df0bab60117231dfc35aaae7920c5d0fc",
+    "plan.pdf": "4d38124ee2402b4da870c7e430158f60a3cd5d4515da23eda41e512e2f16114c",
+    "plan.png": "f70dd38899b39d1d35087915df31a1c9c4d6ccfb55b6bbc1eae141947ec3b4ab"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_20183",
+   "seed": 1877930440,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 74.52,
+    "unsupported_wall_share": 0.0232,
+    "n_openings_dropped": 0,
+    "n_walls": 32,
+    "n_openings": 11,
+    "n_rooms": 7
+   },
+   "phash": "e1947e7910473e78",
+   "files": {
+    "ground_truth.json": "74f6d90260dafa6b44bd02e7118e296b0874bcc5cb42c9beca3a559ca688c165",
+    "plan.pdf": "561f146af79656b46943d91bcd130ef0d914e0e067c318f6c075f8b04ffe536d",
+    "plan.png": "ed999d1a20a7fbc643e84acca90daf23c27897e73d9b3fc6e3c146f20f27f915"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_84",
+   "seed": 2040326306,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 14.55,
+    "unsupported_wall_share": 0.0504,
+    "n_openings_dropped": 0,
+    "n_walls": 22,
+    "n_openings": 10,
+    "n_rooms": 7
+   },
+   "phash": "9ec0e13fd01f9e30",
+   "files": {
+    "ground_truth.json": "bf434eb1a576beb58fd242e2ca5d26c7e6037f01f648e54be45b4d50e34fd9d1",
+    "plan.pdf": "6a914e28b0f21bd74218081a7a7173c120c43fd75d4d58c89ac6e2fc2a243912",
+    "plan.png": "57d6b5ab5d3f73d9dbee7336853098bdc5d1956f08fb2d31f5661c6f2578973b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_9864",
+   "seed": 3274345693,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 44.2,
+    "unsupported_wall_share": 0.0063,
+    "n_openings_dropped": 0,
+    "n_walls": 26,
+    "n_openings": 11,
+    "n_rooms": 9
+   },
+   "phash": "97c3e876e839b085",
+   "files": {
+    "ground_truth.json": "b88e8804c4bbef4290379d17143ad3165f05470a9c0934eab785cd4d99b1a530",
+    "plan.pdf": "117f3ccdb2ceac8761ecc272946f72122cc0b4872e25e9f0631c850b6e88dad7",
+    "plan.png": "c63f4e7147abd8eb4813b37857901bac809fa5b03a680d56fdb831377f3ed16b"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12229",
+   "seed": 234822730,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 15.58,
+    "unsupported_wall_share": 0.2747,
+    "n_openings_dropped": 0,
+    "n_walls": 17,
+    "n_openings": 8,
+    "n_rooms": 6
+   },
+   "phash": "ae2cf07807d3919b",
+   "files": {
+    "ground_truth.json": "3e77e31bbadc264b239a960e4d69e9ec4a7a70a3cb5841adfb8420a55c852a1c",
+    "plan.pdf": "c8a8351ac69312a4e303d7b38ad303488592cb131ca8f191541f74800ee09dd1",
+    "plan.png": "841e77bf8ca5abece9d2b23738ce40ea28ea49f7911382c33de1f89815a4b5ab"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11395",
+   "seed": 2557729557,
+   "degrade": null,
+   "n_rooms": 13,
+   "stats": {
+    "wall_area_m2": 70.62,
+    "unsupported_wall_share": 0.0415,
+    "n_openings_dropped": 0,
+    "n_walls": 59,
+    "n_openings": 24,
+    "n_rooms": 13
+   },
+   "phash": "a2c5fc4bdd3c4330",
+   "files": {
+    "ground_truth.json": "32a734b1f4b5ffd85bc2a9280c163f82471839b81882a8159154f2214428a075",
+    "plan.pdf": "d195069456f386aa76df99308d0100da644e892940d55ac30c86b93cf13f7b70",
+    "plan.png": "97a6b7241e2d7025f9dafebee34428c079819e669ae4c60c9a3bf66a53845352"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9228",
+   "seed": 2537526018,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 23.87,
+    "unsupported_wall_share": 0.0101,
+    "n_openings_dropped": 0,
+    "n_walls": 20,
+    "n_openings": 8,
+    "n_rooms": 6
+   },
+   "phash": "d5b3c8417fe2c834",
+   "files": {
+    "ground_truth.json": "47d88f57c6eb2acbd648e0ddffe4c35fc8083c72b00a1c160892f67f21825219",
+    "plan.pdf": "c30159c1084ff27c8153a1ce85fd969538773886ca6cbdd6ce3ae24efb5e0cce",
+    "plan.png": "e29aaa263fd1b57dde86fb4616041f4939f2a0fcb879a085ab86934a5353ca52"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1781",
+   "seed": 611119844,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 25.2,
+    "unsupported_wall_share": 0.0523,
+    "n_openings_dropped": 0,
+    "n_walls": 38,
+    "n_openings": 18,
+    "n_rooms": 12
+   },
+   "phash": "b1a6cc334ca645be",
+   "files": {
+    "ground_truth.json": "7224de718163287f8363b9aa6da60b51a65018715a8639558ef90ac026dcba4e",
+    "plan.pdf": "0495b54256ec7967da201cc7571731d5258f7b3b7fbd7d2ea6177c7d4a7f352b",
+    "plan.png": "f1e236bcc4ec0725499660f1de221913ab65530212180a34a3d89ff2b0154a77"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12769",
+   "seed": 1091983993,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 21.87,
+    "unsupported_wall_share": 0.0572,
+    "n_openings_dropped": 0,
+    "n_walls": 33,
+    "n_openings": 11,
+    "n_rooms": 9
+   },
+   "phash": "e727b47c991ba0a8",
+   "files": {
+    "ground_truth.json": "79e388d3e84de15e5132758e45050baaca7e58666bfd6e136a9b19ae2df9a358",
+    "plan.pdf": "9ee400dfbe9326f0d418a72bbfe5d4e615c82d59f50f0f3dd0227adc0e7ad474",
+    "plan.png": "824829b14dad9d71899ecea0297f9db5c1091083b5fa0f7ee999a69efcbde333"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_366",
+   "seed": 716934390,
+   "degrade": null,
+   "n_rooms": 16,
+   "stats": {
+    "wall_area_m2": 69.8,
+    "unsupported_wall_share": 0.1369,
+    "n_openings_dropped": 0,
+    "n_walls": 49,
+    "n_openings": 29,
+    "n_rooms": 16
+   },
+   "phash": "abe19239ea8e6199",
+   "files": {
+    "ground_truth.json": "5949baf7e3d1d5b4d17079b4e66a226014e12c76b9032b31897f97cf2885b4a7",
+    "plan.pdf": "a2baab2ff317bcd975852d6026f92cbcb2bc9a8c9ac982a08dc40c97a649e142",
+    "plan.png": "ee05c775ef0c89530d648f97352104f93949fcab68d064d7748f0cd13436a44a"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13195",
+   "seed": 371390263,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 20.21,
+    "unsupported_wall_share": 0.0138,
+    "n_openings_dropped": 0,
+    "n_walls": 21,
+    "n_openings": 7,
+    "n_rooms": 5
+   },
+   "phash": "9fd0e890c40fb32f",
+   "files": {
+    "ground_truth.json": "c147797f006e06d67d97c4340eb575e47be5b91ae3f293020180941721d08f2f",
+    "plan.pdf": "6ee90625431af45bc72385de0213790d073d560155d1f9fd5979e33a31f83eab",
+    "plan.png": "3e17fc2bdc939e46feb8b5c123ccb4eb6834cfb4a9304e7acf13131d48040e5c"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13278",
+   "seed": 3092456057,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 9.69,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 15,
+    "n_openings": 5,
+    "n_rooms": 4
+   },
+   "phash": "be389938b5bd7208",
+   "files": {
+    "ground_truth.json": "71302b6d0adcff195c879ebb16121763fa58476be17d200e73914ebe9274b91f",
+    "plan.pdf": "d57abfce18f27e70d32f5aca1991df66c749bc50a75e75acab0503c3b1b84c33",
+    "plan.png": "b384a5706abf22846189bc81d631bcc2dde98404c26933616972fee6e3434df4"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1966",
+   "seed": 3375480842,
+   "degrade": null,
+   "n_rooms": 18,
+   "stats": {
+    "wall_area_m2": 46.14,
+    "unsupported_wall_share": 0.1938,
+    "n_openings_dropped": 0,
+    "n_walls": 60,
+    "n_openings": 38,
+    "n_rooms": 18
+   },
+   "phash": "bb38f1b93914c4cc",
+   "files": {
+    "ground_truth.json": "0295c4d848500a34b833cea9807f70faaaa878ced49796c86bc7e048ba6b1fa4",
+    "plan.pdf": "aa7f3c8ec88e9b6c3b00f34f72f7df4a0217111b562eeff563a3f627ca972199",
+    "plan.png": "ab269fb1618ec685fb6477416dd6f688a35b83ae7c0ef3eb2dfbe1d886f2f063"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_5064",
+   "seed": 3550858207,
+   "degrade": null,
+   "n_rooms": 19,
+   "stats": {
+    "wall_area_m2": 92.07,
+    "unsupported_wall_share": 0.0183,
+    "n_openings_dropped": 0,
+    "n_walls": 84,
+    "n_openings": 52,
+    "n_rooms": 19
+   },
+   "phash": "af60869f396c0f0e",
+   "files": {
+    "ground_truth.json": "7aeb01644bbe198acab192da3d107b51be66e5b7bb09cb4a2ef8532a552ca96b",
+    "plan.pdf": "a97a2cf5e473da27c843d9d14381380d3eef681bba51284015d5e637e8a0e2c2",
+    "plan.png": "8148b255a2e71ef7ac68e6b0b5730e11f4d93029c5158b1c21fab1499dc7cf31"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_521",
+   "seed": 4269526480,
+   "degrade": null,
+   "n_rooms": 15,
+   "stats": {
+    "wall_area_m2": 39.42,
+    "unsupported_wall_share": 0.021,
+    "n_openings_dropped": 0,
+    "n_walls": 41,
+    "n_openings": 25,
+    "n_rooms": 15
+   },
+   "phash": "fa95b54ac90f9511",
+   "files": {
+    "ground_truth.json": "9425b174d20965ae79a720335a236d7d7f755ee240b3b4b196ffd12a827815e7",
+    "plan.pdf": "9f873f07679d4d194de4a583ca5acd6adf1e96cdcbf6f53b041c2e78ec9308b8",
+    "plan.png": "c23df529eef7c1cd00a8a4da12e06cf40f3cdf50696e21d343a2f88ff78db733"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12625",
+   "seed": 1509609229,
+   "degrade": null,
+   "n_rooms": 18,
+   "stats": {
+    "wall_area_m2": 43.53,
+    "unsupported_wall_share": 0.0058,
+    "n_openings_dropped": 1,
+    "n_walls": 66,
+    "n_openings": 33,
+    "n_rooms": 18
+   },
+   "phash": "e34acc4ddbb28495",
+   "files": {
+    "ground_truth.json": "e2d59122d6f62317fec7f3f9f1092d41c35d53e4bb86d8a64bb6ef8cf692c4af",
+    "plan.pdf": "df6bb0befece553fdbcfde62477819a3b9ee67f1eda36a8ba5d18fc726f34269",
+    "plan.png": "26f5e57f2af844c246a767c8d1456cee5d1bd02bce6860990a23561406ca2140"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_1282",
+   "seed": 1025608403,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 30.16,
+    "unsupported_wall_share": 0.0382,
+    "n_openings_dropped": 0,
+    "n_walls": 34,
+    "n_openings": 16,
+    "n_rooms": 9
+   },
+   "phash": "a619266d19370f6e",
+   "files": {
+    "ground_truth.json": "2ce5f4399c0474d82a02412e6504f34793a602cd61c25536af79a8d52f6e21b4",
+    "plan.pdf": "e9a8f45ed597d0d73900d0da1431bb382cb5bbd12dc02ce81aaace260ba4886f",
+    "plan.png": "0765b3666fb93d24c634735a666fd75a464176632363c0cf47594e2b1eab266c"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2031",
+   "seed": 1980434024,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 21.01,
+    "unsupported_wall_share": 0.0261,
+    "n_openings_dropped": 1,
+    "n_walls": 20,
+    "n_openings": 8,
+    "n_rooms": 6
+   },
+   "phash": "808933f60985d77f",
+   "files": {
+    "ground_truth.json": "5c5a2dcb159b9b94c0a45810cf6e4e9a71b5301106e3c6bd824c317f2687dec2",
+    "plan.pdf": "4861a65030e2646f73eb5ab4734a525d5235b7ae7d055d11e35a11c3334a3417",
+    "plan.png": "8376fb5d2c4d31ba92ed7ad2815549fbb7babfabd3544037acfa64a2d93537b4"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1778",
+   "seed": 1582944720,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 28.55,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 1,
+    "n_walls": 31,
+    "n_openings": 19,
+    "n_rooms": 12
+   },
+   "phash": "8540fa33ef4791d4",
+   "files": {
+    "ground_truth.json": "4b67a9c6f414ed9f11255fb4ba0c5d8fb28a520eeb776e2f39846722604d935f",
+    "plan.pdf": "6eba4d703e3d9f05c977f8c0cbaec740f6f7ffdd090ad13bf090db7a86cce82e",
+    "plan.png": "03c068875d166fbbbe40d0272b6aedad1365e1ac6704437598a9eda6ba88b8b8"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11578",
+   "seed": 1731118766,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 9.46,
+    "unsupported_wall_share": 0.0056,
+    "n_openings_dropped": 0,
+    "n_walls": 11,
+    "n_openings": 4,
+    "n_rooms": 5
+   },
+   "phash": "dd91633ca8c7825d",
+   "files": {
+    "ground_truth.json": "0fc2a206e2a9c0741407be5a0d017187db7eba88ba3eabe6345987dfb896b745",
+    "plan.pdf": "7c41d11923596276ec015675193bb6bf7f15cc612af09ac92b9e6f14fe0908a1",
+    "plan.png": "3611f0c83c5f1dea1d4dc7ffc040f509c082e974e67355f6349803c098765e48"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1242",
+   "seed": 3852881231,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 68.16,
+    "unsupported_wall_share": 0.0154,
+    "n_openings_dropped": 0,
+    "n_walls": 38,
+    "n_openings": 23,
+    "n_rooms": 12
+   },
+   "phash": "eee6a499d1328467",
+   "files": {
+    "ground_truth.json": "3bccfceda41822c92c217f5a690ebf52de2f235b501092eb6e626a17c2eb36d9",
+    "plan.pdf": "7bee085d2676f29c072bae16fc21e430db4ed8371d5140cb0fdcc50f60a178b2",
+    "plan.png": "9043dad74dad58b0dee7dff627c5d23dccd242764dd65ceea0ae3f33e0ca347c"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3060",
+   "seed": 1198048002,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 51.78,
+    "unsupported_wall_share": 0.0009,
+    "n_openings_dropped": 0,
+    "n_walls": 49,
+    "n_openings": 38,
+    "n_rooms": 12
+   },
+   "phash": "99e8af35d80ff030",
+   "files": {
+    "ground_truth.json": "7b088713db823bfddc99617177f1f3fa6e060e2b133111a1f37130e810c0a337",
+    "plan.pdf": "730469b9c741c2b5599ec906681c28c28ee557d09f4a14f35dd0c083fa75d654",
+    "plan.png": "e3a5db8cb17ab6445fb75ec5ccd49e08b4477ecc1cbd5ae1420cfc105c086203"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_52",
+   "seed": 1584198679,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 37.31,
+    "unsupported_wall_share": 0.0197,
+    "n_openings_dropped": 0,
+    "n_walls": 26,
+    "n_openings": 12,
+    "n_rooms": 10
+   },
+   "phash": "8fe0f09f68a0969b",
+   "files": {
+    "ground_truth.json": "8d469caf0637f8fd92422b2b5d7378c9ac78eb732db5c5b4674c500b9f5c7153",
+    "plan.pdf": "6696e1c4e4be66460207614541d93d7fb8dbf0b01dd777cae5cbc9f8dedf915f",
+    "plan.png": "80d6c2e080ff1391d493f766e25817a00b3ca62f7554907fef48cdfc48dac6f1"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4535",
+   "seed": 519127902,
+   "degrade": null,
+   "n_rooms": 10,
+   "stats": {
+    "wall_area_m2": 29.48,
+    "unsupported_wall_share": 0.0447,
+    "n_openings_dropped": 0,
+    "n_walls": 35,
+    "n_openings": 15,
+    "n_rooms": 10
+   },
+   "phash": "c5177e71324929f2",
+   "files": {
+    "ground_truth.json": "f33aed6831fb664f53d39be4c79ccfbc7460f639f9aee37a15342e55ec244541",
+    "plan.pdf": "7ed9994316868e5cff9bbac6da1ce9e607adfa85ba067d776fb6c458d4fb47e1",
+    "plan.png": "050e1f03c71bb1cb5be9885bd1346657e484f54e02a2b1b8fa4441b5e80c3d85"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4828",
+   "seed": 3702305743,
+   "degrade": null,
+   "n_rooms": 19,
+   "stats": {
+    "wall_area_m2": 43.83,
+    "unsupported_wall_share": 0.1241,
+    "n_openings_dropped": 0,
+    "n_walls": 60,
+    "n_openings": 55,
+    "n_rooms": 19
+   },
+   "phash": "bb4b8fa18012f3dc",
+   "files": {
+    "ground_truth.json": "7e2b80e7a0b3a65e4ddcb73a6c2b167ae52767c6dbf913de62179d2ff31ec17c",
+    "plan.pdf": "2bb020d0196c511b04b09da0a22ca93f2b9ad93251f73389700973656b956017",
+    "plan.png": "d2a328a07b6ca2dc90e788048ed979a64f4556f2019079d6426330a1d1ab427c"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7974",
+   "seed": 1013589632,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 29.54,
+    "unsupported_wall_share": 0.0877,
+    "n_openings_dropped": 0,
+    "n_walls": 50,
+    "n_openings": 28,
+    "n_rooms": 14
+   },
+   "phash": "be2ff0381e96e0e0",
+   "files": {
+    "ground_truth.json": "697ba0d79267c76e6cc5f08fb4523464c3057b15cb3bc312434b44aa05c9046d",
+    "plan.pdf": "1dc7ccfb7bea0a95cf0def4cef63875cbc3e3c64aec6e63fa4c965f93f764b2f",
+    "plan.png": "f53145d52ca3be76def31147e9c8af7ee53b3a04047d27018a06ad7afed61fb9"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3781",
+   "seed": 2311813886,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 46.09,
+    "unsupported_wall_share": 0.0083,
+    "n_openings_dropped": 0,
+    "n_walls": 24,
+    "n_openings": 6,
+    "n_rooms": 5
+   },
+   "phash": "bf8be078e28ce292",
+   "files": {
+    "ground_truth.json": "0b29fe2d40b1b8a175a5c7f55f250960384c09adfd69f57b0f24cb5325d8e4e1",
+    "plan.pdf": "4bf9ee915a22a6329967248c14d4eb60186f3145b290fb366c9abe935545876c",
+    "plan.png": "f169c6802a8593b121313df03494da144c8eeffe43c5ca2cdf801dcd79b8b82a"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12139",
+   "seed": 1560768125,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 17.64,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 26,
+    "n_openings": 14,
+    "n_rooms": 8
+   },
+   "phash": "ea02b5a5694abd4d",
+   "files": {
+    "ground_truth.json": "e061b9ea7059db9f9ea038a04cb4daa1e6ad22fc8b92bb63dd366ffd55f02299",
+    "plan.pdf": "03fcb7d3239d110dfca48940abb8f40db37fdf1240be2035764fbfdd1398617b",
+    "plan.png": "764953bb5e3de996953f715cb6367166366fe950d1214844af3f05c8d24ba90c"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_3930",
+   "seed": 3952532034,
+   "degrade": null,
+   "n_rooms": 18,
+   "stats": {
+    "wall_area_m2": 115.77,
+    "unsupported_wall_share": 0.0659,
+    "n_openings_dropped": 0,
+    "n_walls": 82,
+    "n_openings": 41,
+    "n_rooms": 18
+   },
+   "phash": "bb63c49cec399894",
+   "files": {
+    "ground_truth.json": "590964448956c4d909cd42529b731af6c0b075c1b769951a8507fdbe91e10cb7",
+    "plan.pdf": "9d2fbd6cd3bf5d7fc52e55378613e2f68cc2106075ebdf15409476f184ccb2d1",
+    "plan.png": "22381ccd7dc6dba850abbd765c013b0b936f9ca11aec03cbf67256264b4f00aa"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_8731",
+   "seed": 539464267,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 41.73,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 37,
+    "n_openings": 14,
+    "n_rooms": 8
+   },
+   "phash": "c52774361a45355f",
+   "files": {
+    "ground_truth.json": "3fae397fc00a227b51647e213dff01443da09f67f901492d669b789dda4bd04f",
+    "plan.pdf": "5eff78aad01cc7953d6a8432ecb683fcf45572e84c21d1181432674f22450090",
+    "plan.png": "344b01d3e8a652ef69173615fb78f6cd05db39bf38b147889d053380d343c152"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1293",
+   "seed": 3385092143,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 15.84,
+    "unsupported_wall_share": 0.0691,
+    "n_openings_dropped": 2,
+    "n_walls": 17,
+    "n_openings": 9,
+    "n_rooms": 5
+   },
+   "phash": "a9823c1b663f6c2e",
+   "files": {
+    "ground_truth.json": "173b70f2b0f8d093ce9dd481e7925ca838b9bfce538103045fc440472454edb6",
+    "plan.pdf": "3a4fdbef37af1307da2d09ccc609504834b4b1cccc61a0e35301515a0b79d731",
+    "plan.png": "97d79ecca9ab80b41118dda3c6b270252a269083c427f925813383084f83f7fc"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13577",
+   "seed": 1368710055,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 9.52,
+    "unsupported_wall_share": 0.0352,
+    "n_openings_dropped": 0,
+    "n_walls": 21,
+    "n_openings": 10,
+    "n_rooms": 7
+   },
+   "phash": "c0aefb92af50ac45",
+   "files": {
+    "ground_truth.json": "944b755b2d5a4b7a7a694064fa52d9f80789a7ef73aaa1637dc09fc3002fe761",
+    "plan.pdf": "04f78b124239f200644eefeb653f8f1d32bbd7f9ea8139d3c53ca725b7afcd06",
+    "plan.png": "7bf8f2dba72b21c1af0655642f35dce0ed835747067a50633084e07e18b4bc03"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13031",
+   "seed": 3575903848,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 22.04,
+    "unsupported_wall_share": 0.0332,
+    "n_openings_dropped": 0,
+    "n_walls": 28,
+    "n_openings": 14,
+    "n_rooms": 7
+   },
+   "phash": "ad0dd0e23fc8e05b",
+   "files": {
+    "ground_truth.json": "540de1cb29e64a6ad6c6ce27a7b4a209989820fb78f88ab54708e21d3fa64377",
+    "plan.pdf": "1e5c3659ac5b72691d6ad23f80b0eff9f9bdc6109bc44cbfb58bf4f5e0475e23",
+    "plan.png": "3b878e4a03d2056a0d90a7af87765051f9154bbe85037818bfc00084130dfb01"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_20000",
+   "seed": 3118970741,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 86.86,
+    "unsupported_wall_share": 0.006,
+    "n_openings_dropped": 0,
+    "n_walls": 51,
+    "n_openings": 13,
+    "n_rooms": 8
+   },
+   "phash": "e63e7a70199da9a0",
+   "files": {
+    "ground_truth.json": "be073709b050e51382316d9218fa1a38ceec5bd3ea2f266c28b202dde3504a7a",
+    "plan.pdf": "2403a3ee394a0ff63a2121972151185f9156086425bd0363b13e9f63b41408b5",
+    "plan.png": "2ae40489fe538ba0fa9299092493d108904eca02a0322f778fcb92fc2385b491"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1217",
+   "seed": 2880760762,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 36.3,
+    "unsupported_wall_share": 0.1278,
+    "n_openings_dropped": 1,
+    "n_walls": 56,
+    "n_openings": 45,
+    "n_rooms": 14
+   },
+   "phash": "bf919846c379889e",
+   "files": {
+    "ground_truth.json": "e56200b3ed7c2a7e8696dae3ada5a6086e5bf75c434ca5efaed3281e0a8f19ac",
+    "plan.pdf": "2322816a2896ce48441738bb6109bf38e8c0b58d665c3cd6f61509058b8b8fc6",
+    "plan.png": "1afa17a38438b296c145f4e64b5120c1d29f07ac3c1bdcc22ea8e1550487e2c1"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1914",
+   "seed": 2751887534,
+   "degrade": null,
+   "n_rooms": 2,
+   "stats": {
+    "wall_area_m2": 7.05,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 6,
+    "n_openings": 7,
+    "n_rooms": 2
+   },
+   "phash": "9cd0627be5bac08d",
+   "files": {
+    "ground_truth.json": "c46b801c479eac34ba25052065b0096c9f8fea2c707a5bf464a71b4d1ac227ea",
+    "plan.pdf": "c364f4c3a187f358277d9159ad91201e7304898e12859eb41af150046ebdfc6b",
+    "plan.png": "0cc81d3a54af6625b5746b4c61ecc81cc6663454eb5cb60772db94145e416e36"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6303",
+   "seed": 2137144939,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 26.8,
+    "unsupported_wall_share": 0.1736,
+    "n_openings_dropped": 0,
+    "n_walls": 23,
+    "n_openings": 14,
+    "n_rooms": 5
+   },
+   "phash": "927ebc30a139e399",
+   "files": {
+    "ground_truth.json": "a579b05f85233035f86115f2326fe7d3d147c21138f84d96f7c1f17e254dc2c7",
+    "plan.pdf": "7b4fbbf6f34115a18def82754f567b35d9497da1c8296365c1544b6fd3b0d739",
+    "plan.png": "8c60f3ef286ba0a25eaee61e5c61cd9d07e2ffc1f19b7d15bd87d50f834848b7"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_2586",
+   "seed": 2043332620,
+   "degrade": null,
+   "n_rooms": 20,
+   "stats": {
+    "wall_area_m2": 81.65,
+    "unsupported_wall_share": 0.0339,
+    "n_openings_dropped": 0,
+    "n_walls": 60,
+    "n_openings": 32,
+    "n_rooms": 20
+   },
+   "phash": "af1cb02f8f92266c",
+   "files": {
+    "ground_truth.json": "a5de77802837ba3c72f46743da8179c5504be7122162e4f6dd6b6b3a4b9330e6",
+    "plan.pdf": "97b7d8361ae1e3d5ccd67076b69f25a163d5c19d36fae4cb978db46390db8bbf",
+    "plan.png": "abbb747384e6b6f7350564b680b271f3f0f34f5b8a86bc3e6dda5bb52fde15a3"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_4767",
+   "seed": 382392439,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 27.02,
+    "unsupported_wall_share": 0.01,
+    "n_openings_dropped": 0,
+    "n_walls": 33,
+    "n_openings": 15,
+    "n_rooms": 11
+   },
+   "phash": "f21cedcb8c2cd264",
+   "files": {
+    "ground_truth.json": "bfcf81fbe267afc2a8d147a2e4bc29da451d8373ba739c814fff7ef2382d003d",
+    "plan.pdf": "c2c6b52cadc48dc521d5f6e8ffa59c63d07ddcd40929489ae626cec05989c4a2",
+    "plan.png": "7232b3663b0f740981208d15431a8080fc16a8c1419a7c63a8e1812855988b3d"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9270",
+   "seed": 3463628132,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 42.45,
+    "unsupported_wall_share": 0.006,
+    "n_openings_dropped": 0,
+    "n_walls": 44,
+    "n_openings": 20,
+    "n_rooms": 11
+   },
+   "phash": "fe4ba17acbc4850c",
+   "files": {
+    "ground_truth.json": "b029711de4e01c6b34f659bd87efed175e57355bdbc4e03efa9b7be17b07f4c9",
+    "plan.pdf": "549da19494a404c79c540dfea00acfaa5329f289565b33ea64e850295e069ac1",
+    "plan.png": "cfdfe7d04931f4c45eed0d34355155ff93cc9f808a500be7fec3f5bf20d837a3"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_875",
+   "seed": 1386300678,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 33.74,
+    "unsupported_wall_share": 0.0622,
+    "n_openings_dropped": 0,
+    "n_walls": 27,
+    "n_openings": 15,
+    "n_rooms": 8
+   },
+   "phash": "e485b15e0f71873c",
+   "files": {
+    "ground_truth.json": "644a58e07922ce75be5ac71bc22582efd68dfd4596fbbc1a818dd9ce3d03bd38",
+    "plan.pdf": "1876adc87b0db050d4c9c5cf4434c4a677dbadc624cb15ea2b6c2a5afdaa426f",
+    "plan.png": "186c800e7677882d7ca73a68c9ce10cb6c16c367d069c5e55d401b048a5913b8"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11774",
+   "seed": 1891546713,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 11.61,
+    "unsupported_wall_share": 0.3474,
+    "n_openings_dropped": 0,
+    "n_walls": 20,
+    "n_openings": 8,
+    "n_rooms": 6
+   },
+   "phash": "af29de38d01e70c6",
+   "files": {
+    "ground_truth.json": "7e82528952c0447abcd9200902731494da48df49919bd6dbd0e067da83a7e1a2",
+    "plan.pdf": "00af440ac7b0211de32e8cc9c0d0d19f59d4d8e189bc2e7175ed438e81db5d69",
+    "plan.png": "d37a8d5fa4607c2f2b4fe97d886d48278666cde9ef3be60a1bc45778e9c38b71"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1910",
+   "seed": 2734678513,
+   "degrade": null,
+   "n_rooms": 15,
+   "stats": {
+    "wall_area_m2": 71.83,
+    "unsupported_wall_share": 0.0823,
+    "n_openings_dropped": 0,
+    "n_walls": 59,
+    "n_openings": 36,
+    "n_rooms": 15
+   },
+   "phash": "a5c2fe4af3a4c270",
+   "files": {
+    "ground_truth.json": "912bb60c26eb356f2527605de6b0fbddafb20254ccc9688eb8b12d6d4e897fab",
+    "plan.pdf": "cbe513de9dc4b66a19922bb4032a99b7bf1be6a5387db98775153aa034616f9a",
+    "plan.png": "ae268bd2250b15e62de48752b25196233e1f460dc95aeae5b190368d34391c50"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_8380",
+   "seed": 3814110766,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 10.28,
+    "unsupported_wall_share": 0.0584,
+    "n_openings_dropped": 0,
+    "n_walls": 19,
+    "n_openings": 8,
+    "n_rooms": 8
+   },
+   "phash": "ce973a49b01e2d3a",
+   "files": {
+    "ground_truth.json": "05d884ddf0fdca8dcb944da6939e450d5e8160c0fae8d1ab25f0fce39deda778",
+    "plan.pdf": "2ba4de3b0e249471d3aea253df59d83e34b6aef8d50d7102d4115e40dea344c6",
+    "plan.png": "89899f09c2d6e13e0b659842c5020b4e996838c911dcede26b4b8aa40b16f442"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_11402",
+   "seed": 3613917125,
+   "degrade": null,
+   "n_rooms": 13,
+   "stats": {
+    "wall_area_m2": 80.74,
+    "unsupported_wall_share": 0.0196,
+    "n_openings_dropped": 1,
+    "n_walls": 46,
+    "n_openings": 25,
+    "n_rooms": 13
+   },
+   "phash": "aab8fc252a3a872d",
+   "files": {
+    "ground_truth.json": "8f0b06c569b0a419e84d953ab76521d63efdce82ef90129b07fd9b6c1776610a",
+    "plan.pdf": "b8597849c452c4b5dcbae3db22fe0a4823b10b7eb56fe16c27b69c99b59ba2d8",
+    "plan.png": "228a895edbc3c5d9a0dab2d70b08b2e015b47050a4621baabb2de16b9c093c72"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_6123",
+   "seed": 331512891,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 64.45,
+    "unsupported_wall_share": 0.0349,
+    "n_openings_dropped": 0,
+    "n_walls": 60,
+    "n_openings": 22,
+    "n_rooms": 14
+   },
+   "phash": "b243999dc2e1b687",
+   "files": {
+    "ground_truth.json": "ab5a8d2df127e913ce83b64bbd4fbab0ac52813e40bd2b321dcbe4c3e3f2fd8f",
+    "plan.pdf": "df7d84bc15197adbff3d1d77dcffc92cf14a228edd46a41a846525d06660e41a",
+    "plan.png": "690153858d9294dace9a66eb5268bd5b6d7b61ca7ff2817121eacce0abd43a70"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13019",
+   "seed": 4001131452,
+   "degrade": null,
+   "n_rooms": 5,
+   "stats": {
+    "wall_area_m2": 23.18,
+    "unsupported_wall_share": 0.0006,
+    "n_openings_dropped": 0,
+    "n_walls": 19,
+    "n_openings": 10,
+    "n_rooms": 5
+   },
+   "phash": "eb78940b9db46a94",
+   "files": {
+    "ground_truth.json": "aae1d8672fb72c8c577930ad7bbd655f7dac6c6f7c602a6933638b61f56dece5",
+    "plan.pdf": "0072f3208592e56b73bb2e63add3a6c4fcedbff6592c16cd4ccea5ea72185839",
+    "plan.png": "e20c031b02619f645aa58ec7a1a216c6d730f7faaac9c7ba9b1ac17bd2b6dd8b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7639",
+   "seed": 894764339,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 19.93,
+    "unsupported_wall_share": 0.0475,
+    "n_openings_dropped": 0,
+    "n_walls": 25,
+    "n_openings": 8,
+    "n_rooms": 4
+   },
+   "phash": "f7b0896e90336bc4",
+   "files": {
+    "ground_truth.json": "e82d616a72a639960653e1c800b0e82764dc5097313e64b02a44c24445b10f52",
+    "plan.pdf": "a37aee3170b0c0f00a24523de2d3fc24d56ba6a49fa62d4b48958e66ed5865c9",
+    "plan.png": "e583e5178355430a227d2293946f75d4a0aca6d70793a7d77a3c68860e74f31f"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_479",
+   "seed": 4273700407,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 39.84,
+    "unsupported_wall_share": 0.084,
+    "n_openings_dropped": 0,
+    "n_walls": 35,
+    "n_openings": 14,
+    "n_rooms": 8
+   },
+   "phash": "96cffb0818c1ed91",
+   "files": {
+    "ground_truth.json": "59ae9de84ba80793985139da75f7238ae735cbc2cba801c69c3e01fc22e31da6",
+    "plan.pdf": "63b279290e3d3a9be75a2e98bea9c35ea75aa8943cb6c52a51098b49b00b3f56",
+    "plan.png": "5ed7c50045cd293643e8faac2b8316e687213d2b1ff161120491d1b6671ba2f9"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2035",
+   "seed": 3635917121,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 27.18,
+    "unsupported_wall_share": 0.0249,
+    "n_openings_dropped": 0,
+    "n_walls": 21,
+    "n_openings": 9,
+    "n_rooms": 6
+   },
+   "phash": "fe993272898792c5",
+   "files": {
+    "ground_truth.json": "747e0b49599d0e24536dc74efaff8be1cc6cd3b037b4c6777dec27584e53a5c2",
+    "plan.pdf": "b833f6795a603203e094f9154502270431e323a5ff73d82649c7da3ec72ca693",
+    "plan.png": "65f9a52579eb8efb9394f21e1164248a37518eaed324e07901789653d09d9f6f"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4928",
+   "seed": 1413372204,
+   "degrade": null,
+   "n_rooms": 14,
+   "stats": {
+    "wall_area_m2": 60.52,
+    "unsupported_wall_share": 0.0097,
+    "n_openings_dropped": 1,
+    "n_walls": 46,
+    "n_openings": 21,
+    "n_rooms": 14
+   },
+   "phash": "c2f79d13fe008176",
+   "files": {
+    "ground_truth.json": "1cc22aa51ae4bd73793ff58f25fbba59f79cb1f6ab0af7b376000030a51efa8a",
+    "plan.pdf": "780020e55030c8660418fa279441c8ab410613518c4e0401c06cd1bc2edfc32b",
+    "plan.png": "f283fe5b9458259597a490c39028dd14eff28991832ee572d01c4064cc6ec767"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_5760",
+   "seed": 2387055863,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 18.84,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 24,
+    "n_openings": 11,
+    "n_rooms": 8
+   },
+   "phash": "ef9c29919bc4928e",
+   "files": {
+    "ground_truth.json": "4a50127e43e53a0898a71625b7f71939524af6a6b14d09aefb7b993302d1e239",
+    "plan.pdf": "63f29dfaeaf39e06f619ab10c8f111c75e555dd15e3ea3f0216411dfc458d26e",
+    "plan.png": "799fe02944df761a634fe5882945956d6aabdb6ba17722b3f2a0ca499493bedd"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1838",
+   "seed": 28121777,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 7.92,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 11,
+    "n_openings": 4,
+    "n_rooms": 4
+   },
+   "phash": "824acf0ec73b4acd",
+   "files": {
+    "ground_truth.json": "ec061ec4211ea368d1aaef39bf8bb18ae2ea001612e01a3c653a4655e368cb7e",
+    "plan.pdf": "ef703a2098e4cef0eb80eeaec48ded1245d7a9a7b1147c5d253ba1d38347b1bd",
+    "plan.png": "fa174292d96eacf5a690e96e83690b81b566db292dfbc41692229c9c2d5d3238"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_2179",
+   "seed": 1283239868,
+   "degrade": null,
+   "n_rooms": 15,
+   "stats": {
+    "wall_area_m2": 56.96,
+    "unsupported_wall_share": 0.075,
+    "n_openings_dropped": 0,
+    "n_walls": 80,
+    "n_openings": 28,
+    "n_rooms": 15
+   },
+   "phash": "b761dc58c968ec49",
+   "files": {
+    "ground_truth.json": "9a32a92dbda60429518bf4253444837c20729738d6fede5061b1f69a76b3e075",
+    "plan.pdf": "114f9bdbcdd2c62128f2eaec072abcfeb30937cb815b44828eb462d5a43386b6",
+    "plan.png": "7306cc7fecda4bd476a2fbef67b85aff67b444a34fc635a89bf86f88a470a82b"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_4555",
+   "seed": 433978371,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 36.51,
+    "unsupported_wall_share": 0.0404,
+    "n_openings_dropped": 0,
+    "n_walls": 34,
+    "n_openings": 16,
+    "n_rooms": 12
+   },
+   "phash": "b2c39d31db98c698",
+   "files": {
+    "ground_truth.json": "599cdd3f6f9b7b0ec3cd1f1444e2bc8724eae204e792381e2a020c282defad60",
+    "plan.pdf": "080e60c88012d7bba2eddbb9e4a2952697c6c8b1b858bef5f14ea84b97493d36",
+    "plan.png": "9d08c2d8efb53731df520f4f4a8867df55314481362d500de9d478aceb3b52e0"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1599",
+   "seed": 3027144501,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 44.3,
+    "unsupported_wall_share": 0.1215,
+    "n_openings_dropped": 0,
+    "n_walls": 38,
+    "n_openings": 15,
+    "n_rooms": 12
+   },
+   "phash": "dc1ea2e0b98b4d96",
+   "files": {
+    "ground_truth.json": "8f78a56d264fead51b8da7eb948c3ffe8ade6b14c49bd7f2785cc26da070a6df",
+    "plan.pdf": "3adaf352799770d6d24150c43963f521289488b7fc1eeeba201d0a5ae9c9ec5f",
+    "plan.png": "d6757af8fc14270c8855f8e2e2a505f5c2301d9ece49ea3abfd2a99bd84811a0"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_20021",
+   "seed": 1577636747,
+   "degrade": null,
+   "n_rooms": 4,
+   "stats": {
+    "wall_area_m2": 8.19,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 15,
+    "n_openings": 4,
+    "n_rooms": 4
+   },
+   "phash": "c14d27646639e766",
+   "files": {
+    "ground_truth.json": "f422467a67016d062d516dd4faa515d5626794ac7357925613a2e4af3437c4b4",
+    "plan.pdf": "ba9004deb6aa025a0bc1b5154e007d61806ebe8a52127cf03dead8c95a9f5cd5",
+    "plan.png": "35691903c6c6d476b30e8d1e58f50b1db7635d78e379087283fa248ad7a5cb19"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_5121",
+   "seed": 467597514,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 60.79,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 38,
+    "n_openings": 13,
+    "n_rooms": 7
+   },
+   "phash": "87464b5e336e26a9",
+   "files": {
+    "ground_truth.json": "2d0e5dcea2a577316d1fe6fb5da9e4fcc33a3185aaf77bdd5221ef822facec8e",
+    "plan.pdf": "0a88788cc3fd6dfc238daa61560f6476cff11f9062645410bd5edf459f071629",
+    "plan.png": "0193a323abdff9507e37e9015952db2c8dfff2ff1fdbe2ae9aba435810f45b05"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1601",
+   "seed": 1270455384,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 17.6,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 24,
+    "n_openings": 11,
+    "n_rooms": 6
+   },
+   "phash": "cf486a165bd4ac35",
+   "files": {
+    "ground_truth.json": "f71152c2bd436ab0880674cc51b86813e8e8ac0e29a83dd40ed4093c620281b4",
+    "plan.pdf": "6da3104e8b615c93b6b7bea4cc109b2a8fce7b6fe364666ffd3c8a5127a26d93",
+    "plan.png": "884113d54342d8596f38a4c0aa79186962af1a58a381ce91f8e8c046bfe41984"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_12202",
+   "seed": 247256166,
+   "degrade": null,
+   "n_rooms": 3,
+   "stats": {
+    "wall_area_m2": 6.1,
+    "unsupported_wall_share": 0.002,
+    "n_openings_dropped": 0,
+    "n_walls": 7,
+    "n_openings": 4,
+    "n_rooms": 3
+   },
+   "phash": "9bccb5b4c017c91b",
+   "files": {
+    "ground_truth.json": "9479fac23605e067d9853e16fcee74b343ef4eb0961f5fbb51df02b85b71924b",
+    "plan.pdf": "93c0f9c330ffe1e7c469ae05f194342b4d4192b80e143f28b850fa8d3ee9abd9",
+    "plan.png": "42121a35574256075ec85c288d91ed064613e1e068e7bac5a935328d473c14d0"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_9880",
+   "seed": 963682336,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 75.59,
+    "unsupported_wall_share": 0.0339,
+    "n_openings_dropped": 0,
+    "n_walls": 69,
+    "n_openings": 33,
+    "n_rooms": 17
+   },
+   "phash": "ba4cdc0f06782af5",
+   "files": {
+    "ground_truth.json": "e38bd5ae19a59151732148beed0bfe15274933cdf8a42ee61231a293ce19763d",
+    "plan.pdf": "f9e1fbd3ed7c1a0d2a3d169b27fdac02b9bd5d39eb7de55ff423e3ff40917185",
+    "plan.png": "c0179ad62d179ffd84b1bfbf44483f2747771c8ff8628b489ace7e86e1c97965"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13438",
+   "seed": 4062829783,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 28.16,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 37,
+    "n_openings": 12,
+    "n_rooms": 11
+   },
+   "phash": "bf6ac03ec8f016c5",
+   "files": {
+    "ground_truth.json": "455bd80d040b91c9fe8e691aad84d3610eb8404a6564b1e866779c8c3fd24a98",
+    "plan.pdf": "f62f0eecccd77bb4c27133a16e7ab4fe13d3ab9a9da98e0006854b4ffae19b59",
+    "plan.png": "e5d8360fe3082e822d97bca4a1917a679f5ebea323b5df941ae5deec2828eaa9"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_1622",
+   "seed": 2460832892,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 16.1,
+    "unsupported_wall_share": 0.0146,
+    "n_openings_dropped": 0,
+    "n_walls": 24,
+    "n_openings": 10,
+    "n_rooms": 6
+   },
+   "phash": "810d3fc07e70fe70",
+   "files": {
+    "ground_truth.json": "0cb92cba2c368b3ca38d8a2a3e56014f042d7d4219c0f6e06f7fe3ced4925e69",
+    "plan.pdf": "9cf2203cfcb7ccac5a5da54c98b2f14dd75989f235decadc1fe5fd68028da5b2",
+    "plan.png": "2021c556c11c5e3d717a86c58a9824c233d69f3f357e2e074562b773f4107cda"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7037",
+   "seed": 1476946944,
+   "degrade": null,
+   "n_rooms": 13,
+   "stats": {
+    "wall_area_m2": 64.38,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 39,
+    "n_openings": 22,
+    "n_rooms": 13
+   },
+   "phash": "caa7bcc395f8d00a",
+   "files": {
+    "ground_truth.json": "3cace6eefc1de7bef023c79fa022d954a84b8ba4ae821654411394aa0db04c67",
+    "plan.pdf": "c63e73cfff5ea8c568cff667c41bcf35a48cd75c117afe002d90b89e0aa2de68",
+    "plan.png": "9d7b27c3da577eb2d56eaed56ad5bcdda70611dbcbd2ffc145a8143306ef0f43"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_145",
+   "seed": 395711808,
+   "degrade": null,
+   "n_rooms": 6,
+   "stats": {
+    "wall_area_m2": 22.7,
+    "unsupported_wall_share": 0.0795,
+    "n_openings_dropped": 0,
+    "n_walls": 29,
+    "n_openings": 15,
+    "n_rooms": 6
+   },
+   "phash": "b04fff6366e04e08",
+   "files": {
+    "ground_truth.json": "baba101725ec5b91943ea586314e6589a5d98681324f672e61185a9bfd5a64ed",
+    "plan.pdf": "9b0d177fb00a2cd1d62f7ed48686767331df4779d0cb197b14992184f678f0b7",
+    "plan.png": "9828b75772cd2d80dd8720e834c2ac7a8e39099f2a1a6e8ceb0a5203270dce00"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_5872",
+   "seed": 3996513145,
+   "degrade": null,
+   "n_rooms": 9,
+   "stats": {
+    "wall_area_m2": 40.93,
+    "unsupported_wall_share": 0.0314,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 13,
+    "n_rooms": 9
+   },
+   "phash": "92e1ff1eed40e302",
+   "files": {
+    "ground_truth.json": "cfc262eca736e22e35f15ecce349a3cfd6eb39e5a34c3e17096baab9c27aa5ce",
+    "plan.pdf": "473507ca1663b4ed97dcd6a6a7480b4976363b4c0f93ad74715ea0abdfe7f91c",
+    "plan.png": "322b6b62dc6aceb2d4c13304987bb89d431419251dc91b156365cf999c2e7f08"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_8285",
+   "seed": 943203904,
+   "degrade": null,
+   "n_rooms": 21,
+   "stats": {
+    "wall_area_m2": 69.9,
+    "unsupported_wall_share": 0.0163,
+    "n_openings_dropped": 0,
+    "n_walls": 87,
+    "n_openings": 40,
+    "n_rooms": 21
+   },
+   "phash": "eb41c23e8c639c73",
+   "files": {
+    "ground_truth.json": "3f939f89bceeafc602a1a0d6121ff373c55c22145d7f0683868f10a2113c705b",
+    "plan.pdf": "8f6d970922a6e62a895c3cb4f0b62e3dc2f445a82499a5970f7a6891054099f0",
+    "plan.png": "8497c121b3c6fee81d9269d60d8bc1e9e5865eee7698ba54ffe5067dfd55f7c7"
+   }
+  },
+  {
+   "id": "cubicasa_colorful_13352",
+   "seed": 2515051317,
+   "degrade": null,
+   "n_rooms": 17,
+   "stats": {
+    "wall_area_m2": 39.49,
+    "unsupported_wall_share": 0.0193,
+    "n_openings_dropped": 0,
+    "n_walls": 55,
+    "n_openings": 26,
+    "n_rooms": 17
+   },
+   "phash": "bb789c3963c484c7",
+   "files": {
+    "ground_truth.json": "3b493bf7ccbbb4ee49bb70cae084b43f2921cfb2bb9faf33b370c54fb1bc6c6c",
+    "plan.pdf": "a9218b334b72848275369b272d229c0eb510652838c1d1aff3d89c887e053643",
+    "plan.png": "906d57a0baa75568adaaad5aa3b5341c9c1bd25c08ea270052c6916088ad7108"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_9334",
+   "seed": 3120029518,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 24.34,
+    "unsupported_wall_share": 0.0037,
+    "n_openings_dropped": 0,
+    "n_walls": 31,
+    "n_openings": 14,
+    "n_rooms": 11
+   },
+   "phash": "aa06fcf0b40f0fd2",
+   "files": {
+    "ground_truth.json": "c42f56297156b9947831d031b58ec0e258b0e723a8ddfffbdabe15a63dedf616",
+    "plan.pdf": "b7bee933654a82394c28fe369bc21b1a98f1909d378c64686b15de5ab97fb170",
+    "plan.png": "73a56f19d570506ffc7bc6cac3e5d8a34fd1bb2ee98eec75ce43d71bc83c634a"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_3529",
+   "seed": 2206107760,
+   "degrade": null,
+   "n_rooms": 12,
+   "stats": {
+    "wall_area_m2": 46.27,
+    "unsupported_wall_share": 0.0,
+    "n_openings_dropped": 0,
+    "n_walls": 38,
+    "n_openings": 27,
+    "n_rooms": 12
+   },
+   "phash": "ae1ef163ec38d0a1",
+   "files": {
+    "ground_truth.json": "47d47a04317a21c611b863547454132558174791bdb17edca35bd00b7ed68162",
+    "plan.pdf": "a18c4bb342f8d46089ec314dd58b2c869029a4ae93a923f97671ea2326357c9e",
+    "plan.png": "73f75390be1c178427edbb8846c324d5dc7dc02262d77f4c00b1a86fa0b376cd"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_3024",
+   "seed": 2549182814,
+   "degrade": null,
+   "n_rooms": 11,
+   "stats": {
+    "wall_area_m2": 73.33,
+    "unsupported_wall_share": 0.0119,
+    "n_openings_dropped": 0,
+    "n_walls": 45,
+    "n_openings": 20,
+    "n_rooms": 11
+   },
+   "phash": "ef35b831b26936c0",
+   "files": {
+    "ground_truth.json": "c884a8b20dd78440f317cbf8fede9c4c8d5e1942884a17ce1f3a460aa6dca7d0",
+    "plan.pdf": "e451102652da17618b930bdfdd10f8cefe894ffa7d10ccf701c5d04448ad737a",
+    "plan.png": "793196759fc732c9e980d461a54e278baefe33351f75713a607b1e0e8ce08aed"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_7061",
+   "seed": 2471430957,
+   "degrade": null,
+   "n_rooms": 8,
+   "stats": {
+    "wall_area_m2": 22.44,
+    "unsupported_wall_share": 0.0424,
+    "n_openings_dropped": 1,
+    "n_walls": 31,
+    "n_openings": 12,
+    "n_rooms": 8
+   },
+   "phash": "c292bd4cfcc58399",
+   "files": {
+    "ground_truth.json": "6c78874b9c11dbedb58b33e0538b66b18383803b9cf2e8d897eee5715ad86e0e",
+    "plan.pdf": "e649f5abdd8b9be7b98e0505320046059e9e98d2de64fc8d3b4009b95c5ed85d",
+    "plan.png": "2da10154face25312a7ffe506a382a8b91b4c81b60461ae10ef66bd2844de5ec"
+   }
+  },
+  {
+   "id": "cubicasa_high_quality_architectural_8576",
+   "seed": 172734882,
+   "degrade": null,
+   "n_rooms": 7,
+   "stats": {
+    "wall_area_m2": 44.8,
+    "unsupported_wall_share": 0.0879,
+    "n_openings_dropped": 0,
+    "n_walls": 32,
+    "n_openings": 17,
+    "n_rooms": 7
+   },
+   "phash": "bac91d63690bb495",
+   "files": {
+    "ground_truth.json": "ec7a069492ffff728872985196f029307e9808c713033ce94a9cc6eb8f3897ef",
+    "plan.pdf": "8ea67467edd6e533ebafd085521953745787d3f4307855ffabfd187f81752a6c",
+    "plan.png": "343d85651c550f5cc7ecb20b554027b0ca5f3ba8d955eeb40c15f7b717bbf6eb"
+   }
+  }
+ ]
 }

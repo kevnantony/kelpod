@@ -9,30 +9,68 @@ This directory is **protected** (`docs/EVAL_PROTOCOL.md` §6). It is changed onl
   (`KELPOD_EVAL_DATA` overrides the root). Dataset and real splits stay where their manifest's
   `data_dir` points.
 
-## Splits (status 2026-11-24)
+## Splits (status 2026-11-25)
 
 | split | family | status | size | where | notes |
 |---|---|---|---|---|---|
 | `val-synth` | val | frozen | 200 plans | `~/kelpod-data/eval/val-synth/` | seeds 200000-200199, train style, degrade uniform 0 to 1.2 per plan |
 | `test-synth` | test-synth | frozen | 300 plans | `~/kelpod-data/eval/test-synth/` | seeds 300000-300299, **held-out style**, degrade uniform 0 to 1.2 |
 | `fresh` | fresh | generated per run | 200 plans | temp dir, deleted after the run | seeds from `sha256(candidate commit + main commit)`, held-out style, degrade 0 to 1.2 |
-| `test-ood-swiss` | test-ood | **pending** | (site/building ID list written) | | held out by site; the ID lists are in the manifest so training can exclude them |
-| `test-ood-cubicasa` | test-ood | **pending** | (official test list, 400) | | official CubiCasa5k `test.txt` |
-| `test-ood-resplan` | test-ood | **pending** | (canonical test list, 1632) | | ResPlan `split.json` `test` |
-| `val-swiss`, `val-resplan`, `val-cubicasa` | val | **pending** | (ID lists written) | | |
+| `test-ood-swiss` | test-ood | frozen | 150 floors | `~/kelpod-data/eval/test-ood-swiss/` | Swiss Dwellings floors of held-out **sites** (`crc32(site_id) % 10 == 0`), re-rendered by `kelpod.evaluation.vectorplans`; all test site/building/floor IDs are in the manifest so training excludes them |
+| `test-ood-resplan` | test-ood | frozen | 150 plans | `~/kelpod-data/eval/test-ood-resplan/` | ResPlan `split.json` `test`, re-rendered |
+| `test-ood-cubicasa` | test-ood | frozen | 200 plans | `~/kelpod-data/eval/test-ood-cubicasa/` | official CubiCasa5k `test.txt`; real raster pages, **scale-free scoring** (below) |
+| `val-swiss`, `val-resplan`, `val-cubicasa` | val | frozen | 100 each | `~/kelpod-data/eval/val-*/` | val sites / `split.json` `val` / `val.txt`; same renderers |
 | `real-dev` | val (proxy) | **pending** | | `~/kelpod-data/real/dev/` | no data on disk yet; when there is, `pending` writes a hash manifest and runs use the proxy panel |
 | `test-real` | test-real | **pending** | | `~/kelpod-data/sealed/real-test/` | no data on disk yet; hashes only, items are never opened one by one |
 
-Why the dataset splits are pending: scoring them needs a renderer for vector plans that draws
-DIN-style input pages **and** writes a `PlanGraph` ground truth (walls, rooms, openings). The
-finetune agent's renderer (`training/kelpod_train/render.py` in the main checkout) is uncommitted
-and writes pixel class maps for training, not graphs. A frozen split must come from committed
-code. To build them: commit a renderer + graph converter (on an `eval/*` branch, or import a
-committed one), add a `build` entry in `kelpod.evaluation.splits`, freeze, and record it here.
+### Dataset splits (renderer and ground truth)
 
-`locked_eval.py` skips a pending or missing split with a note in the table and the log line. Until
-test-ood exists, the primary split of rule 2 is **fresh** alone (protocol: test-ood + fresh), and
-rule 4 can only count test-synth and fresh.
+Built by `python -m kelpod.evaluation.splits build-dataset <split>` from the held-out ID lists of
+the manifest. Candidates are taken in the order of `sha256('kelpod-eval/<split>/<id>')`; the first
+N that render are kept (extent 3-60 m, at least 4 walls and 2 rooms, at most 3 % of the wall area
+outside what the GT can represent). Sizes: the runtime budget is about 25 s per plan and run, 8
+workers, 4 runs per plan (candidate and baseline, 2 seeds each): test-synth 300 + fresh 200 + OOD
+500 = 1000 plans = about 3.5 h. Frozen splits are never rebuilt.
+
+**Swiss Dwellings and ResPlan** (`kelpod.evaluation.vectorplans`, `datasets.py`): drawn in the
+default **train style** of the synthetic generator (same canvas, pens, hatching, fonts, scan
+degradation 0-1.2, 300 dpi, 1:100), as an image-only `plan.pdf`, with two dimension chains per side
+(wall faces, overall), room stamps (name and area) and a title, so the pipeline finds its scale
+(`scale_source` is never `ground_truth` in a prediction). `ground_truth.json` holds the PlanGraph in
+metres plus `stats`. What the GT contains:
+
+- walls: each source wall rectangle (Swiss) or strip of the rectilinear wall union (ResPlan; the
+  openings are added to the union so walls stay continuous) = a centreline with thickness, merged
+  when collinear, ends snapped onto the wall they meet, noded at every junction. Kind: exterior if
+  one face looks outside the footprint, else drywall below 15 cm, else interior (hatched from 15 cm).
+  ResPlan has no metric scale: plan units are scaled so `wall_depth` is a wall of 0.20-0.30 m
+  (uniform, seeded by the plan id).
+- openings: doors (sill 0, height 2.01 m) and windows (**no sill, no height**: not in the sources,
+  so `sill_error_m` is undefined). Openings that lie in no wall are dropped (counted in `stats`).
+- rooms: the source room polygons (largest part, >= 1.5 m2) with German stamp names. Open-plan areas
+  that the source splits without a wall stay separate GT rooms. Balconies, shafts, voids, lifts are
+  not rooms. Fixtures, furniture, columns and railings are neither in the GT nor drawn.
+- Swiss floors hold all apartments of a storey and often have rotated or non-rectilinear parts; the
+  plan is rotated so its dominant wall direction is axis-parallel and the GT is in that frame.
+  Wall area the GT cannot represent (thick blocks, curves) is recorded as `unsupported_wall_share`.
+
+**CubiCasa5k** (real scans, CC BY-NC 4.0): `plan.pdf` is the real `F1_scaled.png` (grayscale,
+resized so the median wall is 20 px, 200 dpi PDF), the GT comes from `model.svg` (walls, doors,
+windows, spaces) in pseudo-metres (median wall = 0.20 m). CubiCasa5k has **no metric scale**, so the
+GT scale is not a measurement and the split is scored scale-free (`"scoring": "scale-free"`):
+predicted rooms are aligned to the GT rooms by a similarity transform (scale from the room area
+ratio, translation, 3 refinements; no rotation), then compared. n/a (`None`, dropped from means and
+bootstraps) on this split: `room_area_error`, `total_area_error`, `wall_*`, `thickness_class_acc`,
+`door_*`, `window_*`, `sill_error_m`, `edit_cost`, `ext_wall_length_error`,
+`window_facade_error`, `gross_volume_error`. Defined: `correct_closed` (closed, every GT room matched
+at IoU >= 0.85, room count equal; the area condition is dropped because the aligned areas are equal
+by construction), `closed`, `room_iou`, `room_precision`, `room_recall`, `room_count_error`,
+`crash`, `ifc_fail`, `runtime_s`. `room_count_error` (new, all splits) = |rooms - GT rooms| / GT
+rooms, capped at 1.
+
+`locked_eval.py` skips a pending or missing split with a note in the table and the log line. The
+primary split of rule 2 is test-ood (3 splits pooled) + fresh. Rule 4 counts families: test-synth,
+test-ood (pooled over its three splits) and fresh, one verdict each.
 
 ## Reserved seeds (synthetic generator)
 

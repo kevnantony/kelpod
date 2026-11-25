@@ -49,6 +49,13 @@ the log is audited.
 - Near duplicates are checked with a perceptual hash against all test splits before a new training
   source is used.
 
+Frozen sizes (2026-11-25, `eval/README.md` has the renderer and ground-truth details): val-swiss,
+val-resplan, val-cubicasa 100 each; test-ood-swiss 150, test-ood-resplan 150, test-ood-cubicasa 200
+(sized from the runtime budget; the CubiCasa5k lists have 399 plans, 4 near duplicates of training
+images were dropped). CubiCasa5k has no metric scale, so it is scored scale-free: the metrics that
+need metres are n/a there and room comparison uses a similarity alignment. Rule 4 counts
+test-ood once, pooled over its three splits.
+
 ## 3. Metrics (a panel, never a single number)
 
 For each split, the table reports the following. "Correct" is defined by the headline metric below.
