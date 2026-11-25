@@ -367,3 +367,42 @@ Tried and dropped: snapping partitions across 1.2 m door gaps in massive walls (
   Incident: while looking for the run directory I listed the per-plan results of the coordinator's
   latest locked run (test-synth / fresh ids) once, before noticing; I did not use them for any
   decision, the fix was derived from val-synth s200048 only.
+
+## historic-v2 (2026-11-25, branch exp/historic-v2 = main/baseline-v1 + historic-plans + din-web-v2 + door gaps)
+
+- **Hypothesis:** with the learned segmenter the walls of the historic plans are mostly found, but
+  rooms stay open because doors and segmentation dropouts are plain gaps in solid walls. Bridging
+  a dangling wall end across a gap, only on evidence, closes the rooms without hurting the
+  synthetic splits.
+- **Merge:** `origin/exp/historic-plans` (scale bars, interior dimensions, sheet splitting,
+  historic room names, `scripts/dev/realdev_score.py`), then `origin/exp/din-web-v2` (fixed
+  footprint guard, attach tolerance 0.3 m, chain OCR, upscaling). `pipeline.convert_all` resolves
+  the default backend from `kelpod-run.toml` (learned) as on main. `uv run pytest`: 397 passed, 2
+  skipped (skips pre-existing).
+- **Change (`src/kelpod/geometry/doorgap.py`, switch `GeometryParams.close_door_gaps`):** for each
+  dangling wall end (touches no other wall) look for (a) the collinear dangling end of another
+  wall pointing back at it, same thickness (+-6 cm), centrelines within a few cm, or (b) a
+  perpendicular wall behind it. The gap must be 0.55-1.3 m (door: added as an opening of kind
+  door) or up to 2.6 m (segmentation dropout: bridged as plain wall, no opening). A gap towards
+  open air has no target and is left alone. Gate: all candidates together must raise the number of
+  closed rooms, and then every bridge that is not needed for that gain is dropped (leave-one-out).
+  A first version with gaps limited to 1.3 m barely changed the plans (real, villa 7 -> 9 rooms,
+  Tafel unchanged), because most gaps are dropouts, not doors.
+- **Real, 3 hand-labelled plans (dev only, agent-made labels +-5 px, not a benchmark).**
+  Wall F1 / room IoU with the label scale ("oracle": geometry only) / scale error;
+  main = baseline-v1, branch = this branch:
+
+| plan | main F1 / IoU / scale err | branch F1 / IoU / scale err | branch before door gaps |
+|---|---|---|---|
+| tafel71 plan 2 (7 rooms) | 0.18 / 0.00 / 91 % (whole sheet) | 0.61 / 0.72 / 1.9 % | 0.62 / 0.72 |
+| tafel71 plan 3 (6) | 0.19 / 0.00 / 91 % | 0.73 / 0.55 / 1.9 % | 0.72 / 0.37 |
+| villa-garten-vorhof (19) | 0.86 / 0.17 / 37 % | 0.81 / 0.41 / 50 % | 0.81 / 0.24 |
+| villa-gundel (7) | 0.36 / 0.00 / 68 % | 0.71 / 0.25 / 5 % | 0.56 / 0.00 |
+
+  (F1 and IoU are the oracle numbers; at the pipeline's own scale: Tafel 0.73 / 0.55 on plan 3, villa
+  IoU 0.06 because its scale is wrong, Gundel 0.22.)
+- **Still failing:** the villa scale bar has no numbers; the tick value is guessed from the wall
+  thickness, and the learned segmenter's thickness (22 px, true about 11 px) gives 0.5 m per tick
+  instead of 1 m (scale error 50 %, worse than main's 37 %). Gundel: the learned wall mask is
+  patchy on the thick outer walls (large dropouts), thin partitions are missed. Rooms at
+  IoU < 0.6 everywhere: **no plan works yet.**
