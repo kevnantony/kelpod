@@ -20,7 +20,8 @@ backends, the uv project whose interpreter runs the pipeline, and one checkpoint
 seed (path outside the worktree + sha256). Every checkpoint is hash-verified, its training
 manifests are checked for test overlap, and it is staged read-only and passed only through
 ``KELPOD_SEG_CHECKPOINT``. Each candidate checkpoint is its own side (``cand0``, ``cand1``, ...);
-rule 5 must hold for the worse seed. The configs are printed in the report.
+the baseline runs once per declared seed too, candidate seed k is compared with baseline seed k
+(``pair_sides``), and rule 5 must hold for the worse pair. The configs are printed in the report.
 
 Output: a Markdown comparison table (stdout and ``<out>/comparison.md``), ``<out>/results.json``
 (per-plan panels, for audits only: locked splits are read as aggregates), and one appended line in
@@ -120,9 +121,11 @@ def load_run_configs(
 
 
 def build_sides(baseline: Path, cands: list[Path], configs: dict, staging: Path) -> dict:
-    """``base`` plus ``cand0``, ``cand1``, ...: one candidate side per declared checkpoint (training
-    seed) of every candidate worktree (one side if it declares none). The baseline runs with its
-    first declared checkpoint, if any. Checkpoints are staged read-only under ``staging``."""
+    """Baseline sides plus ``cand0``, ``cand1``, ...: one candidate side per declared checkpoint
+    (training seed) of every candidate worktree (one side if it declares none). The baseline gets
+    one side per declared checkpoint too (``base0``, ``base1``, ...; ``base`` if it declares none),
+    so every seed is run on the baseline as well (see ``pair_sides``). Checkpoints are staged
+    read-only under ``staging``."""
     from kelpod.evaluation import run_config as rc
 
     pythons: dict = {}
@@ -143,7 +146,11 @@ def build_sides(baseline: Path, cands: list[Path], configs: dict, staging: Path)
         }  # fmt: skip
 
     bcfg = configs[baseline]
-    add("base", baseline, bcfg, bcfg.checkpoints[0] if bcfg.checkpoints else None)
+    if bcfg.checkpoints:
+        for i, ck in enumerate(bcfg.checkpoints):
+            add(f"base{i}", baseline, bcfg, ck)
+    else:
+        add("base", baseline, bcfg, None)
     k = 0
     for wt in cands:
         cfg = configs[wt]
@@ -151,6 +158,37 @@ def build_sides(baseline: Path, cands: list[Path], configs: dict, staging: Path)
             add(f"cand{k}", wt, cfg, ck)
             k += 1
     return sides
+
+
+def base_sides(sides: dict) -> list[str]:
+    return [s for s in sides if s.startswith("base")]
+
+
+def pair_sides(sides: dict) -> list[tuple[str, str, str]]:
+    """(key, candidate side, baseline side) for every comparison. Rule 3 to 5 must hold for all.
+
+    - baseline with at most one side: every candidate side against it (key = candidate side);
+    - several baseline seeds: per candidate worktree, candidate seed k against baseline seed k when
+      the seed labels match as sets; else by position when the counts are equal; else every
+      candidate seed against every baseline seed (key ``candX~baseY``), so the rule must hold for
+      the worst pairing."""
+    bases = base_sides(sides)
+    cands = [s for s in sides if s not in bases]
+    if len(bases) <= 1:
+        return [(c, c, bases[0]) for c in cands]
+    out = []
+    for wt in dict.fromkeys(sides[c]["worktree"] for c in cands):
+        group = [c for c in cands if sides[c]["worktree"] == wt]
+        cs = [sides[c]["seed"] for c in group]
+        bs = [sides[b]["seed"] for b in bases]
+        if None not in cs and len(set(cs)) == len(cs) and set(cs) == set(bs):
+            by_seed = {sides[b]["seed"]: b for b in bases}
+            out += [(c, c, by_seed[sides[c]["seed"]]) for c in group]
+        elif len(group) == len(bases):
+            out += [(c, c, b) for c, b in zip(group, bases, strict=True)]
+        else:
+            out += [(f"{c}~{b}", c, b) for c in group for b in bases]
+    return out
 
 
 def staged_checkpoints_changed(sides: dict) -> list[str]:
@@ -169,6 +207,11 @@ def side_label(info: dict) -> str:
     args = " ".join(info["args"]) or "defaults"
     ck = f", seed {info['seed']} sha256 {info['sha256'][:12]}" if info["sha256"] else ""
     return f"{Path(info['worktree']).name}@{info['commit'][:10]}, {args}{ck}"
+
+
+def pair_label(sides: dict, pair: tuple[str, str, str]) -> str:
+    key, c, b = pair
+    return f"{key}: {side_label(sides[c])} vs baseline {b} ({side_label(sides[b])})"
 
 
 def log_cell(sides: dict, names: list[str]) -> str:
@@ -373,8 +416,9 @@ def _seed_for(*parts: str) -> int:
     return int(hashlib.sha256("/".join(parts).encode()).hexdigest()[:12], 16)
 
 
-def compare(rows: list[dict], splits: list[dict], sides: list[str], commits: dict) -> dict:
-    """Per split and per candidate side: Δ with CI for every panel metric."""
+def compare(rows: list[dict], splits: list[dict], pairs: list, commits: dict) -> dict:
+    """Per split and per (key, candidate side, baseline side): Δ with CI for every panel metric.
+    Paired bootstrap over the plans the two sides share. ``commits[key]`` seeds the bootstrap."""
     from kelpod.evaluation.panel import METRICS, PROXY_METRICS
     from kelpod.evaluation.stats import compare_metric
 
@@ -382,12 +426,12 @@ def compare(rows: list[dict], splits: list[dict], sides: list[str], commits: dic
     for r in rows:
         by.setdefault((r["split"], r["side"]), {})[r["id"]] = r["panel"]
     out: dict = {}
-    for side in sides:
+    for side, cside, bside in pairs:
         res = {}
         for s in splits:
             name = s["split"]
             metrics = PROXY_METRICS if s["kind"] in ("proxy", "sealed") else METRICS
-            b, c = by.get((name, "base"), {}), by.get((name, side), {})
+            b, c = by.get((name, bside), {}), by.get((name, cside), {})
             ids = sorted(set(b) & set(c))
             deltas, kinds = {}, {}
             for m, (direction, kind) in metrics.items():
@@ -493,15 +537,16 @@ def markdown(res: dict, decisions: dict, meta: dict) -> str:
         f"- branch `{meta['branch']}`; candidate `{meta['commits']['cand0'][:10]}`, baseline "
         f"`{meta['commits']['base'][:10]}`; {meta['machine']}; {meta['workers']} workers x "
         f"{meta['cores_per_plan']} dedicated physical core(s) per plan",
-        f"- splits: {', '.join(f'{n} ({r["n"]})' for n, r in res['cand0'].items())}",
+        f"- splits: {', '.join(f'{n} ({r["n"]})' for n, r in next(iter(res.values())).items())}",
         *[f"- note: {n}" for n in meta["notes"]],
         *[f"- side {s}: {side_label(i)}" for s, i in meta["sides"].items()],
+        *[f"- pair {p}" for p in meta["pairs"]],
         "- synthetic splits only say something about synthetic plans, not real scans",
         "",
     ]
     for side, splits in res.items():
         if len(res) > 1:
-            lines += [f"### candidate {side}", ""]
+            lines += [f"### candidate {side} (baseline {meta['pair_base'][side]})", ""]
         for name, r in splits.items():
             lines += [
                 f"#### {name} (n = {r['n']}, family {r['family']})",
@@ -659,9 +704,16 @@ def main(argv: list[str] | None = None) -> int:
         shutil.rmtree(staging, ignore_errors=True)
         print(f"FAIL: {exc}")
         return 2
-    sides = [s for s in sides_info if s != "base"]
+    pairs = pair_sides(sides_info)
+    keys = [k for k, _, _ in pairs]
     pythons = {s: i["python"] for s, i in sides_info.items()}
     commits = {s: i["commit"] for s, i in sides_info.items()}
+    commits["base"] = commits[base_sides(sides_info)[0]]
+    # bootstrap seeds: per pair, so two seeds with the same commit still draw different resamples
+    seed_commits = {
+        k: commits[c] + ("" if b == "base" else f"/{b}") for k, c, b in pairs
+    } | {"base": commits["base"]}
+    order = list(dict.fromkeys(x for _, c, b in pairs for x in (b, c)))  # base k, cand k, ...
 
     fresh_dir = None
     if any(s["split"] == "fresh" for s in splits):
@@ -675,7 +727,7 @@ def main(argv: list[str] | None = None) -> int:
     tasks = []
     for s in splits:
         for it in split_items(s, fresh_dir, args.limit):
-            for side in ["base", *sides]:  # interleaved: same load on both sides
+            for side in order:  # interleaved: paired baseline and candidate run back to back
                 tasks.append({
                     "split": s["split"], "id": it["id"], "side": side, "python": pythons[side],
                     "input": str(it["input"]), "gt": str(it["gt"]) if it["gt"] else None,
@@ -708,16 +760,16 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     rejected = [r for r in rows if r.get("rejected")]
-    res = compare(rows, splits, sides, commits)
+    res = compare(rows, splits, pairs, seed_commits)
     decisions = {}
-    for side in sides:
+    for side in keys:
         names, label = primary_of(res[side], test_real_pages)
         deltas = {n: r["deltas"] for n, r in res[side].items()}
         kinds = {n: r["kinds"] for n, r in res[side].items()}
         fams = {n: r["family"] for n, r in res[side].items()}
         primary = "primary"
         if names:
-            deltas[primary] = pooled(res[side], names, side, commits)
+            deltas[primary] = pooled(res[side], names, side, seed_commits)
             kinds[primary] = kinds[names[0]]
         dec = decide(
             deltas, kinds, primary=primary,
@@ -734,10 +786,11 @@ def main(argv: list[str] | None = None) -> int:
                 0, RuleResult("integrity", False, f"{len(rejected)} result(s) used GT scale")
             )
         decisions[side] = dec
-    heads = {s: primary_headline(res[s], test_real_pages, s, commits) for s in sides}
-    worse = min(sides, key=lambda s: heads[s][0])
-    rule5 = seed_rule(sides_info, {s: decisions[s].passed for s in sides}, heads)
-    decisions["cand0"].rules.append(rule5)
+    heads = {s: primary_headline(res[s], test_real_pages, s, seed_commits) for s in keys}
+    worse = min(keys, key=lambda s: heads[s][0])
+    pair_info = {k: sides_info[c] for k, c, _ in pairs}  # rule 5 counts the candidate's seeds
+    rule5 = seed_rule(pair_info, {s: decisions[s].passed for s in keys}, heads)
+    decisions[keys[0]].rules.append(rule5)
     passed = all(d.passed for d in decisions.values())
     decision = (
         f"smoke run, no promotion decision (rule {'met' if passed else 'not met'})"
@@ -758,6 +811,8 @@ def main(argv: list[str] | None = None) -> int:
         "workers": args.workers,
         "cores_per_plan": args.cores_per_plan,
         "notes": notes + ([f"{len(rejected)} rejected results"] if rejected else []),
+        "pairs": [pair_label(sides_info, p) for p in pairs],
+        "pair_base": {k: b for k, _, b in pairs},
         "sides": {
             s: {k: v for k, v in i.items() if k not in ("python", "env")}
             for s, i in sides_info.items()
@@ -793,15 +848,15 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
     head = heads[worse][1]
-    if len(sides) > 1:
+    if len(keys) > 1:
         head = f"worse seed {worse}: {head}"
-    split_list = ", ".join(f"{n} ({r['n']})" for n, r in res["cand0"].items())
+    split_list = ", ".join(f"{n} ({r['n']})" for n, r in res[keys[0]].items())
     branch_cell = args.branch if kind == "locked" else f"{args.branch} ({kind})"
     short = "PASS" if decision == "PASS" else "FAIL" if decision == "FAIL" else kind
     append_log(
         args.log,
-        f"| {date} | {kind} | {branch_cell} | {log_cell(sides_info, sides)} "
-        f"| {log_cell(sides_info, ['base'])} "
+        f"| {date} | {kind} | {branch_cell} | {log_cell(sides_info, [c for _, c, _ in pairs])} "
+        f"| {log_cell(sides_info, base_sides(sides_info))} "
         f"| {split_list} | {head} | {short} | {args.job_id} "
         f"({str(out).replace(str(Path.home()), '~')}) |",
     )

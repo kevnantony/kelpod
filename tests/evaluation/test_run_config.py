@@ -371,3 +371,133 @@ def test_locked_run_refuses_uncommitted_config(tmp_path, models, fake_run, monke
         "--workers", "1", "--log", str(tmp_path / "log.md"), "--out", str(tmp_path / "out"),
     ])  # fmt: skip
     assert code == 2 and _records(fake_run["rec"]) == []
+
+
+# --------------------------------------------------------------------------------------------
+# baseline seeds: candidate seed k is paired with baseline seed k (rule 5)
+# --------------------------------------------------------------------------------------------
+
+
+def _sides(base, cand, wt="/c"):
+    """Sides as ``build_sides`` makes them: ``base``/``baseN`` and ``candN`` (seed labels)."""
+    out = {}
+    for n, (name, seed) in enumerate(base):
+        out[name] = {"worktree": "/b", "seed": seed, "sha256": seed and f"{seed:0<64}"}
+    for n, seed in enumerate(cand):
+        out[f"cand{n}"] = {"worktree": wt, "seed": seed, "sha256": seed and f"{seed:0<64}"}
+    return out
+
+
+def test_pair_sides_by_seed_label_position_or_all():
+    two = [("base0", "1"), ("base1", "2")]
+    # same labels, even in another order: seed k against seed k
+    assert le.pair_sides(_sides(two, ["2", "1"])) == [
+        ("cand0", "cand0", "base1"), ("cand1", "cand1", "base0")
+    ]  # fmt: skip
+    # retrained with new labels but the same count: by position
+    assert le.pair_sides(_sides(two, ["7", "8"])) == [
+        ("cand0", "cand0", "base0"), ("cand1", "cand1", "base1")
+    ]  # fmt: skip
+    # counts differ: every candidate seed against every baseline seed (worst pairing counts)
+    got = le.pair_sides(_sides(two, ["1", "2", "3"]))
+    assert len(got) == 6 and ("cand2~base1", "cand2", "base1") in got
+    # classical baseline (no checkpoints) or a classical candidate against a trained baseline
+    assert le.pair_sides(_sides([("base", None)], ["1", "2"])) == [
+        ("cand0", "cand0", "base"), ("cand1", "cand1", "base")
+    ]  # fmt: skip
+    assert le.pair_sides(_sides(two, [None])) == [
+        ("cand0~base0", "cand0", "base0"), ("cand0~base1", "cand0", "base1")
+    ]  # fmt: skip
+
+
+def _rows(split, per_side):
+    """Rows with panels of 60 plans; ``per_side[side]`` = (correct-closed rate, area error)."""
+    from kelpod.evaluation.panel import METRICS
+
+    rows = []
+    for side, (cc, err) in per_side.items():
+        for i in range(60):
+            panel = {m: (0.0 if d > 0 else 0.1) for m, (d, _) in METRICS.items()}
+            panel["correct_closed"] = 1.0 if i < round(cc * 60) else 0.0
+            panel["total_area_error"] = err + (0.001 * (i % 5))
+            panel["runtime_s"] = 5.0
+            rows.append({"split": split, "id": f"p{i}", "side": side, "panel": panel})
+    return rows
+
+
+def _flags(res):
+    from kelpod.evaluation.stats import regression
+
+    return {
+        key: sorted(
+            m for m, d in r["val-x"]["deltas"].items() if regression(d, *r["val-x"]["kinds"][m])
+        )
+        for key, r in res.items()
+    }
+
+
+SPLIT = [{"split": "val-x", "family": "val", "kind": "synth"}]
+
+
+def test_identical_candidate_vs_two_seed_baseline_has_no_flags():
+    # seed 2 of the baseline is worse than seed 1 (0.95 vs 0.80); the candidate is the same code
+    per = {"base0": (0.95, 0.02), "cand0": (0.95, 0.02), "base1": (0.80, 0.06),
+           "cand1": (0.80, 0.06)}  # fmt: skip
+    pairs = le.pair_sides(_sides([("base0", "1"), ("base1", "2")], ["1", "2"]))
+    res = le.compare(_rows("val-x", per), SPLIT, pairs, {"cand0": "a", "cand1": "a", "base": "b"})
+    assert _flags(res) == {"cand0": [], "cand1": []}
+    # the old behaviour (every seed against baseline seed 1 only) flags seed 2
+    old = le.compare(
+        _rows("val-x", per), SPLIT, [("cand0", "cand0", "base0"), ("cand1", "cand1", "base0")],
+        {"cand0": "a", "cand1": "a", "base": "b"},
+    )  # fmt: skip
+    assert _flags(old)["cand1"] != []
+
+
+def test_candidate_worse_on_one_seed_fails_on_that_seed():
+    per = {"base0": (0.95, 0.02), "cand0": (0.95, 0.02), "base1": (0.90, 0.02),
+           "cand1": (0.60, 0.02)}  # fmt: skip
+    pairs = le.pair_sides(_sides([("base0", "1"), ("base1", "2")], ["1", "2"]))
+    res = le.compare(_rows("val-x", per), SPLIT, pairs, {"cand0": "a", "cand1": "a", "base": "b"})
+    flags = _flags(res)
+    assert flags["cand0"] == [] and "correct_closed" in flags["cand1"]
+    heads = {k: le.primary_headline(res[k], 0, k, {"cand0": "a", "cand1": "a", "base": "b"})
+             for k in res}  # fmt: skip
+    info = {k: {"worktree": "/c", "commit": "c" * 40, "args": [], "seed": k, "sha256": k * 64}
+            for k in res}  # fmt: skip
+    r = le.seed_rule(info, {"cand0": True, "cand1": False}, heads)
+    assert r.passed is False and "worse seed: cand1" in r.detail
+
+
+def _run(tmp_path, base, cand, extra=()):
+    log, out = tmp_path / "log.md", tmp_path / "out"
+    code = le.main([
+        "--candidate", str(cand), "--baseline", str(base), "--branch", "eval/x", "--smoke",
+        "--limit", "1", "--workers", "1", "--log", str(log), "--out", str(out), *extra,
+    ])  # fmt: skip
+    return code, log, out
+
+
+def test_end_to_end_baseline_runs_per_seed_interleaved(tmp_path, models, fake_run):
+    cand = _repo(tmp_path / "cand", _config(models))
+    base = _repo(tmp_path / "base", _config(models))  # same checkpoints, same sha256
+    code, log, out = _run(tmp_path, base, cand)
+    assert code == 0
+    recs = _records(fake_run["rec"])
+    assert [r["content"] for r in recs] == ["fake weights 0"] * 2 + ["fake weights 1"] * 2
+    line = log.read_text().splitlines()[-1]
+    h = [m[1][:12] for m in models]
+    assert f"ckpt s0:{h[0]}, s1:{h[1]} | " in line and line.count(f"s0:{h[0]}") == 2
+    md = (out / "comparison.md").read_text()
+    assert "(baseline base0)" in md and "(baseline base1)" in md
+    assert "REGRESSION" not in md
+
+
+def test_end_to_end_unmatched_seeds_fall_back_to_all_pairs(tmp_path, models, fake_run):
+    cand = _repo(tmp_path / "cand", _config(models[:1]).replace("seed = 0", "seed = 9"))
+    base = _repo(tmp_path / "base", _config(models))
+    code, _, out = _run(tmp_path, base, cand)
+    assert code == 0
+    assert len(_records(fake_run["rec"])) == 3  # base0, cand0, base1
+    md = (out / "comparison.md").read_text()
+    assert "candidate cand0~base0" in md and "candidate cand0~base1" in md
