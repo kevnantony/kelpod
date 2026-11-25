@@ -33,6 +33,7 @@ Used by the learned segmentation backend (`training/`, `src/kelpod/segment/learn
 
 | Project | What we use | Licence | Link |
 |---|---|---|---|
+| Kelpod segmenter weights (baseline-v1, 2 seeds, ONNX) | published by this project for the sandbox and reuse | CC BY-NC-SA 4.0 (training data includes CubiCasa5k) | https://huggingface.co/kevinantony/kelpod-seg |
 | CubiCasa5k dataset | 4200 train plans (images + SVG labels) for fine-tuning; val/test splits for evaluation | CC BY-NC 4.0 (Zenodo record: CC BY-NC-SA 4.0) | https://github.com/CubiCasa/CubiCasa5k, https://zenodo.org/records/2613548 |
 | CubiCasa5k model (`hg_furukawa_original` + released weights) | zero-shot baseline; network code vendored in `training/kelpod_train/third_party/cubicasa_hg.py` | CC BY-NC 4.0 | https://github.com/CubiCasa/CubiCasa5k |
 | Swiss Dwellings v3.0.0 | wall/opening/room geometry re-rendered in DIN 1356-1 style | CC BY 4.0 | https://zenodo.org/records/7788422 |

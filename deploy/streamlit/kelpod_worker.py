@@ -6,6 +6,7 @@ Called as ``python kelpod_worker.py <function> <args.pkl> <result.pkl>`` by the 
 
 from __future__ import annotations
 
+import os
 import pickle
 import sys
 import tempfile
@@ -37,17 +38,68 @@ def sample_pdf(seed: int) -> bytes:
 SANDBOX_DPI = 160.0
 
 
+# The learned segmenter's weights are not in git. They are published (CC BY-NC-SA 4.0) on Hugging
+# Face; the sandbox downloads the default checkpoint once and checks its sha256 against
+# kelpod-run.toml, so the hosted app runs the same model as main.
+WEIGHTS_REPO = "https://huggingface.co/kevinantony/kelpod-seg/resolve/main"
+WEIGHTS_CACHE = Path(os.environ.get("KELPOD_CACHE", Path.home() / ".cache" / "kelpod"))
+
+
+def _fetch_published_weights() -> None:
+    """Download the run configuration's first checkpoint (seed 1) when it is not on this machine,
+    verify it, and point KELPOD_SEG_CHECKPOINT at it. Any failure leaves the variable unset."""
+    import hashlib
+    import urllib.request
+
+    from kelpod.runconfig import load_config
+
+    entries = load_config().get("checkpoints") or []
+    if not entries or os.environ.get("KELPOD_SEG_CHECKPOINT"):
+        return
+    entry = entries[0]
+    want = str(entry.get("sha256", ""))
+    name = Path(str(entry["path"])).parent.name + "/model.onnx"  # e.g. v1-s1/model.onnx
+    dest = WEIGHTS_CACHE / (want[:16] or "unverified") / "model.onnx"
+
+    def sha(path: Path) -> str:
+        h = hashlib.sha256()
+        with path.open("rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                h.update(block)
+        return h.hexdigest()
+
+    if not dest.is_file():
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_suffix(".part")
+        req = urllib.request.Request(f"{WEIGHTS_REPO}/{name}",
+                                     headers={"User-Agent": "kelpod-sandbox"})
+        with urllib.request.urlopen(req, timeout=120) as r, tmp.open("wb") as f:
+            for block in iter(lambda: r.read(1 << 20), b""):
+                f.write(block)
+        if want and sha(tmp) != want:
+            tmp.unlink(missing_ok=True)
+            return
+        tmp.replace(dest)
+    os.environ["KELPOD_SEG_CHECKPOINT"] = str(dest)
+
+
 def _segment_backend() -> str:
-    """The learned segmenter (main's default) needs its checkpoint, which is not in git. Use it when
-    the run configuration resolves one; otherwise fall back to the classical segmenter."""
+    """The learned segmenter (main's default) needs its checkpoint. Use the local one from the run
+    configuration, else the published one; fall back to the classical segmenter if neither works."""
     from kelpod.runconfig import CheckpointError, default_segment_backend, resolve_checkpoint
 
     backend = default_segment_backend()
+    if os.environ.get("KELPOD_SANDBOX_CLASSICAL"):  # set by the page to retry after a failed run
+        return "classical"
     if backend == "learned":
         try:
             resolve_checkpoint()
         except (CheckpointError, OSError):
-            return "classical"
+            try:
+                _fetch_published_weights()
+                resolve_checkpoint()
+            except Exception:  # noqa: BLE001 - any download or verify problem: use classical
+                return "classical"
     return backend
 
 
