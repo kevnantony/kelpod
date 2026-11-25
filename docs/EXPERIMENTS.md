@@ -40,6 +40,13 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
   2000 iterations; ~5.6 GPU-h in total. Justification: rule 5 needs two seeds; the longer schedule
   because more varied data needs more iterations (v1 val score was still rising at 40k: to be checked
   in `log.jsonl`), same network, no bigger encoder.
+- **Measured:** CPU builds ~21,000 pages as planned (synth_v2 12,000, swiss_v2 4,178, resplan_v2 4,484, dev/val ~500;
+  Slurm 128929-128936, pascal, ~50 pages/min per 8-CPU job, i.e. about 2x slower than the 3.5 CPU-s per page
+  estimate because the node was shared). GPU: kseg-v2-s1 3.22 GPU-h, kseg-v2-s2 3.28 GPU-h (ampere, 64k iterations),
+  **6.5 GPU-h in total** against 5.6 expected (+16 %: the per-2000-iteration validation on 6 val sets cost more than estimated).
+  Best checkpoints: score (mean wall/window/door IoU over val sets) 0.9140 (s1), 0.9133 (s2). ONNX exports checked against
+  PyTorch (max logit diff 1.3e-5, argmax agreement 1.0). Baseline-v1 on the hard proxy (measured, synthetic): end-to-end
+  correct-closed 0.89 (s1) / 0.87 (s2), mask-level mean IoU 0.941 / 0.943; first proxy 0.942 / 0.943.
 - **Selection:** dev proxy, val-synth (smoke) and the dev-val sets only. test-synth / fresh / test-ood /
   sealed data are not looked at.
 
