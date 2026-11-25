@@ -133,7 +133,7 @@ seed = 1
 ```
 
 - **Absent file = today's defaults.** `locked_eval.py` reads the file from the candidate **and**
-  the baseline worktree. The baseline runs with its first declared checkpoint, if any.
+  the baseline worktree. The baseline runs once per declared checkpoint (see "Baseline seeds").
 - **Part of the commit.** The file is not a protected path: an `exp/*` branch may add or change
   it. A locked run refuses a config that is modified or untracked (smoke and val runs only note
   it). The full text of every config is printed in `comparison.md`.
@@ -154,6 +154,14 @@ seed = 1
   distinct seeds, and the promotion rule must hold for every seed, i.e. the worse one. The
   report shows all seeds; the TEST_LOG line shows the worse seed's headline Δ and the checkpoint
   hashes (`ckpt s0:<12 hex>, s1:<12 hex>`) next to the commits.
+- **Baseline seeds (paired).** The baseline is run once per declared checkpoint too (`base0`,
+  `base1`, ...), also when the candidate keeps the same checkpoints (the code under test differs).
+  Candidate seed k is compared with baseline seed k (paired bootstrap per pair): by `seed` label
+  when the label sets match, else by position when the counts match, else every candidate seed
+  against every baseline seed (the rule must hold for the worst pairing). A baseline without
+  checkpoints (classical) is one side, as before. Per-seed baseline runs double the baseline
+  time; runs are ordered so each baseline seed and its candidate seed run on the same plan
+  back to back. The TEST_LOG line lists the baseline's checkpoints per seed.
 - **Backends** are passed to `locked_runner.py` as `--segment-backend` / `--ocr-backend`, and
   to `convert()` only when declared. `python_project` must be a relative path to a directory with
   a `pyproject.toml`; its `.venv` must import `kelpod` from the worktree (checked).
@@ -186,8 +194,6 @@ not use up the 2-run budget (rule 6).
   storey.
 - **IFC.** Re-opened by the evaluator with ifcopenshell (at least one `IfcWall` and one
   `IfcSpace`), independent of the pipeline's own `reopened_ok`.
-- **Baseline seeds.** The baseline runs one checkpoint (its first declared one), so baseline
-  seed variance is not in the CI. This only matters once `main` itself has a trained model.
 - **Not measured yet:** the OCR panel (dimension-value P/R, dimension-to-wall linking).
   `PipelineResult` exposes no OCR annotations, and the runner may only call the public
   `kelpod.pipeline.convert`.

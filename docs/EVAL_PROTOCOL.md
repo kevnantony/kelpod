@@ -98,7 +98,8 @@ A candidate is promoted only if **all** of the following hold:
    enough for promotion once test-real exists.
 5. **Seed stability.** Trained models are evaluated from at least 2 training seeds, and the rule
    must hold for the **worse** seed. The seeds are the checkpoints declared in the candidate's
-   run config (`kelpod-run.toml`, §6); each is compared with the baseline on its own.
+   run config (`kelpod-run.toml`, §6); each is compared with the baseline's checkpoint of the same seed (the baseline is run
+   once per seed too; unmatched seeds: every pair, the worst pair counts).
 6. **Budget.** At most **2 locked runs per experiment branch**. Further tries need a new branch with a
    new idea, recorded in `docs/EXPERIMENTS.md`. This prevents trying until a lucky draw passes.
 
