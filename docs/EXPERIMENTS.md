@@ -12,7 +12,13 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
 - **Locked run (test-synth 300 + fresh 200, synthetic):** correct-closed +2.0 pp [-0.3, +4.3]
   (test-synth), +3.0 pp [+1.0, +5.5] (fresh, primary): rules 2 and 4 pass. Rule 3 fails: door
   recall Δ CI [-3.3, -1.1] pp (test-synth) and [-4.5, -1.3] pp (fresh). **Not promoted.**
-- **Next:** find the door-recall loss on val/dev data only, fix, then the second locked run.
+- **Fix (4be979b):** opening-to-wall attach tolerance 0.3 m (GeometryParams.opening_wall_tol_m);
+  the chain-decoded dimension fit can move a thin wall >0.2 m from its detected door gap. Val-synth
+  door recall -0.1 pp [-0.3, 0]. Disclosure (agent): while looking for its run folder it listed the
+  per-plan ids of the locked run directory once; not used for any decision.
+- **Locked run 2 of 2:** started 2026-11-25 on the agent node (8 pinned workers).
+- **CPU job for exp/learned-fast:** Slurm 128900, 9 CPUs / 24 GB, <= 4 h, val-synth smoke for both
+  seeds vs main (needs its own node so runtime is not distorted by the din-web locked run).
 
 ## historic-plans (2026-11-24, branch exp/historic-plans @ d4ef811, includes din-web-plans; not gated)
 
