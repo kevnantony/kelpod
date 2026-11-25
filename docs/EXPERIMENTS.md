@@ -24,6 +24,13 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
   (per-class IoU at the deployment setting: ONNX, whole page, 0.65x) for baseline-v1 seeds 1/2 and
   learned-v2 seeds 1/2. Using v1's own options as the held-out part would favour baseline-v1 (it trained
   on them), hence new options.
+- **Hard dev proxy (added after the first one scored 0.94 mean IoU for baseline-v1, too mild):**
+  (a) mask level, 200 pages (`build dev_hard`, seeds 960,000+): unseen font + hatch + damage together,
+  full scan degradation, 150-220 dpi resampling, JPEG Q 20-55; (b) end to end, 100 plans
+  (`kelpod_train.dev_hard`, seeds 950,000+): generator layout and renderer with an unseen font, 45 degree
+  hatching at 3.4-4.5 mm, unseen damage, degrade 0.6-1.2, extra low resolution / JPEG / blur, written as
+  plan.pdf + ground_truth.json and scored by the real pipeline and the eval panel (correct-closed etc.).
+  Only options in no train and no held-out list. Baseline-v1 numbers are measured by CPU jobs 128936-128937.
 - **CPU jobs (no GPU; planned):** page builds on pascal (not node02), 8 CPUs each, about 3.5 CPU-s per
   page measured on 8 pages: synth_v2 12,000 pages (3 jobs), swiss_v2 4,500, resplan_v2 4,500, val
   and dev sets about 400 pages: about 21,400 pages = ~21 CPU-h in total, wall about 40-60 min per job.
