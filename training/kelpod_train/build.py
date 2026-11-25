@@ -95,7 +95,9 @@ def _synth_v2_job(args) -> str:
     name = f"synth_{seed}"
     if (out / f"{name}_lab.png").exists():
         return name
-    if dev:
+    if dev == "hard":
+        from kelpod_train.style_v2 import sample_dev_hard_style as sampler
+    elif dev:
         from kelpod_train.style_v2 import sample_dev_style as sampler
     else:
         from kelpod_train.style_v2 import sample_train_style_v2 as sampler
@@ -105,7 +107,7 @@ def _synth_v2_job(args) -> str:
         return f"ERR {seed}: {traceback.format_exc(limit=2)}"
     if s is None:
         return f"SKIP {name}"
-    s.meta.update(source="dev_proxy" if dev else "synth_v2")
+    s.meta.update(source="dev_proxy" if dev else "synth_v2")  # dev: True or "hard"
     _write(out, name, s.image, s.label, s.meta)
     return name
 
@@ -151,7 +153,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("source", choices=["synth", "swiss", "resplan", "cubicasa",
                                        "synth_v1", "swiss_v1", "resplan_v1",
-                                       "synth_v2", "swiss_v2", "resplan_v2", "dev_proxy"])
+                                       "synth_v2", "swiss_v2", "resplan_v2", "dev_proxy", "dev_hard"])
     ap.add_argument("--out", required=True)
     ap.add_argument("--start", type=int, default=1_000_000)
     ap.add_argument("--n", type=int, default=1000)
@@ -170,8 +172,8 @@ def main() -> None:
     elif a.source == "synth_v1":  # style-randomised (learned-v1); train seeds from 1,100,000
         jobs = [(s, out) for s in range(a.start, a.start + a.n)]
         fn = _synth_v1_job
-    elif a.source in ("synth_v2", "dev_proxy"):  # learned-v2; train seeds from 1,200,000
-        dev = a.source == "dev_proxy"
+    elif a.source in ("synth_v2", "dev_proxy", "dev_hard"):  # learned-v2; train seeds 1,200,000+
+        dev = {"dev_proxy": True, "dev_hard": "hard"}.get(a.source, False)
         jobs = [(s, out, dev) for s in range(a.start, a.start + a.n)]
         fn = _synth_v2_job
     elif a.source == "cubicasa":

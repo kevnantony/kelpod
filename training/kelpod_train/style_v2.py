@@ -162,3 +162,15 @@ def check_not_heldout_v2(st: TrainStyleV2) -> None:
         damage="scan" if st.damage in new_d_all else st.damage,
     )
     V1.check_not_heldout(stand)
+
+
+def sample_dev_hard_style(rng: np.random.Generator) -> TrainStyleV2:
+    """Harder dev-proxy style: unseen font + hatch + damage together (as ``sample_dev_style``) and a
+    stronger scan: full scan degradation, 150-220 dpi resampling, JPEG quality 20-55."""
+    ts = sample_dev_style(rng)
+    ts = dataclasses.replace(
+        ts, scan_degrade=1.0, scan_dpi=float(rng.uniform(150, 220)),
+        jpeg_quality=int(rng.integers(20, 56)), damage_strength=float(rng.uniform(0.6, 1.0)))
+    st = dataclasses.replace(ts, dev=True)
+    check_not_heldout_v2(st)
+    return st
