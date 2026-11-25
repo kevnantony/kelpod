@@ -344,12 +344,22 @@ def build_dataset_split(name: str, *, workers: int = 8, data: Path | None = None
     out.mkdir(parents=True, exist_ok=True)
     with ProcessPoolExecutor(workers) as ex:
         res = list(ex.map(_dataset_job, jobs, chunksize=2))
+    ok = [r for r in res if r]
+    # a candidate that is a near duplicate (pHash <= 4) of a training image is not used: some
+    # CubiCasa5k plans occur in both its train and test lists
+    train_ph = {}
+    for f in sorted((root / "training" / "manifests").glob("*.json")):
+        for e in json.loads(f.read_text()).get("files", []):
+            if e.get("phash"):
+                train_ph[f"{f.stem}/{e['path']}"] = e["phash"]
+    dup = {a for a, _, _ in near_duplicates({r["id"]: r["phash"] for r in ok}, train_ph, 4)}
+    res = [None if (r and r["id"] in dup) else r for r in res]
     items = [r for r in res if r][:n]
     keep = {i["id"] for i in items}
     import shutil
 
-    for r in res:  # candidates beyond the first n successes are not part of the split
-        if r and r["id"] not in keep:
+    for r in ok:  # candidates beyond the first n successes are not part of the split
+        if r["id"] not in keep:
             shutil.rmtree(out / r["id"], ignore_errors=True)
     if len(items) < n:
         raise RuntimeError(f"{name}: only {len(items)} of {n} candidates rendered")
@@ -364,7 +374,8 @@ def build_dataset_split(name: str, *, workers: int = 8, data: Path | None = None
                       "dpi": D.CUBICASA_DPI if ds == "cubicasa" else D.DPI},
         "source": old.get("source"),
         "params": {"candidates": f"sorted by sha256('kelpod-eval/{name}/<id>'), first {n} that "
-                   f"render ({len(res)} tried)",
+                   f"render and are no near duplicate of a training image ({len(res)} tried, "
+                   f"{len(dup)} dropped as near duplicates)",
                    "degrade": f"uniform {DEGRADE_RANGE}, per candidate index, from "
                    f"sha256('kelpod-eval/{name}') (not for CubiCasa: real scans, no degradation)"},
         "heldout_ids": held, "n_items": len(items), "items": items,
