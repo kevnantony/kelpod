@@ -34,10 +34,12 @@ Used by the learned segmentation backend (`training/`, `src/kelpod/segment/learn
 
 | Project | What we use | Licence | Link |
 |---|---|---|---|
+| Kelpod segmenter weights (baseline-v1, 2 seeds, ONNX) | published by this project for the sandbox and reuse | CC BY-NC-SA 4.0 (training data includes CubiCasa5k) | https://huggingface.co/kevinantony/kelpod-seg |
 | CubiCasa5k dataset | 4200 train plans (images + SVG labels) for fine-tuning; val/test splits for evaluation | CC BY-NC 4.0 (Zenodo record: CC BY-NC-SA 4.0) | https://github.com/CubiCasa/CubiCasa5k, https://zenodo.org/records/2613548 |
 | CubiCasa5k model (`hg_furukawa_original` + released weights) | zero-shot baseline; network code vendored in `training/kelpod_train/third_party/cubicasa_hg.py` | CC BY-NC 4.0 | https://github.com/CubiCasa/CubiCasa5k |
 | Swiss Dwellings v3.0.0 | wall/opening/room geometry re-rendered in DIN 1356-1 style | CC BY 4.0 | https://zenodo.org/records/7788422 |
 | ResPlan | vector plans re-rendered in DIN 1356-1 style | data CC BY 4.0, code MIT | https://github.com/m-agour/ResPlan |
+| Swiss Dwellings, ResPlan, CubiCasa5k (evaluation) | frozen `val-*` and `test-ood-*` splits: held-out plans re-rendered (Swiss, ResPlan) or used as real raster pages with SVG-derived ground truth (CubiCasa5k, scale-free scoring), see `eval/README.md`; renderer `src/kelpod/evaluation/vectorplans.py` | as above (CubiCasa5k CC BY-NC 4.0) | as above |
 | ImageNet-pretrained ResNet-34 encoder (torchvision weights via segmentation_models_pytorch) | encoder initialisation | BSD-3-Clause (torchvision) | https://pytorch.org/vision/stable/models.html |
 
 ### Training-only libraries (`training/pyproject.toml`)

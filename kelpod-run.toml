@@ -1,6 +1,6 @@
 # Run configuration of this branch (read by kelpod.runconfig and scripts/locked_eval.py).
-# Final: the two learned-v1 seeds (U-Net ResNet-34, ONNX), run with whole-page inference at 0.65 scale
-# (LearnedSegmenter defaults), see docs/EXPERIMENTS.md "learned-fast". Training manifests: every
+# learned-v2: U-Net ResNet-34 trained with style_v2 randomisation, 64k iterations, 2 seeds (ONNX,
+# whole-page inference at 0.65x, LearnedSegmenter defaults). Training manifests: every
 # training/manifests/*.json (checked by scripts/locked_eval.py --verify-manifests).
 version = 1
 segment_backend = "learned"
@@ -9,10 +9,10 @@ python_project = "."
 
 [[checkpoints]]
 seed = 1
-path = "~/kelpod-models/kelpod-seg/v1-s1/model.onnx"
-sha256 = "6d1b6d39941510a3fae85048cbc7eb860a841d4084d2d5860b870022d48b79bc"
+path = "~/kelpod-models/kelpod-seg/v2-s1/model.onnx"
+sha256 = "a7415f6715ade2ca5e8b79f00b0e7febabfaeea5d71f77f5a756fbddd17e66ba"
 
 [[checkpoints]]
 seed = 2
-path = "~/kelpod-models/kelpod-seg/v1-s2/model.onnx"
-sha256 = "9ed1bed6a149f23a778dc9e8987e4be643abadbed15222c4600e134844f01a07"
+path = "~/kelpod-models/kelpod-seg/v2-s2/model.onnx"
+sha256 = "aaa7ab7a14486a7e9e63dac8e721db26d1bfd012122118e898e8571ac31034d4"

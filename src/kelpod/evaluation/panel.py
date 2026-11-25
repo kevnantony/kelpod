@@ -54,6 +54,7 @@ METRICS: dict[str, tuple[int, str]] = {
     "room_precision": (+1, "rate"),
     "room_recall": (+1, "rate"),
     "room_area_error": (-1, "error"),
+    "room_count_error": (-1, "error"),
     "total_area_error": (-1, "error"),
     "wall_precision": (+1, "score"),
     "wall_recall": (+1, "score"),
@@ -326,6 +327,103 @@ def envelope_errors(pred: PlanGraph, gt: PlanGraph) -> dict[str, float | None]:
     }
 
 
+def _room_count_error(pred: PlanGraph, gt: PlanGraph) -> float | None:
+    """|predicted rooms - GT rooms| / GT rooms, capped at 1."""
+    return _cap(abs(len(pred.rooms) - len(gt.rooms)) / len(gt.rooms)) if gt.rooms else None
+
+
+SCALEFREE_NA = (
+    "room_area_error", "total_area_error", "wall_precision", "wall_recall", "wall_f1",
+    "thickness_class_acc", "door_precision", "door_recall", "window_precision", "window_recall",
+    "sill_error_m", "edit_cost", "ext_wall_length_error", "window_facade_error",
+    "gross_volume_error",
+)  # fmt: skip
+"""Panel metrics that need a metric scale: ``None`` on scale-free splits (CubiCasa5k)."""
+
+
+def similarity_align(pred: PlanGraph, gt: PlanGraph, iters: int = 3) -> PlanGraph | None:
+    """Scale and translate the predicted rooms onto the GT rooms (no rotation: both come from
+    the same upright page). Scale = sqrt of the ratio of total room areas, translation = centroid
+    of the room union, then ``iters`` refinements by the median offset of matched room
+    centroids. ``None`` if either side has no valid room."""
+    pr = [Polygon(r.polygon) for r in pred.rooms if _valid_room(r.polygon)]
+    gr = [Polygon(r.polygon) for r in gt.rooms if _valid_room(r.polygon)]
+    if not pr or not gr:
+        return None
+    from shapely import affinity
+
+    s = math.sqrt(sum(g.area for g in gr) / sum(p.area for p in pr))
+    cp, cg = unary_union(pr).centroid, unary_union(gr).centroid
+    dx, dy = cg.x - s * cp.x, cg.y - s * cp.y
+    for _ in range(iters):
+        mp = [affinity.translate(affinity.scale(p, s, s, origin=(0, 0)), dx, dy) for p in pr]
+        iou = np.zeros((len(mp), len(gr)))
+        for i, p in enumerate(mp):
+            for j, g in enumerate(gr):
+                if p.intersects(g):
+                    inter = p.intersection(g).area
+                    iou[i, j] = inter / (p.area + g.area - inter)
+        rows, cols = linear_sum_assignment(-iou)
+        pairs = [(r, c) for r, c in zip(rows, cols, strict=True) if iou[r, c] > 0.1]
+        if not pairs:
+            break
+        dx += float(np.median([gr[c].centroid.x - mp[r].centroid.x for r, c in pairs]))
+        dy += float(np.median([gr[c].centroid.y - mp[r].centroid.y for r, c in pairs]))
+    out = pred.model_copy(deep=True)
+    out.rooms = [
+        r.model_copy(update={"polygon": [(s * x + dx, s * y + dy) for x, y in r.polygon]})
+        for r in out.rooms
+    ]
+    return out
+
+
+def scalefree_crash_panel(gt: PlanGraph) -> dict[str, float | None]:
+    out = {k: None for k in METRICS}
+    out.update(
+        correct_closed=0.0, closed=0.0, room_iou=0.0, room_precision=0.0, room_recall=0.0,
+        room_count_error=ERROR_CAP, crash=1.0, ifc_fail=1.0, runtime_s=None,
+    )  # fmt: skip
+    return out
+
+
+def scalefree_panel(
+    pred: PlanGraph | None,
+    gt: PlanGraph,
+    *,
+    runtime_s: float | None = None,
+    ifc_ok: bool | None = None,
+) -> dict[str, float | None]:
+    """Panel for plans without a metric scale (CubiCasa5k): every metric that needs metres is
+    ``None`` (``SCALEFREE_NA``). Rooms are compared after :func:`similarity_align`. Correct-closed
+    drops the area condition (the aligned areas are equal by construction): closed, every GT room
+    matched with IoU >= 0.85, and the room count equal."""
+    if pred is None:
+        return scalefree_crash_panel(gt)
+    closed = closure_metrics(pred).is_closed
+    out: dict[str, float | None] = {k: None for k in METRICS}
+    out.update(
+        closed=float(closed), crash=0.0, ifc_fail=0.0 if ifc_ok else 1.0, runtime_s=runtime_s,
+        room_count_error=_room_count_error(pred, gt),
+    )  # fmt: skip
+    al = similarity_align(pred, gt)
+    if al is None:
+        out.update(correct_closed=0.0, room_iou=0.0, room_precision=0.0, room_recall=0.0)
+        return out
+    ious = room_ious(al, gt)
+    pr = [r for r in al.rooms if _valid_room(r.polygon)]
+    # precision / recall at IoU 0.5 as in compare_to_ground_truth (room_iou_threshold default)
+    cmp = compare_to_ground_truth(al, gt, align="none", wall_tol_m=WALL_TOL_M)
+    out.update(
+        correct_closed=float(
+            closed and min(ious) >= CORRECT_ROOM_IOU and len(pred.rooms) == len(gt.rooms)
+        ),
+        room_iou=float(sum(ious) / len(gt.rooms)),
+        room_precision=cmp.room_precision if pr else 0.0,
+        room_recall=cmp.room_recall,
+    )
+    return out
+
+
 def crash_panel(gt: PlanGraph) -> dict[str, float | None]:
     """Scores of a plan whose run crashed or was rejected."""
     out: dict[str, float | None] = {k: 0.0 for k, (d, _) in METRICS.items() if d > 0}
@@ -375,6 +473,7 @@ def plan_panel(
         "room_recall": cmp.room_recall,
         # no matched room: the room area is entirely wrong
         "room_area_error": _cap(cmp.room_area_error if cmp.room_area_error is not None else 1.0),
+        "room_count_error": _room_count_error(pred, gt),
         "total_area_error": _cap(total_err),
         "wall_precision": cmp.wall_precision,
         "wall_recall": cmp.wall_recall,
@@ -429,4 +528,7 @@ __all__ = [
     "plan_panel",
     "proxy_panel",
     "room_ious",
+    "scalefree_panel",
+    "SCALEFREE_NA",
+    "similarity_align",
 ]

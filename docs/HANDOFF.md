@@ -176,6 +176,10 @@ tell the user in README status which of the 3 plans now work.
 - [x] baseline-v0 on main (40546a9, 2026-11-24): MVP + eval protocol v1 merged, tagged, pushed.
 - [x] baseline-v1 on main (2026-11-25): learned segmenter default (exp/learned-fast), locked run
   PASS (correct-closed fresh 0.305 -> 0.600, worse seed; synthetic).
+- [x] eval (2026-11-25): seed pairing; test-ood + val-* dataset splits frozen (primary = test-ood
+  pooled + fresh). A full locked run now takes ~4.5 h on 8 physical cores: submit gates as Slurm
+  jobs with -c 16. Closed experiments: din-web-v2 (2 runs, gain too small), ocr-fast (negative).
+  Waiting for the founders: historic-v2 (real-plan gains, no real split), held-out style vs poché.
 - [ ] Continuous improvement (approved 2026-11-23; never checked, runs until a person stops the loop):
   2026-11-24 14:10: eval/learned-runner and a load-aware OCR timing test merged into main.
   Historic plans (top priority) measured: classical 9/1/2 rooms, learned (r34) 4/1/0 rooms, none

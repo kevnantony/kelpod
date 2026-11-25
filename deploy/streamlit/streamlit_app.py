@@ -44,13 +44,14 @@ def _lock() -> threading.Lock:
     return threading.Lock()
 
 
-def _in_child(fn_name: str, *args):
+def _in_child(fn_name: str, *args, env: dict | None = None):
     """Run kelpod_worker.<fn_name> in a fresh Python process (one at a time); return its result."""
     with _lock(), tempfile.TemporaryDirectory() as d:
         args_path, out_path = Path(d) / "args.pkl", Path(d) / "out.pkl"
         args_path.write_bytes(pickle.dumps(args))
-        proc = subprocess.run([sys.executable, str(WORKER), fn_name, str(args_path), str(out_path)],
-                              capture_output=True, text=True, timeout=300)
+        cmd = [sys.executable, str(WORKER), fn_name, str(args_path), str(out_path)]
+        proc = subprocess.run(cmd, env={**os.environ, **(env or {})}, capture_output=True,
+                              text=True, timeout=300)
         if proc.returncode != 0:
             lines = proc.stderr.strip().splitlines()
             raise RuntimeError(lines[-1] if lines else "worker failed")
@@ -65,7 +66,13 @@ def _sample_pdf(seed: int) -> bytes:
 @st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def _convert(data: bytes, suffix: str, schema: str, plan_scale: float, height: float) -> dict:
     """Cached by content, so repeating a plan costs nothing."""
-    return _in_child("convert_bytes", data, suffix, schema, plan_scale, height)
+    try:
+        return _in_child("convert_bytes", data, suffix, schema, plan_scale, height)
+    except RuntimeError:
+        # The learned model needs more memory than the classical segmenter (about 1.2 vs 0.9 GB
+        # peak); if its run dies on the free tier, retry once with the classical segmenter.
+        return _in_child("convert_bytes", data, suffix, schema, plan_scale, height,
+                         env={"KELPOD_SANDBOX_CLASSICAL": "1"})
 
 
 st.title("Kelpod sandbox")
@@ -117,8 +124,8 @@ except Exception as exc:  # noqa: BLE001 - show any pipeline failure to the user
 
 s = out["stats"]
 if out.get("segmenter") == "classical":
-    st.info("This sandbox uses the classical segmenter: the learned model's weights are not "
-            "deployed here yet, so results are below what Kelpod's main branch reaches.")
+    st.info("This run used the classical segmenter because the learned model's weights could "
+            "not be loaded here, so results are below what Kelpod's main branch reaches.")
 if out["closed"]:
     st.success(f"**Closed model.** {s['rooms']} rooms, {s['walls']} walls, {s['doors']} doors and "
                f"{s['windows']} windows; every wall end meets another wall.")

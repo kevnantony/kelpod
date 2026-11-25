@@ -9,7 +9,7 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-25 CET (afternoon). Numbers are synthetic unless marked "real"._
+_Last updated: 2026-11-25 14:30 CET. Numbers are synthetic unless marked "real"._
 
 **Done**
 - **`baseline-v1` on `main`: the learned segmenter is the default.** On the held-out synthetic test
@@ -30,8 +30,14 @@ _Last updated: 2026-11-25 CET (afternoon). Numbers are synthetic unless marked "
   yet.** Tafel 71 plan 2 comes closest.
 
 **Doing now**
-- `eval/seed-pairing`: fixing an evaluation flaw. The baseline was only run with its first
-  training seed, so identical code looked worse on seed 2.
+- `exp/learned-v2`: the learned segmenter is being retrained on a wider set of drawing styles
+  (2 seeds, on the cluster GPUs since about 15:30).
+- Done today:
+  - New out-of-distribution test sets (Swiss Dwellings, ResPlan, CubiCasa5k) are frozen and now
+    count for promotion. The current model closes almost none of them: correct-closed 0 % on the
+    validation sets, room IoU 0.14-0.62.
+  - The evaluation now compares each training seed with the same baseline seed.
+  - OCR speed-up: negative result.
 
 **Questions for you**
 - **How should real-plan improvements be promoted?** `exp/historic-v2` clearly helps your real
@@ -42,6 +48,12 @@ _Last updated: 2026-11-25 CET (afternoon). Numbers are synthetic unless marked "
     plans.
 
   Until you decide, the branch stays unmerged.
+- **Conflict between the protocol and historic plans.** The held-out synthetic test style uses solid
+  (poché) walls and cross-hatching, so training may never use them. Your historic plans are drawn
+  exactly like that, so the learned segmenter is forbidden from learning the style it needs most.
+  Proposal: retire that test style (EVAL_PROTOCOL §7 allows rotating held-out sets), define a new
+  held-out style (e.g. other fonts and damage profiles), freeze a new test-synth, and allow solid
+  walls in training. That is an eval change: I would do it on an `eval/*` branch only with your OK.
 - May the model weights (98 MB) be published (GitHub release / Hugging Face, non-commercial note
   because of CubiCasa5k)? Then the sandbox gets the learned segmenter.
 - The +25 % runtime rule: keep it, or rely only on "p95 under 180 s"?

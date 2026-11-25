@@ -49,6 +49,13 @@ the log is audited.
 - Near duplicates are checked with a perceptual hash against all test splits before a new training
   source is used.
 
+Frozen sizes (2026-11-25, `eval/README.md` has the renderer and ground-truth details): val-swiss,
+val-resplan, val-cubicasa 100 each; test-ood-swiss 150, test-ood-resplan 150, test-ood-cubicasa 200
+(sized from the runtime budget; the CubiCasa5k lists have 399 plans, 4 near duplicates of training
+images were dropped). CubiCasa5k has no metric scale, so it is scored scale-free: the metrics that
+need metres are n/a there and room comparison uses a similarity alignment. Rule 4 counts
+test-ood once, pooled over its three splits.
+
 ## 3. Metrics (a panel, never a single number)
 
 For each split, the table reports the following. "Correct" is defined by the headline metric below.
@@ -98,7 +105,8 @@ A candidate is promoted only if **all** of the following hold:
    enough for promotion once test-real exists.
 5. **Seed stability.** Trained models are evaluated from at least 2 training seeds, and the rule
    must hold for the **worse** seed. The seeds are the checkpoints declared in the candidate's
-   run config (`kelpod-run.toml`, §6); each is compared with the baseline on its own.
+   run config (`kelpod-run.toml`, §6); each is compared with the baseline's checkpoint of the same seed (the baseline is run
+   once per seed too; unmatched seeds: every pair, the worst pair counts).
 6. **Budget.** At most **2 locked runs per experiment branch**. Further tries need a new branch with a
    new idea, recorded in `docs/EXPERIMENTS.md`. This prevents trying until a lucky draw passes.
 
