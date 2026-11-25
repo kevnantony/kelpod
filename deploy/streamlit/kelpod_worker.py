@@ -37,6 +37,20 @@ def sample_pdf(seed: int) -> bytes:
 SANDBOX_DPI = 160.0
 
 
+def _segment_backend() -> str:
+    """The learned segmenter (main's default) needs its checkpoint, which is not in git. Use it when
+    the run configuration resolves one; otherwise fall back to the classical segmenter."""
+    from kelpod.runconfig import CheckpointError, default_segment_backend, resolve_checkpoint
+
+    backend = default_segment_backend()
+    if backend == "learned":
+        try:
+            resolve_checkpoint()
+        except (CheckpointError, OSError):
+            return "classical"
+    return backend
+
+
 def convert_bytes(data: bytes, suffix: str, schema: str, plan_scale: float, height: float) -> dict:
     """Run the Kelpod pipeline on an uploaded file and return everything the page shows."""
     import cv2
@@ -49,13 +63,15 @@ def convert_bytes(data: bytes, suffix: str, schema: str, plan_scale: float, heig
         src = Path(d) / f"plan{suffix}"
         src.write_bytes(data)
         ifc = Path(d) / "model.ifc"
+        backend = _segment_backend()
         res = convert(src, ifc, schema=schema, dpi=SANDBOX_DPI, plan_scale=plan_scale,
-                      storey_height_m=height)
+                      storey_height_m=height, segment_backend=backend)
         rep = res.graph.report
         counts = res.export.entity_counts if res.export else {}
         html = write_viewer(src, ifc, Path(d) / "viewer.html", title="", note="", stats={})
         _, png = cv2.imencode(".png", load(src, dpi=110)[0])
         return {
+            "segmenter": backend,
             "closed": bool(rep and rep.is_closed),
             "node_closure": rep.node_closure if rep else None,
             "dangling": len(rep.dangling_nodes) if rep else None,
