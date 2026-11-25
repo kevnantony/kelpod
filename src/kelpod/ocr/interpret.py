@@ -298,10 +298,12 @@ def _interior_lines(dims, items, ink, notes):
 
 
 def annotate(
-    items: list[TextItem], ink: np.ndarray | None, backend: str, *, decode: str = "chain"
+    items: list[TextItem], ink: np.ndarray | None, backend: str, *, decode: str = "greedy"
 ) -> OcrAnnotations:
-    """``decode="chain"`` (default) re-decodes the dimension labels jointly over their chains
-    (:mod:`kelpod.ocr.chains`); ``"greedy"`` keeps one independent reading per label (v0)."""
+    """``decode="chain"`` re-decodes the dimension labels jointly over their chains
+    (:mod:`kelpod.ocr.chains`); ``"greedy"`` (default) keeps one independent reading per label.
+    Chain decoding is off by default: on synthetic val plans it moved the exterior wall length by
+    ~0.05 % (rule-3 regression, docs/EXPERIMENTS.md historic-v2) and the real plans do not need it."""
     items = split_merged_items(items)
     dims, sills, stamps, notes = interpret(items, ink, decode=decode)
     if ink is not None:

@@ -388,6 +388,13 @@ Tried and dropped: snapping partitions across 1.2 m door gaps in massive walls (
   closed rooms, and then every bridge that is not needed for that gain is dropped (leave-one-out).
   A first version with gaps limited to 1.3 m barely changed the plans (real, villa 7 -> 9 rooms,
   Tafel unchanged), because most gaps are dropouts, not doors.
+- **Synthetic guard, run 1 (val-synth 200, smoke, job 128911):** seed 1 correct-closed 0.945 ->
+  0.960, seed 2 0.945 -> 0.930 (CIs include 0), but rule 3 flagged `ext_wall_length_error` and
+  `gross_volume_error` (absolute 0.0001 -> 0.0002, i.e. 0.01 % -> 0.02 % of the wall length).
+  Ablation on val plans: door gaps are not the cause (identical with the switch off); the chain
+  decoding of the dimension labels (from din-web-v2 / ocr-chainsum) moves the exterior wall length by
+  ~0.05 %. Fix: `ocr.interpret.annotate` defaults to `decode="greedy"` (chain decoding stays
+  available as an option); the real-plan numbers below are identical with either setting.
 - **Real, 3 hand-labelled plans (dev only, agent-made labels +-5 px, not a benchmark).**
   Wall F1 / room IoU with the label scale ("oracle": geometry only) / scale error;
   main = baseline-v1, branch = this branch:
