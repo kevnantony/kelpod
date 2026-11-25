@@ -174,6 +174,8 @@ tell the user in README status which of the 3 plans now work.
   the size limit is checked while reading, so a reverse proxy should also cap request size.
 - [x] Final report in `docs/MVP_REPORT.md`: what works, what doesn't, what needs real plans (2026-11-24).
 - [x] baseline-v0 on main (40546a9, 2026-11-24): MVP + eval protocol v1 merged, tagged, pushed.
+- [x] baseline-v1 on main (2026-11-25): learned segmenter default (exp/learned-fast), locked run
+  PASS (correct-closed fresh 0.305 -> 0.600, worse seed; synthetic).
 - [ ] Continuous improvement (approved 2026-11-23; never checked, runs until a person stops the loop):
   2026-11-24 14:10: eval/learned-runner and a load-aware OCR timing test merged into main.
   Historic plans (top priority) measured: classical 9/1/2 rooms, learned (r34) 4/1/0 rooms, none

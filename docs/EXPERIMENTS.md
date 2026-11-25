@@ -2,6 +2,22 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## learned-fast -> PROMOTED as baseline-v1 (2026-11-25)
+
+- **Change:** learned-v1 U-Net (2 seeds) as the default segmenter; whole-page ONNX inference at
+  0.65x scale instead of 1024 px tiles (network ~35 s -> ~3 s per page on 1 core). 0 GPU-h (no
+  retraining). CPU jobs: Slurm 128900 (val smoke, 9 CPUs, ~1 h), 128901 (gate, 9 CPUs, ~2.5 h).
+- **Val-synth (200, synthetic):** correct-closed 0.720 -> 0.945 (s1) / 0.920 (s2); edit cost
+  -81 % / -79 %; runtime +21 % / +20 %.
+- **Locked run 1 (test-synth 300 held-out style + fresh 200, synthetic), worse seed s2:**
+  correct-closed fresh 0.305 -> 0.600 (+29.5 pp [+21.5, +37.5]), test-synth 0.267 -> 0.537;
+  room IoU +0.135; door recall +0.13; edit cost -62 to -72 %; runtime median +18 to +28 %
+  (s1 fresh +27.7 % [+21.3, +35.3]: point estimate above +25 %, not flagged because the CI is not
+  entirely above). Rules 1-6 pass. **Promoted: main = baseline-v1.**
+- **Caveat:** the checkpoints live outside git (~/kelpod-models); the sandbox falls back to the
+  classical segmenter until the weights are published (needs the founders' OK; training data
+  includes CubiCasa5k, CC BY-NC).
+
 ## din-web-v2 (2026-11-25, branch exp/din-web-v2, locked run 1 of 2: FAIL on door recall only)
 
 - **Change vs din-web-plans:** footprint guard fixed (in the partial-footprint case only wall and
