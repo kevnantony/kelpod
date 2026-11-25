@@ -9,7 +9,7 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-25 CET (evening). Numbers are synthetic unless marked "real"._
+_Last updated: 2026-11-25 16:30 CET. Numbers are synthetic unless marked "real"._
 
 **Done**
 - **`baseline-v1` on `main`: the learned segmenter is the default.** On the held-out synthetic test
@@ -30,10 +30,14 @@ _Last updated: 2026-11-25 CET (evening). Numbers are synthetic unless marked "re
   yet.** Tafel 71 plan 2 comes closest.
 
 **Doing now**
-- `exp/learned-v2`: learned segmenter trained on a wider set of drawing styles (more fonts,
-  hatchings, scan damage), 2 seeds. The training data is being built.
-- Done today: the evaluation now compares each training seed with the same seed of the baseline
-  (merged). OCR speed-up (`exp/ocr-fast`): negative, every faster variant lost dimension recall.
+- `exp/learned-v2`: the learned segmenter is being retrained on a wider set of drawing styles
+  (2 seeds, on the cluster GPUs since about 15:30).
+- Done today:
+  - New out-of-distribution test sets (Swiss Dwellings, ResPlan, CubiCasa5k) are frozen and now
+    count for promotion. The current model closes almost none of them: correct-closed 0 % on the
+    validation sets, room IoU 0.14-0.62.
+  - The evaluation now compares each training seed with the same baseline seed.
+  - OCR speed-up: negative result.
 
 **Questions for you**
 - **How should real-plan improvements be promoted?** `exp/historic-v2` clearly helps your real
