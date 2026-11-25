@@ -395,6 +395,16 @@ Tried and dropped: snapping partitions across 1.2 m door gaps in massive walls (
   decoding of the dimension labels (from din-web-v2 / ocr-chainsum) moves the exterior wall length by
   ~0.05 %. Fix: `ocr.interpret.annotate` defaults to `decode="greedy"` (chain decoding stays
   available as an option); the real-plan numbers below are identical with either setting.
+- **Synthetic guard, run 2 (val-synth 200, smoke, job 128913, after the fix; panel main vs branch):**
+  seed 1: correct-closed 0.945 -> 0.945, closed 0.955 -> 0.955, room IoU 0.9721 -> 0.9739,
+  wall F1 0.9988 -> 0.9988, door P/R 1.000 -> 1.000, edit cost 0.78 -> 0.76, runtime median
+  27.3 -> 27.8 s; rule 3: no flag. Seed 2: correct-closed 0.945 -> 0.920, room IoU 0.9721 -> 0.9652,
+  rule 3 flags `ext_wall_length_error` / `gross_volume_error` (+40 %, absolute 0.0001 -> 0.0001 /
+  0.0002 -> 0.0003). Control (job 128920, main as candidate, same baseline): main's own seed 2
+  gives correct-closed 0.920, room IoU 0.9633 and the same flags (+41 %, plus `room_area_error`),
+  so the seed-2 flags come from the seed-2 checkpoint against a seed-1 baseline, not from this
+  branch (the branch is better than the control on every one of them). The lead's promotion run
+  decides how rule 3 treats that.
 - **Real, 3 hand-labelled plans (dev only, agent-made labels +-5 px, not a benchmark).**
   Wall F1 / room IoU with the label scale ("oracle": geometry only) / scale error;
   main = baseline-v1, branch = this branch:
