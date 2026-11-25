@@ -26,6 +26,7 @@ from kelpod.contracts import (
 )
 
 from .checks import check
+from .doorgap import close_door_gaps
 from .fit import DimM, fit_dimensions
 from .graph import (
     GraphBuilder,
@@ -226,6 +227,12 @@ def _run(
     free_segs = [Seg(frame.correct(w.p0), frame.correct(w.p1), w.t, w.kind) for w in free]
     segs += snap_free(free_segs, segs, prm.free_snap_m)
     segs = node_segments(segs, eps=prm.node_tol_m / 2)
+    if prm.close_door_gaps:
+        segs, door_gaps = close_door_gaps(segs, prm, issues)
+        if door_gaps:
+            segs = node_segments(segs, eps=prm.node_tol_m / 2)
+    else:
+        door_gaps = []
 
     gb = GraphBuilder(segs, prm)
     n_spurs = gb.remove_spurs()
@@ -252,7 +259,7 @@ def _run(
     all_openings = [
         OpeningM(o.kind, frame.correct(o.p0), frame.correct(o.p1), o.synthetic)
         for o in openings_m + synthetic
-    ]
+    ] + door_gaps
     sills = [(s.value_m, frame.to_m(s.anchor)) for s in ocr.sill_heights if _finite(*s.anchor)]
     openings = attach_openings(all_openings, nodes, walls, sills, prm, issues)
 

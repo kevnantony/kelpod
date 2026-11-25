@@ -48,6 +48,12 @@ class GeometryParams:
     """Measured thickness snaps to the nearest standard one within max(2 cm, 10 %)."""
     min_thickness_m: float = 0.04
 
+    # door gaps in solid walls (see doorgap.py)
+    close_door_gaps: bool = True
+    door_gap_min_m: float = 0.55
+    door_gap_max_m: float = 1.30
+    door_gap_max_candidates: int = 80
+
     # junctions
     end_tol_min_m: float = 0.25
     end_tol_factor: float = 0.75
