@@ -16,7 +16,12 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
   the chain-decoded dimension fit can move a thin wall >0.2 m from its detected door gap. Val-synth
   door recall -0.1 pp [-0.3, 0]. Disclosure (agent): while looking for its run folder it listed the
   per-plan ids of the locked run directory once; not used for any decision.
-- **Locked run 2 of 2:** started 2026-11-25 on the agent node (8 pinned workers).
+- **Locked run 2 of 2 (2026-11-25):** rule 3 now passes (door recall test-synth -2.0 pp
+  [-3.2, -0.9], fresh -1.9 pp [-3.9, 0.0]; runtime +5-7 %). Rule 2 FAILS: fresh correct-closed
+  +1.5 pp [-1.0, +4.0] (test-synth +2.3 pp [0.0, +5.0]); room IoU +0.009 [-0.004, +0.021].
+  **Not promoted; branch budget used, branch closed.** The gain is real but small; the run-to-run
+  difference on fresh (+3.0 vs +1.5 pp) shows its noise. Parts (upscaling, footprint guard,
+  attach tolerance, chain OCR) can return inside a branch with a new idea.
 - **CPU job for exp/learned-fast:** Slurm 128900, 9 CPUs / 24 GB, <= 4 h, val-synth smoke for both
   seeds vs main (needs its own node so runtime is not distorted by the din-web locked run).
 
