@@ -13,6 +13,13 @@ options only, see ``style_v1``)::
     uv run python -m kelpod_train.build swiss_v1 --out ~/kelpod-data/train/swiss_v1 --start 5000000 --n 3000
     uv run python -m kelpod_train.build resplan_v1 --out ~/kelpod-data/train/resplan_v1 --start 6000000 --n 3000
 
+learned-v2 (``style_v2``; dev-proxy pages use seeds 930,000+, never trained on)::
+
+    uv run python -m kelpod_train.build synth_v2 --out ~/kelpod-data/train/synth_v2 --start 1200000 --n 12000
+    uv run python -m kelpod_train.build swiss_v2 --out ~/kelpod-data/train/swiss_v2 --start 7000000 --n 4500
+    uv run python -m kelpod_train.build resplan_v2 --out ~/kelpod-data/train/resplan_v2 --start 8000000 --n 4500
+    uv run python -m kelpod_train.build dev_proxy --out ~/kelpod-data/dev/proxy-v2 --start 930000 --n 200
+
 Seeds >= 1,000,000 are training plans; the held-out synthetic test seeds are 100000-100049
 (see ``kelpod_train.evaluate``), so they never overlap.
 """
@@ -71,20 +78,53 @@ def _synth_v1_job(args) -> str:
     return name
 
 
+def _sampler(version: int):
+    if version == 2:
+        from kelpod_train.style_v2 import sample_train_style_v2
+
+        return sample_train_style_v2
+    return None
+
+
+def _synth_v2_job(args) -> str:
+    """learned-v2: style_v2 sampler (more fonts / hatch angles / damage kinds) on synth geometry.
+    ``dev=True``: dev-proxy styles (options reserved from every training run)."""
+    seed, out, dev = args
+    from kelpod_train.render_v1 import styled_sample, synth_vector_plan
+
+    name = f"synth_{seed}"
+    if (out / f"{name}_lab.png").exists():
+        return name
+    if dev:
+        from kelpod_train.style_v2 import sample_dev_style as sampler
+    else:
+        from kelpod_train.style_v2 import sample_train_style_v2 as sampler
+    try:
+        s = styled_sample(synth_vector_plan(seed), seed=seed, sampler=sampler)
+    except Exception:  # noqa: BLE001
+        return f"ERR {seed}: {traceback.format_exc(limit=2)}"
+    if s is None:
+        return f"SKIP {name}"
+    s.meta.update(source="dev_proxy" if dev else "synth_v2")
+    _write(out, name, s.image, s.label, s.meta)
+    return name
+
+
 def _vector_v1_job(args) -> str:
-    kind, idx, plan, out, seed = args
+    kind, idx, plan, out, seed, *rest = args
+    version = rest[0] if rest else 1
     from kelpod_train.render_v1 import styled_sample
 
     name = f"{kind}_{idx}"
     if (out / f"{name}_lab.png").exists():
         return name
     try:
-        s = styled_sample(plan, seed=seed)
+        s = styled_sample(plan, seed=seed, sampler=_sampler(version))
     except Exception:  # noqa: BLE001
         return f"ERR {name}: {traceback.format_exc(limit=2)}"
     if s is None:
         return f"SKIP {name}"
-    s.meta.update(source=f"{kind}_v1", index=idx)
+    s.meta.update(source=f"{kind}_v{version}", index=idx)
     _write(out, name, s.image, s.label, s.meta)
     return name
 
@@ -110,7 +150,8 @@ def _vector_job(args) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("source", choices=["synth", "swiss", "resplan", "cubicasa",
-                                       "synth_v1", "swiss_v1", "resplan_v1"])
+                                       "synth_v1", "swiss_v1", "resplan_v1",
+                                       "synth_v2", "swiss_v2", "resplan_v2", "dev_proxy"])
     ap.add_argument("--out", required=True)
     ap.add_argument("--start", type=int, default=1_000_000)
     ap.add_argument("--n", type=int, default=1000)
@@ -129,20 +170,30 @@ def main() -> None:
     elif a.source == "synth_v1":  # style-randomised (learned-v1); train seeds from 1,100,000
         jobs = [(s, out) for s in range(a.start, a.start + a.n)]
         fn = _synth_v1_job
+    elif a.source in ("synth_v2", "dev_proxy"):  # learned-v2; train seeds from 1,200,000
+        dev = a.source == "dev_proxy"
+        jobs = [(s, out, dev) for s in range(a.start, a.start + a.n)]
+        fn = _synth_v2_job
     elif a.source == "cubicasa":
         from kelpod_train.datasets.cubicasa import build_split
 
         build_split(Path(a.data) / "cubicasa5k" / "cubicasa5k", a.split, out, workers=a.workers)
         return
     else:
-        base = a.source.removesuffix("_v1")
+        version = 2 if a.source.endswith("_v2") else 1
+        base = a.source.removesuffix("_v1").removesuffix("_v2")
         if base == "swiss":
             from kelpod_train.datasets.swiss import iter_plans
         else:
             from kelpod_train.datasets.resplan import iter_plans
         plans = list(iter_plans(Path(a.data), split=a.split, limit=a.n))
-        jobs = [(base, pid, plan, out, a.start + i) for i, (pid, plan) in enumerate(plans)]
-        fn = _vector_v1_job if a.source.endswith("_v1") else _vector_job
+        if a.source.endswith(("_v1", "_v2")):
+            jobs = [(base, pid, plan, out, a.start + i, version)
+                    for i, (pid, plan) in enumerate(plans)]
+            fn = _vector_v1_job
+        else:
+            jobs = [(base, pid, plan, out, a.start + i) for i, (pid, plan) in enumerate(plans)]
+            fn = _vector_job
     ok = bad = 0
     with ProcessPoolExecutor(a.workers) as ex:
         for i, r in enumerate(ex.map(fn, jobs, chunksize=4)):

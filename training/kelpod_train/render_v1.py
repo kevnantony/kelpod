@@ -66,7 +66,7 @@ class StyledPlan(VectorPlan):
 
 class _StyledCanvas(_Canvas):
     def __init__(self, w: int, h: int, ts: TrainStyle) -> None:
-        spec = TRAIN_FONTS[ts.font]
+        spec = getattr(ts, "font_spec", None) or TRAIN_FONTS[ts.font]
         if spec is not None and not spec.startswith("hershey:") and not Path(spec).is_file():
             spec = None  # font not installed on this node: the generator default
         super().__init__(w, h, SRC_DPI, M_PER_PX, Style(font=spec))
@@ -125,7 +125,8 @@ class _StyledCanvas(_Canvas):
                         cv2.circle(layer, (int(px - x0), int(py - y0)), r, 0, -1, cv2.LINE_AA)
         else:
             ang = {"diag45": 45.0, "double45": 45.0, "dashed45": 45.0, "diag30": 30.0,
-                   "diag60": 60.0, "horizontal": 0.0}[kind]
+                   "diag60": 60.0, "horizontal": 0.0, "diag15": 15.0, "diag75": 75.0,
+                   "vertical": 90.0, "diag20": 20.0, "diag70": 70.0, "diag45_sparse": 45.0}[kind]
             th = math.radians(ang)
             d = np.array([math.cos(th), -math.sin(th)])  # screen, rising to the right
             nrm = np.array([math.sin(th), math.cos(th)])
@@ -457,7 +458,7 @@ def synth_vector_plan(seed: int) -> StyledPlan:
 
 
 def styled_sample(plan: VectorPlan, *, seed: int, ts: TrainStyle | None = None,
-                  align: bool = True):
+                  align: bool = True, sampler=None):
     """Draw ``plan`` in a randomised train style, degrade it (``degrade_v1``) and clean it.
     Returns a :class:`kelpod_train.labels.Sample` or None."""
     from kelpod_train.degrade_v1 import degrade_page
@@ -466,7 +467,7 @@ def styled_sample(plan: VectorPlan, *, seed: int, ts: TrainStyle | None = None,
 
     rng = np.random.default_rng([int(seed), 0x76317374])
     if ts is None:
-        ts = sample_train_style(rng)
+        ts = (sampler or sample_train_style)(rng)
     if align and not isinstance(plan, StyledPlan):
         plan = axis_align(plan)
     out = render_styled(plan, ts, rng)

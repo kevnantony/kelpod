@@ -41,8 +41,8 @@ def _entries(args) -> list[dict]:
     meta = json.loads(meta_p.read_text()) if meta_p.exists() else {}
     key = img.name.replace("_img.png", "")
     extra: dict = {}
-    v1 = source.endswith("_v1")
-    source = source.removesuffix("_v1")
+    v1 = source.endswith(("_v1", "_v2"))
+    source = source.removesuffix("_v1").removesuffix("_v2")
     if source == "synth":
         extra = {"seed": int(meta.get("seed", key.split("_")[1])), "style": "train",
                  "degrade": meta.get("degrade")}
@@ -75,7 +75,7 @@ def _swiss_ids(floors: set[int]) -> dict[int, dict]:
 
 def write(source: str) -> Path:
     imgs = sorted((DATA / "train" / source).glob("*_img.png"))
-    is_swiss = source.removesuffix("_v1") == "swiss"
+    is_swiss = source.removesuffix("_v1").removesuffix("_v2") == "swiss"
     ids = _swiss_ids({int(p.name.split("_")[1]) for p in imgs}) if is_swiss else {}
     files: list[dict] = []
     with ProcessPoolExecutor(12) as ex:

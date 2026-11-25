@@ -39,8 +39,10 @@ class CropDataset(Dataset):
     """Random 512 px crops (mostly centred on drawn content) with geometric and photometric
     augmentation. One epoch = ``length`` samples drawn by source weights."""
 
-    def __init__(self, sources: dict[str, float], size: int, length: int, seed: int = 0):
+    def __init__(self, sources: dict[str, float], size: int, length: int, seed: int = 0,
+                 scale_range: tuple[float, float] = (0.8, 1.25)):
         self.sources = sources
+        self.scale_range = scale_range
         self.size, self.length, self.seed = size, length, seed
         self._scan()
 
@@ -65,7 +67,7 @@ class CropDataset(Dataset):
         lab = cv2.imread(str(lp), cv2.IMREAD_GRAYSCALE)
         s = self.size
         # mild scale jitter (wall thickness carries meaning, so keep it small)
-        f = float(rng.uniform(0.8, 1.25))
+        f = float(rng.uniform(*self.scale_range))
         if abs(f - 1) > 0.02:
             img = cv2.resize(img, None, fx=f, fy=f, interpolation=cv2.INTER_AREA if f < 1
                              else cv2.INTER_LINEAR)
@@ -175,6 +177,7 @@ def main() -> None:
     ap.add_argument("--eval-every", type=int, default=2000)
     ap.add_argument("--val-limit", type=int, default=60)
     ap.add_argument("--workers", type=int, default=12)
+    ap.add_argument("--scale-range", default="0.8,1.25", help="random page rescale before cropping")
     ap.add_argument("--init", default=None, help="state dict to start from (continue training)")
     ap.add_argument("--seed", type=int, default=0, help="training seed (init of new layers, data)")
     ap.add_argument("--out", required=True)
@@ -186,7 +189,8 @@ def main() -> None:
     np.random.seed(a.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     mix = {k: float(v) for k, v in (s.split(":") for s in a.mix.split(","))}
-    ds = CropDataset(mix, a.size, a.iters * a.batch, seed=a.seed)
+    ds = CropDataset(mix, a.size, a.iters * a.batch, seed=a.seed,
+                     scale_range=tuple(float(v) for v in a.scale_range.split(",")))
     print({s: len(v) for s, v in ds.items.items()}, flush=True)
     dl = DataLoader(ds, batch_size=a.batch, num_workers=a.workers, pin_memory=True,
                     drop_last=True, persistent_workers=True, prefetch_factor=4)

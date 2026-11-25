@@ -2,6 +2,40 @@
 
 Hypothesis, change, data, GPU hours (with justification), results, decision. Append only.
 
+## learned-v2 (2026-11-25, branch exp/learned-v2, not yet run through the gate)
+
+- **Hypothesis:** baseline-v1 reaches correct-closed 0.945 on val-synth (training style) but only about
+  0.54-0.60 on the held-out-style splits (synthetic). Broader train-only style randomisation, more and
+  more diverse data and a longer schedule narrow that gap (and help on real scans). Same network
+  (U-Net ResNet-34, whole-page ONNX at 0.65x): runtime unchanged by construction.
+- **Change (training only; `training/kelpod_train/{style_v2,render_v1,degrade_v1,build,train}.py`):**
+  new train options on top of learned-v1 (`style_v2.py`, guard + test `tests/training/test_style_v2.py`):
+  18 more open fonts (SIL OFL Google Fonts: sans, serif, hand lettering; none narrow, monospace or
+  geometric-gothic; see CREDITS.md), hatching at 15/75/90 degrees, damage kinds `aged_paper`, `defocus`,
+  `scan_bands`, plus page rescale jitter 0.72-1.40 (was 0.8-1.25). Held-out options are not used;
+  poche/solid walls and cross-hatching are held out in `kelpod.evaluation.synth.styles`, so they are
+  **not** used (deviation from the brief, on purpose). More data: synth_v2 12,000 pages (new geometry
+  seeds 1,200,000+), swiss_v2 ~4,500 and resplan_v2 ~4,500 re-renders of the train floors/plans
+  with new style draws, on top of v0/v1 data and CubiCasa5k. Schedule 64k iterations (v1: 40k).
+- **Dev proxy (style generalisation, tuned on):** 200 synthetic plans (geometry seeds 930,000-930,199,
+  not in any eval split) drawn in our renderer with options **reserved from every training run and
+  never seen by baseline-v1 either**: 8 fonts (`DEV_FONTS`), hatching 20 degrees, 70 degrees and sparse
+  45 degrees (3.3-4.5 mm), damage `uneven_light`, `sensor_noise`, `halftone`. Scored at mask level
+  (per-class IoU at the deployment setting: ONNX, whole page, 0.65x) for baseline-v1 seeds 1/2 and
+  learned-v2 seeds 1/2. Using v1's own options as the held-out part would favour baseline-v1 (it trained
+  on them), hence new options.
+- **CPU jobs (no GPU; planned):** page builds on pascal (not node02), 8 CPUs each, about 3.5 CPU-s per
+  page measured on 8 pages: synth_v2 12,000 pages (3 jobs), swiss_v2 4,500, resplan_v2 4,500, val
+  and dev sets about 400 pages: about 21,400 pages = ~21 CPU-h in total, wall about 40-60 min per job.
+- **GPU jobs (planned):** `kseg-v2-s1`, `kseg-v2-s2` (ampere, 1 GPU each, 64k iterations x batch 16
+  at 512 px). Expected 2.8 GPU-h each (v1: 40k iterations = 1.86 / 1.65 GPU-h, so 64k = 1.6 x
+  = 2.6-3.0 GPU-h, plus 6 val sets every 2000 iterations), time limit 6 h, checkpoint + resume every
+  2000 iterations; ~5.6 GPU-h in total. Justification: rule 5 needs two seeds; the longer schedule
+  because more varied data needs more iterations (v1 val score was still rising at 40k: to be checked
+  in `log.jsonl`), same network, no bigger encoder.
+- **Selection:** dev proxy, val-synth (smoke) and the dev-val sets only. test-synth / fresh / test-ood /
+  sealed data are not looked at.
+
 ## historic-v2 (2026-11-25, branch exp/historic-v2 @ b8d363c, not gated)
 
 - **Change (on baseline-v1):** historic-plans (scale bars, interior dimensions, sheet splitting,

@@ -138,6 +138,30 @@ def damage(img: np.ndarray, ts: TrainStyle, rng: np.random.Generator, seed: int)
         x = x * (1.0 - 0.05 * s * (np.tanh(fib) + 1))
     elif kind == "letterpress":
         return _augraphy(img, ["Letterpress"], seed)
+    elif kind == "aged_paper":  # learned-v2 (train): grey paper, dark ink, smooth shading
+        paper = 255.0 - float(rng.uniform(20, 55)) * s - 14 * _smooth_field(h, w, rng, 900.0)
+        x = paper * (x / 255.0)
+    elif kind == "defocus":  # learned-v2 (train): out-of-focus scan
+        x = cv2.GaussianBlur(x, (0, 0), 0.7 + 1.1 * s)
+    elif kind == "scan_bands":  # learned-v2 (train): faint scanner brightness bands
+        n = int(rng.integers(4, 14))
+        prof = np.interp(np.arange(h), np.linspace(0, h, n), rng.normal(0, 1, n))
+        x = x * (1.0 - 0.06 * s * (np.tanh(prof) + 1))[:, None]
+    # --- dev-proxy only (never sampled for training, see style_v2.DEV_DAMAGE) ---
+    elif kind == "uneven_light":
+        yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+        a = rng.uniform(0, 2 * np.pi)
+        g = ((xx / w - 0.5) * np.cos(a) + (yy / h - 0.5) * np.sin(a))
+        x = x * np.clip(1.0 - (0.35 * s) * (g + 0.5) - 0.05 * _smooth_field(h, w, rng, 500.0), 0.5, 1)
+    elif kind == "sensor_noise":
+        x = x + rng.normal(0, 14 + 22 * s, x.shape).astype(np.float32)
+    elif kind == "halftone":
+        pitch = float(rng.uniform(5.0, 8.0))
+        yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+        c, sn = np.cos(0.5236), np.sin(0.5236)
+        u, v = (xx * c + yy * sn) / pitch, (-xx * sn + yy * c) / pitch
+        thr = (np.cos(2 * np.pi * u) + np.cos(2 * np.pi * v)) * 0.25 + 0.5
+        x = np.where(x / 255.0 > thr * (0.6 + 0.4 * (1 - s)), 255.0, x * 0.4)
     else:
         raise ValueError(f"unknown train damage {kind!r}")
     return np.clip(x, 0, 255).astype(np.uint8)
