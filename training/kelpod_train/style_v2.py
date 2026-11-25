@@ -153,11 +153,12 @@ def check_not_heldout_v2(st: TrainStyleV2) -> None:
         if st.damage in V1.FORBIDDEN_DAMAGE or st.damage in H["damages"]:
             raise HeldOutStyleError(f"damage {st.damage} is held out")
     # everything else: run the v1 guard with the new options replaced by v1 stand-ins
+    new_h_all, new_d_all = set(NEW_TRAIN_HATCH) | set(DEV_HATCH), set(NEW_TRAIN_DAMAGE) | set(DEV_DAMAGE)
     stand = dataclasses.replace(
         TrainStyle(**{f.name: getattr(st, f.name) for f in dataclasses.fields(TrainStyle)}),
-        font=st.font if st.font in V1.TRAIN_FONTS else "default",
-        hatch=st.hatch if st.hatch in V1.HATCH_KINDS else "diag45",
-        hatch_spacing_mm=st.hatch_spacing_mm if st.hatch in V1.HATCH_KINDS else 2.0,
-        damage=st.damage if st.damage in V1.DAMAGE_KINDS else "scan",
+        font="default" if st.font in new_fonts else st.font,
+        hatch="diag45" if st.hatch in new_h_all else st.hatch,
+        hatch_spacing_mm=2.0 if st.hatch in new_h_all else st.hatch_spacing_mm,
+        damage="scan" if st.damage in new_d_all else st.damage,
     )
     V1.check_not_heldout(stand)

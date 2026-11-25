@@ -26,6 +26,7 @@ each licence's terms. Add an entry whenever you add something.
 | Augraphy (training-only degradations, `training/`) | MIT | https://github.com/sparkfish/augraphy |
 | ONNX (model export, `training/`) / ONNX Runtime (CPU inference) | Apache-2.0 / MIT | https://onnx.ai |
 | Indie Flower font, Kimberly Geswein (`training/fonts/`, not used in the learned-v1 data build) | SIL OFL 1.1 | https://fonts.google.com/specimen/Indie+Flower |
+| Google Fonts used for synthetic training pages (learned-v2, `training/kelpod_train/style_v2.py`, `fetch_fonts.sh`; files are not in git): Lato, Barlow, PT Sans, PT Serif, Cardo, Kalam, Patrick Hand, Shadows Into Light, Handlee, Open Sans, Lora, Caveat, IBM Plex Serif, Covered By Your Grace, Gaegu, Rubik, Work Sans, Cabin, Source Sans 3, Architects Daughter, Gloria Hallelujah, Reenie Beanie, Karla, Crimson Pro, DM Sans, Libre Baskerville | SIL OFL 1.1 (each family's own copyright holders) | https://github.com/google/fonts (`ofl/<family>`), https://fonts.google.com |
 
 ## Models and datasets
 
