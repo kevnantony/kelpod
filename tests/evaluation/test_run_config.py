@@ -381,7 +381,7 @@ def test_locked_run_refuses_uncommitted_config(tmp_path, models, fake_run, monke
 def _sides(base, cand, wt="/c"):
     """Sides as ``build_sides`` makes them: ``base``/``baseN`` and ``candN`` (seed labels)."""
     out = {}
-    for n, (name, seed) in enumerate(base):
+    for name, seed in base:
         out[name] = {"worktree": "/b", "seed": seed, "sha256": seed and f"{seed:0<64}"}
     for n, seed in enumerate(cand):
         out[f"cand{n}"] = {"worktree": wt, "seed": seed, "sha256": seed and f"{seed:0<64}"}
