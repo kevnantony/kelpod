@@ -3,6 +3,37 @@
 Read `KELPOD_CONTEXT.md`, `CLAUDE.md` and `docs/ARCHITECTURE.md` first. Work on branch
 `claude/kelpod-mvp-fa1abc`; commit and push about once an hour; `main` only by promotion (`docs/EVAL_PROTOCOL.md`).
 
+## PAUSED by Kevin on 2026-11-25 (~17:30 CET)
+
+Kelpod is paused to free the agent and the GPUs for another project. The stop flag `.agent-stop`
+is set and the cron watchdog is removed **on purpose**. Resume with `scripts/cockroach.sh start`.
+
+**In flight at the pause (nothing else running):**
+- `exp/learned-v2` (worktree ~/kelpod-wt/learned-v2, branch pushed @ 812b16d): U-Net retrained
+  with wider train-only style randomisation, 2 seeds, 6.5 GPU-h; ONNX exported
+  (~/kelpod-models/kelpod-seg/v2-s1, v2-s2), kelpod-run.toml updated. **No evaluation numbers yet.**
+  Two CPU Slurm jobs were left queued/running (results will land in the worktree):
+  - 129106 `lv2-smoke` (16 CPUs): locked_eval smoke, learned-v2 vs main (paired seeds) on
+    val-synth + val-swiss + val-resplan + val-cubicasa. Log:
+    `~/kelpod-wt/learned-v2/training/logs/lv2-smoke-129106.out`; tables under
+    `~/kelpod-runs/locked/` (newest `*exp-learned-v2*` directory); it appends a line to that
+    worktree's `eval/TEST_LOG.md` — do NOT commit that on the branch, move it to main's log.
+  - 129107 `lv2-dev`: both seeds on the dev proxy (mask) and the hard proxy (mask + end to end).
+    Log: `~/kelpod-wt/learned-v2/training/logs/lv2-dev-129107.out`; JSON under
+    `~/kelpod-wt/learned-v2/training/runs/`. Baseline-v1 for comparison: proxy mask mean IoU
+    0.942/0.943, hard proxy mask 0.941/0.943, hard end-to-end correct-closed 0.89/0.87.
+
+**Next steps on resume:**
+1. Read the two job outputs; log learned-v2 val numbers in docs/EXPERIMENTS.md.
+2. If clearly better than baseline-v1 on val, run the locked gate as a Slurm job with `-c 16`
+   (~4.5 h; primary split is now test-ood pooled + fresh).
+3. Waiting on the founders (README "Questions"): how real-plan gains are promoted
+   (`exp/historic-v2` is ready: Tafel 71 room IoU 0.00 -> 0.72 / 0.55, Gundel 0.00 -> 0.25, villa
+   0.17 -> 0.41, real, agent labels); retiring the held-out poché/cross-hatch test style; publishing
+   the model weights (CubiCasa5k CC BY-NC); the +25 % runtime rule; Streamlit deploy from main.
+4. Leftover detached worktrees to remove: ~/kelpod-wt/base-main, learned-v2-base, snap-bcd01f1
+   (and prune stale /tmp worktree entries with `git worktree prune`).
+
 ## Definition of done
 
 The pipeline runs end to end on at least 3 synthetic sample plans, writes IFC files that IfcOpenShell

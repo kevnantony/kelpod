@@ -9,35 +9,32 @@ See [KELPOD_CONTEXT.md](KELPOD_CONTEXT.md) for the product and
 <!-- status:start (kept current by the lead agent; see CLAUDE.md) -->
 ## Status
 
-_Last updated: 2026-11-25 14:30 CET. Numbers are synthetic unless marked "real"._
+_Last updated: 2026-11-25 17:35 CET. **Kelpod is PAUSED by Kevin (25 Nov) to free the agent and
+GPUs for another project.** Resume: `scripts/cockroach.sh start`. Numbers are synthetic unless
+marked "real"._
 
 **Done**
-- **`baseline-v1` on `main`: the learned segmenter is the default.** On the held-out synthetic test
-  splits, plans that come out closed and correct went from **30 % to 60 %** (worse of 2 seeds), and
-  expert edits per plan dropped by 62-72 %.
-- Sandbox: it uses the learned segmenter when its weights are available, otherwise the classical
-  segmenter, with a note in the app.
-- Historic plans (`exp/historic-v2`): your 3 plans, room IoU against agent-made labels (real):
-
-  | Plan | `main` | branch |
-  |---|---|---|
-  | Tafel 71, plan 2 | 0.00 | 0.72 |
-  | Tafel 71, plan 3 | 0.00 | 0.55 |
-  | Villa Gundel | 0.00 | 0.25 |
-  | Villa Garten/Vorhof | 0.17 | 0.41 |
-
-  Scale error drops from 68-91 % to 2-5 % on Tafel and Gundel. **None of the 3 is fully right
-  yet.** Tafel 71 plan 2 comes closest.
+- `main` = **`baseline-v1`**: the learned segmenter is the default. On the held-out synthetic test
+  splits, plans that come out closed and correct went from 30 % to 60 % (worse of 2 seeds); expert
+  edits per plan dropped by 62-72 %.
+- Evaluation:
+  - out-of-distribution test sets (Swiss Dwellings, ResPlan, CubiCasa5k) frozen and used for
+    promotion;
+  - each training seed is compared with the same baseline seed;
+  - learned checkpoints are checked by hash.
+- Historic plans (`exp/historic-v2`, unmerged), real, agent-made labels, room IoU: Tafel 71
+  0.00 -> 0.72 / 0.55, Gundel 0.00 -> 0.25, villa 0.17 -> 0.41. None of the 3 is fully right yet.
 
 **Doing now**
-- `exp/learned-v2`: the learned segmenter is being retrained on a wider set of drawing styles
-  (2 seeds, on the cluster GPUs since about 15:30).
-- Done today:
-  - New out-of-distribution test sets (Swiss Dwellings, ResPlan, CubiCasa5k) are frozen and now
-    count for promotion. The current model closes almost none of them: correct-closed 0 % on the
-    validation sets, room IoU 0.14-0.62.
-  - The evaluation now compares each training seed with the same baseline seed.
-  - OCR speed-up: negative result.
+- Nothing (paused).
+- In flight at the pause: `exp/learned-v2`, the learned segmenter retrained on wider drawing styles
+  (2 seeds, 6.5 GPU-h). No evaluation numbers yet.
+  - Slurm jobs 129106 (validation comparison) and 129107 (dev proxies) were left queued; their
+    results land in `~/kelpod-wt/learned-v2/training/logs/`.
+
+**Next (on resume)**
+- Read the learned-v2 results. If they are better, run the locked promotion gate (~4.5 h).
+- Answer the questions below. They decide what can be merged next.
 
 **Questions for you**
 - **How should real-plan improvements be promoted?** `exp/historic-v2` clearly helps your real
