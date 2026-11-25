@@ -19,6 +19,7 @@ each licence's terms. Add an entry whenever you add something.
 | NetworkX | BSD-3-Clause | https://networkx.org |
 | IfcOpenShell | LGPL-3.0 | https://ifcopenshell.org |
 | RapidOCR (ONNX Runtime, PaddleOCR models) | Apache-2.0 | https://github.com/RapidAI/RapidOCR |
+| OR-Tools (CP-SAT, dimension-chain decoding; pulls in protobuf and pandas, both BSD-3-Clause) | Apache-2.0 | https://github.com/google/or-tools |
 | Typer | MIT | https://github.com/fastapi/typer |
 | FastAPI / Uvicorn | MIT / BSD-3-Clause | https://fastapi.tiangolo.com |
 | Starlette | BSD-3-Clause | https://github.com/encode/starlette |

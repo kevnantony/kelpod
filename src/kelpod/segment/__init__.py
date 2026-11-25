@@ -6,8 +6,10 @@ from kelpod.contracts import RasterPage, Segmentation
 from kelpod.segment.base import Segmenter, available, get_segmenter, register
 from kelpod.segment.classical import ClassicalParams, ClassicalSegmenter
 from kelpod.segment.learned import LearnedSegmenter
+from kelpod.segment.pairs import PairsSegmenter  # noqa: E402
 
 register("classical", ClassicalSegmenter)
+register("pairs", PairsSegmenter)
 register("learned", LearnedSegmenter)
 
 __all__ = [

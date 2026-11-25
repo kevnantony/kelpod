@@ -7,8 +7,11 @@ import math
 import numpy as np
 
 from kelpod.contracts import DimensionLabel, OcrAnnotations, RoomStamp, SillHeight, TextItem
+from kelpod.ocr.chains import Candidate, decode, reading_values
 from kelpod.ocr.dimlines import DimensionLineFinder, pick_span
 from kelpod.ocr.engines import quad_size
+from kelpod.ocr.interior import interior_span
+from kelpod.ocr.names import join_hyphenated, match_historic_name
 from kelpod.ocr.parse import (
     is_brh_keyword,
     is_opening_label,
@@ -70,10 +73,11 @@ def _text_height(it: TextItem) -> float:
 
 
 def interpret(
-    items: list[TextItem], ink: np.ndarray | None = None
+    items: list[TextItem], ink: np.ndarray | None = None, *, decode: str = "greedy"
 ) -> tuple[list[DimensionLabel], list[SillHeight], list[RoomStamp], list[str]]:
-    """Classify items. ``ink`` (bool mask) enables the dimension-line / tick search."""
-    items = split_merged_items(items)
+    """Classify items. ``ink`` (bool mask) enables the dimension-line / tick search.
+    ``decode="chain"`` decodes the dimension labels jointly over their chains."""
+    items = split_merged_items(join_hyphenated(items))
     notes: list[str] = []
     used: set[int] = set()
     sills: list[SillHeight] = []
@@ -123,7 +127,7 @@ def interpret(
             else:
                 areas.append((i, area))
             continue
-        name = match_room_name(it.text)
+        name = match_room_name(it.text) or match_historic_name(it.text)
         if name is not None:
             names.append((i, name))
 
@@ -164,6 +168,7 @@ def interpret(
 
     # 3. Everything else that parses as a length is a dimension.
     cands: list[tuple[TextItem, float, float, float]] = []  # item, value, angle, confidence
+    extra: list[TextItem] = []  # top reading is no length, but an n-best reading is
     skipped: list[str] = []
     for i, it in enumerate(items):
         if i in used:
@@ -174,20 +179,59 @@ def interpret(
         v = parse_length_m(it.text)
         if v is None:
             skipped.append(it.text)
+            if decode == "chain" and reading_values(it):
+                extra.append(it)
             continue
         n = parse_number(it.text)
         conf = it.confidence * (0.8 if n is not None and n.fixed else 1.0)
         cands.append((it, v, _snap_angle(it.angle_deg), conf))
-    lines = _link_lines(cands, ink, notes) if ink is not None else [None] * len(cands)
-    for (it, v, angle, conf), line in zip(cands, lines, strict=True):
-        dims.append(DimensionLabel(value_m=v, text=it.text, anchor=it.center, angle_deg=angle,
-                                   line=line, confidence=conf))
+    if ink is None:
+        lines = [None] * len(cands)
+    else:
+        finder = DimensionLineFinder(ink)
+        found = [finder.ticks(it.quad, angle) for it, _, angle, _ in cands]
+        lines, px_per_m = _link_lines(cands, finder, found, notes)
+    greedy = [
+        DimensionLabel(value_m=v, text=it.text, anchor=it.center, angle_deg=angle, line=line,
+                       confidence=conf)
+        for (it, v, angle, conf), line in zip(cands, lines, strict=True)
+    ]
+    if decode == "chain" and ink is not None and px_per_m is not None:
+        dims = _chain_decode(cands, extra, greedy, finder, found, px_per_m, notes)
+    else:
+        dims = greedy
     if skipped:
         notes.append(f"{len(skipped)} text item(s) not interpreted: {skipped[:20]}")
     return dims, sills, stamps, notes
 
 
-def _link_lines(cands, ink: np.ndarray, notes: list[str]):
+def _chain_decode(cands, extra, greedy, finder, found, px_per_m, notes):
+    """Re-decode the labels on dimension chains jointly (:func:`kelpod.ocr.chains.decode`)."""
+    cs: list[Candidate] = []
+    for (it, v, angle, _), f in zip(cands, found, strict=True):
+        cs.append(Candidate(it, angle, v, reading_values(it), *(f if f else (None, False))))
+    for it in extra:
+        angle = _snap_angle(it.angle_deg)
+        f = finder.ticks(it.quad, angle)
+        cs.append(Candidate(it, angle, None, reading_values(it), *(f if f else (None, False))))
+    try:
+        res = decode(cs, finder, px_per_m)
+    except Exception as exc:  # noqa: BLE001 - never lose the greedy result
+        notes.append(f"chain decoding failed ({type(exc).__name__}: {exc}); greedy kept")
+        return greedy
+    notes.extend(res.notes)
+    out = []
+    for k in range(len(cs)):
+        if k in res.labels:
+            out.append(res.labels[k])
+        elif k in res.dropped:
+            continue
+        elif k < len(greedy):
+            out.append(greedy[k])
+    return out + res.inferred
+
+
+def _link_lines(cands, finder: DimensionLineFinder, found, notes: list[str]):
     """Find the measured span of every dimension text.
 
     Pass 1 takes the nearest tick on each side of the text. The page-wide pixels per metre is
@@ -196,8 +240,6 @@ def _link_lines(cands, ink: np.ndarray, notes: list[str]):
     length fits (short spans whose label overhangs the ticks, missed or extra ticks); spans that
     still do not fit within 8 % are dropped rather than passed on wrong.
     """
-    finder = DimensionLineFinder(ink)
-    found = [finder.ticks(it.quad, angle) for it, _, angle, _ in cands]
     first = []
     ratios = []
     for (_, v, _, _), f in zip(cands, found, strict=True):
@@ -211,7 +253,7 @@ def _link_lines(cands, ink: np.ndarray, notes: list[str]):
             out.append(None if sp is None else finder.to_image(sp[0], sp[1], f[0].y, f[1]))
         if ratios:
             notes.append("too few dimension lines to check spans against each other")
-        return out
+        return out, None
     r = float(np.median(ratios))
     out = []
     n_ok = n_refit = n_drop = 0
@@ -234,11 +276,35 @@ def _link_lines(cands, ink: np.ndarray, notes: list[str]):
         f"with ticks ({n_refit} re-picked, {n_drop} dropped as inconsistent; "
         f"{r:.1f} px/m from the spans)"
     )
+    return out, r
+
+
+def _interior_lines(dims, items, ink, notes):
+    """Give dimension values without a tick chain the span of the dotted line they sit on
+    (values written inside rooms, historic plans). Only for labels without a line."""
+    out, n = [], 0
+    for d in dims:
+        if d.line is None and d.value_m >= 0.6:
+            it = next((i for i in items if i.text.strip().lstrip("- ") == d.text.strip().lstrip("- ")
+                       and _dist(i.center, d.anchor) < 2.0), None)
+            span = interior_span(ink, it.quad, it.angle_deg) if it is not None else None
+            if span is not None:
+                d = d.model_copy(update={"line": span})
+                n += 1
+        out.append(d)
+    if n:
+        notes.append(f"{n} dimension(s) linked to a dotted interior dimension line")
     return out
 
 
-def annotate(items: list[TextItem], ink: np.ndarray | None, backend: str) -> OcrAnnotations:
+def annotate(
+    items: list[TextItem], ink: np.ndarray | None, backend: str, *, decode: str = "chain"
+) -> OcrAnnotations:
+    """``decode="chain"`` (default) re-decodes the dimension labels jointly over their chains
+    (:mod:`kelpod.ocr.chains`); ``"greedy"`` keeps one independent reading per label (v0)."""
     items = split_merged_items(items)
-    dims, sills, stamps, notes = interpret(items, ink)
+    dims, sills, stamps, notes = interpret(items, ink, decode=decode)
+    if ink is not None:
+        dims = _interior_lines(dims, items, ink, notes)
     return OcrAnnotations(items=items, dimensions=dims, sill_heights=sills, room_stamps=stamps,
                           backend=backend, notes=notes)

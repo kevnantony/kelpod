@@ -197,3 +197,109 @@ Hypothesis, change, data, GPU hours (with justification), results, decision. App
 - **Decision:** keep scale 0.65. Next: val-synth 200 plans for both seeds at 0.65 before the lead's
   locked run. A lighter encoder (ResNet-18) was not trained; it is the fallback if the real
   locked-run runtime exceeds +25 %.
+
+## ocr-chainsum (2026-11-24, branch exp/ocr-chainsum)
+
+- **Hypothesis:** dimension chains say every length more than once (parts sum to the
+  Gesamtmaß, nested chains share ticks, opposite facades repeat the overall, every value matches
+  its pixel span at one px/m). Decoding all labels jointly with n-best readings raises dimension
+  precision and recall over one greedy guess per label, and with it the dimension fit.
+- **Change** (`src/kelpod/ocr/`): `nbest.py` (CTC prefix beam search over RapidOCR's softmax,
+  top 5 per digit-bearing box, no extra recogniser pass); `chains.py` (chains from shared
+  dimension lines; ticks kept only with a 45° stroke plus an extension line; CP-SAT Boolean
+  model over tick coordinates: one value per tick node, one option per label =
+  (tick interval, n-best value, lost-superscript-⁵ variant, raised-mm-digit variant) or drop;
+  unread intervals whose ends are tied by the chosen labels get an exact inferred value;
+  corrections and inferences are emitted only if no unchecked label they depend on has a cheap
+  alternative; pages where under half of the chain labels are consistent keep the greedy result).
+  `parse_area` reads a lost comma (`2091mF` = 20,91 m²). Contracts: optional
+  `TextItem.alternatives`, `DimensionLabel.origin` (`read` / `corrected` / `inferred`).
+  New dependency: OR-Tools (Apache-2.0). Geometry unchanged.
+- **Data:** dev synth (train style) seeds 200000-200049 for tuning, 200050-200099 held out, degrade
+  0.5 and 1.0; frozen val-synth (200 plans). Script: `tests/ocr/chain_eval.py` (cached reads).
+  No test-synth, no sealed data. CPU only, 0 GPU hours (all runs on the agent node).
+- **Results** (synthetic, dev/val, not a locked evaluation), greedy (v0) → chain:
+
+  | set | dim precision | dim recall | linked to right span | correct-closed | room IoU | total area err | edit cost |
+  |---|---|---|---|---|---|---|---|
+  | dev held-out, degrade 0.5 (50) | 0.803 → 0.882 | 0.717 → 0.807 | 0.544 → 0.793 | 0.74 → 0.78 | 0.9405 → 0.9444 | 0.0133 → 0.0134 | 3.38 → 2.58 |
+  | dev held-out, degrade 1.0 (50) | 0.799 → 0.874 | 0.693 → 0.772 | 0.498 → 0.733 | 0.56 → 0.60 | 0.8804 → 0.8861 | 0.0479 → 0.0476 | 9.12 → 8.60 |
+  | val-synth (200) | 0.803 → 0.878 | 0.708 → 0.793 | 0.530 → 0.775 | 0.720 → 0.725 | 0.9401 → 0.9443 | 0.0128 → 0.0124 | 4.14 → 4.00 |
+
+  Of the labels the decoder changed on val-synth, corrected ones are right 78 % (501/641) and
+  inferred ones 57 % (420/731); most wrong ones have the right span but are ±5 mm off (lost
+  superscript ⁵ ambiguity).
+- **Runtime:** `scripts/benchmark.py --n 6 --seed 200000` on the shared node, main vs branch,
+  two rounds: 3.64 / 3.66 s → 4.60 / 4.40 s per plan (+20-26 %). Steady state +0.5-0.8 s per plan
+  (decoding +0.2-0.3 s mean, p95 +0.5 s; beam search 0.25 s); a fresh process also pays the
+  OR-Tools import (~0.5 s). Borderline against the +25 % rule; the locked run decides.
+- **Real plan check** (one web JPEG of a single-family-house plan, 550 px, dev only, not committed):
+  room areas `2091mF` / `2142m1` now read as 20,91 / 21,42 m²; `1245` gets the 124⁵ cm = 1.245 m
+  option, but at this resolution the page-wide scale and most reads are too poor, so the guard
+  keeps the greedy result. `2865` for 178⁵ is a digit misread that only chain arithmetic could
+  fix, which needs a readable chain. A higher-resolution scan is needed to judge real plans.
+- **Decision:** candidate for promotion by the lead (`scripts/promotion_check.sh`, not run here).
+  Ideas not built: margin by re-solving, page-level length style (cm / ⁵ / m) as a prior, the room
+  stamp area as a further constraint, using `origin` as a weight in the geometry fit.
+
+## din-web-plans (2026-11-24, branch exp/din-web-plans)
+
+- **Hypothesis:** real DIN plans from the web fail for three separable reasons: (1) tiny images
+  were *shrunk* (file dpi 96/300 assumed, resampled to 200 dpi), (2) the classical footprint filter
+  deletes every wall outside a small enclosed region, (3) walls drawn as two thin lines are
+  invisible to the solid/hatched wall mask.
+- **Change:** `clean/io.py`: effective dpi from the modal glyph height (2.5 mm digits); images
+  below 130 dpi are upscaled (Lanczos + unsharp mask, factor 200/eff, max 3x) instead of using the
+  file dpi. `segment/classical.py`: the footprint filter is skipped when the enclosed footprint
+  touches under 65 % of the wall length (synthetic plans: min 70 %, positionsplan 60 %).
+  `segment/pairs.py` (new backend `pairs`): line components per direction (0/90 and, in 45-degree
+  rotated copies, 45/135), parallel pairs at the plan's dominant (length-weighted) spacing, fill
+  test, widest-pair dedupe, heavy single strokes as walls, network filter (isolated furniture,
+  chains, terrace grids drop out), door-gap closing, rooms from the barrier. `pipeline.convert`
+  tries `pairs` only if the classical graph is not closed and under half its wall length is
+  hatched/solid, and takes it only if it scores better (rooms, dangling ends, groups).
+  Script `scripts/web_plan_check.py` (real plans, no ground truth). Tests: `tests/segment/test_pairs.py`.
+- **Data:** two web plans in `~/kelpod-data/real/din-web-2026-11-24/` (dev only, licence
+  unchecked, not committed; no ground truth, no hand labels); synthetic seeds 300-319, degrade
+  0.5 and 1.0. The web collector had written no plan images when this ran. CPU only, 0 GPU hours.
+- **Results (real, main -> branch):**
+
+  | plan | before | after |
+  |---|---|---|
+  | efh-erdgeschoss-550.jpg | 23 walls, 0 rooms, 13 dangling, 4 groups, scale guessed | 48 walls, 5 rooms (0.7-9.2 m2, not the real rooms), 12 dangling, 1 group, scale from dims (src=dimensions) |
+  | positionsplan-fig134.png | 18 walls, 0 rooms | 37 walls, 5 rooms (one 77 m2 merged), 9 dangling, 1 group |
+
+  Not solved: neither plan is closed. Segmenter overlay checked by eye (Read tool).
+- **Synthetic guard** (20 plans, seed 300): identical to main on all means at degrade 0.5
+  (closed 0.85, room IoU 0.990, wall F1 0.995) and 1.0 (closed 0.75, IoU 0.985, F1 0.992).
+  Runtime 4.9 s/plan (0.5) and 4.9 s (1.0); the main run was taken while other jobs ran
+  (6.7 / 7.9 s), so no clean ratio; against the ocr-chainsum figure (4.4-4.6 s) it is within +25 %.
+  `uv run pytest`: 337 passed, 1 skipped (existing).
+- **What still fails and why:** (a) efh: the pairs path finds the axis-aligned double lines (see
+  overlays) but misses walls whose faces fuse into one line at this resolution, the 45-degree
+  hall/bay walls (diagonals are chopped by aliasing; only ~3 short pieces found) and curved
+  walls, so no closed outline; the classical result (garbage rooms) is therefore still chosen.
+  Closing with 5 px line bridging raised clutter and was reverted. (b) Only two dimensions match
+  at the nominal scale, so the scale rests on few labels; OCR of 178^5-style cm chains was not
+  improved here. (c) positionsplan: partial hatched walls, circled position numbers cross wall
+  lines, open outline at window gaps.
+- **Decision:** the upscale and footprint-guard changes are safe candidates (no synthetic change);
+  the `pairs` backend is an experimental fallback, not a result. Not promoted, no locked run.
+
+
+## historic-plans (2026-11-24, CPU only, no GPU used)
+
+Branch `exp/historic-plans` (on top of main + `exp/din-web-plans`). Labels: `~/kelpod-data/real/user-feedback-2026-11-24/labels/`
+(outside git; hand-made by the agent with `scripts/dev/annotate_assist.py`, +-5 px, scales of the villa and the sheet ASSUMED
+from unnumbered scale bars). Scorer: `scripts/dev/realdev_score.py`. Real, 3 plans, not a benchmark; scale_err in the table is
+partly circular for the two bar plans (label scale uses the same bar).
+
+| plan | before: rooms / wall F1 / room IoU / scale err | after |
+|---|---|---|
+| villa-garten-vorhof (19 GT rooms) | 5 / 0.16 / 0.02 / 59 % | 3 / 0.32 / 0.07 / 1 % |
+| villa-gundel (7) | 12 / 0.59 / 0.31 / 4 % | 13 / 0.55 / 0.30 / 5 % (source: dimensions) |
+| tafel71 plan 2 (7) | 12 / 0.27 / 0.23 / 59 % (whole sheet) | 3 / 0.41 / 0.18 / 2 % |
+| tafel71 plan 3 (6) | 12 / 0.23 / 0.14 / 59 % | 4 / 0.71 / 0.29 / 2 % |
+
+Synthetic (`benchmark.py --n 20 --seed 300 --degrade 0.5`): before closed 0.850, IoU 0.991, wall F1 0.996; after 0.850, 0.990, 0.995.
+Tried and dropped: snapping partitions across 1.2 m door gaps in massive walls (made tafel rooms worse).

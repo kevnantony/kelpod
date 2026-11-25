@@ -66,6 +66,8 @@ class GeometryParams:
     helps most is dropped (greedy leave-one-out)."""
     dim_max_reject_share: float = 0.34
     scale_inlier_rel: float = 0.03
+    scale_inlier_rel_loose: float = 0.12
+    """Looser agreement accepted for the scale if at least three dimension spans fit it."""
     prior_weight: float = 0.02
 
     # rooms and openings

@@ -55,6 +55,11 @@ class RasterPage(_Model):
     """Rotation that was removed from the scan (degrees, counter-clockwise positive)."""
     plan_scale: float | None = 100.0
     """Drawing scale denominator, e.g. 100 for 1:100. ``None`` if unknown."""
+    origin: tuple[int, int] = (0, 0)
+    """Offset (x, y) of this page inside the full sheet if it is one plan cropped from a sheet."""
+    scale_hint: tuple[float, str] | None = None
+    """``(m_per_px, source)`` found outside this crop (e.g. the sheet's scale bar); the geometry
+    step uses it when the plan has no dimensions of its own."""
 
     @property
     def height(self) -> int:
@@ -155,6 +160,9 @@ class TextItem(_Model):
     angle_deg: float = 0.0
     """Reading direction in image space: 0 = left-to-right, 90 = bottom-to-top (rotated text)."""
     confidence: float = 1.0
+    alternatives: list[tuple[str, float]] = Field(default_factory=list)
+    """n-best readings ``(text, probability)``, most probable first, if the engine provides them
+    (empty otherwise). ``text`` is the engine's own best guess and need not be the first entry."""
 
     @property
     def center(self) -> Point:
@@ -174,6 +182,10 @@ class DimensionLabel(_Model):
     line: tuple[Point, Point] | None = None
     """Endpoints (ticks) of the measured span on the dimension line, image space, if found."""
     confidence: float = 1.0
+    origin: Literal["read", "corrected", "inferred"] = "read"
+    """``read``: as recognised; ``corrected``: another n-best reading or the chain arithmetic
+    replaced the recognised value; ``inferred``: no label was read, the value comes from the
+    other labels of its chains (``text`` is then empty)."""
 
 
 class SillHeight(_Model):
@@ -245,6 +257,9 @@ class Room(_Model):
     polygon: list[Point]
     """Closed boundary (inner faces of walls), plan space, counter-clockwise, not repeated."""
     name: str | None = None
+    exterior: bool = False
+    """Garden, courtyard (Vorhof), Altan, terrace, balcony, loggia: enclosed by walls on the plan
+    but not a room. Kept in the graph, left out of the IFC model."""
     area_m2: float
     stamp_area_m2: float | None = None
     """Area written on the room stamp, if any (for cross-checking)."""
@@ -281,7 +296,16 @@ class PlanGraph(_Model):
     openings: list[Opening] = Field(default_factory=list)
     rooms: list[Room] = Field(default_factory=list)
     m_per_px: float
-    scale_source: Literal["dimensions", "plan_scale", "default", "ground_truth"]
+    scale_source: Literal[
+        "dimensions",
+        "scale_bar",
+        "scale_bar_assumed",
+        "plan_scale",
+        "default",
+        "ground_truth",
+    ]
+    """``scale_bar``: graphic scale bar with legible numbers; ``scale_bar_assumed``: a bar was
+    found but not its numbers, the tick value (0.5 .. 10 m) was chosen from the wall thickness."""
     image_height_px: int
     """Needed to convert back to image space (see :func:`m_to_px`)."""
     report: ConsistencyReport | None = None

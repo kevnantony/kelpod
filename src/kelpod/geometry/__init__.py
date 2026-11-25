@@ -80,6 +80,45 @@ def run(
         return graph
 
 
+def _scale_from_bar(page, seg, ocr, m_per_px, scale_source, issues):
+    """Graphic scale bar as the scale when no dimensions fixed it (see :mod:`.scalebar`)."""
+    from .scalebar import bar_scale, typical_wall_px
+
+    if page.scale_hint is not None:  # the sheet's bar, found outside this plan's crop
+        issues.append(
+            f"Scale from the sheet's graphic scale bar ({page.scale_hint[1]}); "
+            "check the scale."
+        )
+        return page.scale_hint
+    th = typical_wall_px(
+        [
+            (math.dist(w.p0, w.p1), w.thickness_px)
+            for w in (seg.walls if seg is not None else [])
+            if _finite(*w.p0, *w.p1, w.thickness_px)
+        ]
+    )
+    try:
+        found = bar_scale(page.ink, ocr.items, th)
+    except Exception:  # never let the optional bar break the step
+        log.exception("scale bar detection failed")
+        return m_per_px, scale_source
+    if found is None:
+        return m_per_px, scale_source
+    m, src, bar = found
+    if src == "scale_bar_assumed" and str(page.source).lower().endswith(".pdf"):
+        return m_per_px, scale_source  # a PDF's page size is real: do not override with a guess
+    issues.append(
+        f"Scale from the graphic scale bar ({len(bar.ticks_x)} ticks of {bar.tick_px:.1f} px): "
+        + (
+            "numbers read."
+            if src == "scale_bar"
+            else "its numbers were not legible, the tick value was guessed from the wall "
+            "thickness. Check the scale."
+        )
+    )
+    return m, src
+
+
 def _finite(*vals: float) -> bool:
     return all(isinstance(v, (int, float)) and math.isfinite(v) for v in vals)
 
@@ -92,6 +131,8 @@ def _run(
     # 1. scale and residual skew ---------------------------------------------------------------
     m_per_px, scale_source, scale_issues = estimate_scale(page, ocr.dimensions, prm)
     issues += scale_issues
+    if scale_source != "dimensions":
+        m_per_px, scale_source = _scale_from_bar(page, seg, ocr, m_per_px, scale_source, issues)
     raw = [
         w
         for w in (seg.walls if seg is not None else [])

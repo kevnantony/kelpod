@@ -18,9 +18,10 @@ from pathlib import Path
 
 from kelpod.clean.core import CleanResult, clean_image, deskew_angle, rotate
 from kelpod.clean.io import load
+from kelpod.clean.sheets import PlanRegion, crop_page, split_plans
 from kelpod.contracts import RasterPage
 
-__all__ = ["CleanResult", "clean_image", "deskew_angle", "load", "rotate", "run"]
+__all__ = ["PlanRegion", "crop_page", "split_plans", "CleanResult", "clean_image", "deskew_angle", "load", "rotate", "run"]
 
 
 def run(

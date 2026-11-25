@@ -96,6 +96,12 @@ def estimate_scale(
         r = np.array(ratios)
         med = float(np.median(r))
         inl = r[np.abs(r / med - 1.0) <= prm.scale_inlier_rel]
+        if len(inl) < 3:
+            # hand-drawn / interior dimension arrows end at wall faces or arrow tips: spans are
+            # only good to a few percent. Accept a looser agreement if at least three fit.
+            wide = r[np.abs(r / med - 1.0) <= prm.scale_inlier_rel_loose]
+            if len(wide) >= 3 and len(wide) >= 0.5 * len(r):
+                inl = wide
         enough = (len(inl) >= 2 and len(inl) >= 0.5 * len(r)) or (len(inl) >= 1 and base is None)
         if enough:
             m = float(np.median(inl))

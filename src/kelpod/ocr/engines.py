@@ -48,7 +48,9 @@ class RapidOcrEngine:
 
     name = "rapidocr"
 
-    def __init__(self, *, tile: int = 1600, overlap: int = 200, text_score: float = 0.5) -> None:
+    def __init__(
+        self, *, tile: int = 1600, overlap: int = 200, text_score: float = 0.5, nbest: int = 5
+    ) -> None:
         from rapidocr_onnxruntime import RapidOCR
 
         # Explicit thread counts: with the default (-1) ONNX Runtime pins threads to cores and
@@ -64,6 +66,11 @@ class RapidOcrEngine:
         # labels the wrong way. Vertical text is handled by the 90° pass in read_page.
         self._ocr = RapidOCR(max_side_len=max(4000, tile + 1), text_score=text_score,
                              use_cls=False, **threads)
+        if nbest > 1:  # n-best readings for the dimension-chain decoder, same greedy text
+            from kelpod.ocr.nbest import NBestDecoder
+
+            rec = self._ocr.text_rec
+            rec.postprocess_op = NBestDecoder(rec.postprocess_op, k=nbest)
         self.tile = tile
         self.overlap = overlap
 
@@ -71,12 +78,14 @@ class RapidOcrEngine:
         bgr = np.ascontiguousarray(np.repeat(gray[:, :, None], 3, axis=2))
         result, _ = self._ocr(bgr)
         items: list[TextItem] = []
-        for quad, text, score in result or []:
+        for row in result or []:
+            quad, text, score = row[0], row[1], row[2]
+            alts = [(str(t).strip(), float(p)) for t, p in row[3]] if len(row) > 3 else []
             text = str(text).strip()
             if not text:
                 continue
             q = [(float(x) + ox, float(y) + oy) for x, y in quad]
-            items.append(TextItem(text=text, quad=q, confidence=float(score)))
+            items.append(TextItem(text=text, quad=q, confidence=float(score), alternatives=alts))
         return items
 
     def read(self, gray: np.ndarray) -> list[TextItem]:

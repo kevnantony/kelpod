@@ -69,7 +69,11 @@ def _load_image(path: Path, dpi: float) -> list[np.ndarray]:
         for frame in ImageSequence.Iterator(im):
             src_dpi = _image_dpi(frame)
             gray = _pil_to_gray(frame)
-            pages.append(resample(gray, src_dpi, dpi))
+            up = lowres_factor(gray)
+            if up > 1.0:  # web-size image: the file dpi means nothing, upscale by the text size
+                pages.append(upscale_sharpen(gray, up))
+            else:
+                pages.append(resample(gray, src_dpi, dpi))
     return pages
 
 
@@ -115,6 +119,50 @@ def _to_gray(arr: np.ndarray) -> np.ndarray:
     if arr.shape[2] == 4:
         return cv2.cvtColor(arr, cv2.COLOR_BGRA2GRAY)
     return cv2.cvtColor(arr, cv2.COLOR_BGR2GRAY)
+
+
+LOWRES_DPI = 130.0
+"""Raster images whose text implies less than this effective dpi are upscaled."""
+LOWRES_TARGET_DPI = 200.0
+LOWRES_MAX_FACTOR = 3.0
+TEXT_HEIGHT_MM = 2.5
+"""Plotted height of dimension digits (DIN 1356-1: 2.5 mm)."""
+
+
+def effective_dpi(gray: np.ndarray) -> float | None:
+    """Resolution implied by the digit height (typical 2.5 mm text), not by file metadata: the
+    modal height of small glyph-like components. ``None`` if there is too little text."""
+    ink = (gray < 140).astype(np.uint8)
+    n, _, st, _ = cv2.connectedComponentsWithStats(ink, connectivity=8)
+    if n < 30:
+        return None
+    h, w = st[1:, 3], st[1:, 2]
+    ok = (h >= 3) & (h <= 40) & (w <= 1.3 * h + 1)
+    if ok.sum() < 40:
+        return None
+    hist = np.bincount(h[ok], minlength=41).astype(float)
+    hist = np.convolve(hist, np.ones(3) / 3, mode="same")
+    mode_h = float(np.argmax(hist))
+    # digits are about 2/3 of the glyph-component mode on mixed text; use the mode directly
+    return 25.4 * mode_h / TEXT_HEIGHT_MM
+
+
+def lowres_factor(gray: np.ndarray) -> float:
+    """Upscale factor (>1) for low-resolution raster plans, else 1.0."""
+    if max(gray.shape) > 2200:
+        return 1.0
+    eff = effective_dpi(gray)
+    if eff is None or eff >= LOWRES_DPI:
+        return 1.0
+    return float(min(LOWRES_MAX_FACTOR, LOWRES_TARGET_DPI / eff))
+
+
+def upscale_sharpen(gray: np.ndarray, factor: float) -> np.ndarray:
+    """Lanczos upscale followed by a mild unsharp mask (thin lines stay crisp for thresholding)."""
+    h, w = gray.shape
+    big = cv2.resize(gray, (round(w * factor), round(h * factor)), interpolation=cv2.INTER_LANCZOS4)
+    blur = cv2.GaussianBlur(big, (0, 0), 1.2 * factor / 2)
+    return cv2.addWeighted(big, 1.8, blur, -0.8, 0)
 
 
 def resample(gray: np.ndarray, src_dpi: float, dst_dpi: float) -> np.ndarray:
